@@ -16,11 +16,6 @@ app.debug = True
 app.config['SECRET_KEY'] = SECRET
 app.register_blueprint(auth_blueprint, url_prefix='/api')
 
-db.init_app(app)
-bcrypt.init_app(app)
-jwt.init_app(app)
-migrate = Migrate(app, db)
-
 
 @app.before_request
 def check_json_content_type():
@@ -28,4 +23,8 @@ def check_json_content_type():
         return error_response(ValidationError(['Content-Type - application/json only']))
 
 if __name__ == '__main__':
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+    migrate = Migrate(app, db)
     app.run(debug=DEBUG)
