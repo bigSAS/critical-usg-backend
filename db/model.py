@@ -1,5 +1,10 @@
+from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from app import db, bcrypt
+
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 
 class User(db.Model):
