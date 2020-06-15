@@ -130,3 +130,4 @@ dmypy.json
 .idea/
 app.db
 app_test.db
+config_local.py

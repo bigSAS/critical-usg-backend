@@ -3,7 +3,7 @@ from typing import List
 from flask import Response
 from flask.json import dumps
 
-from cfg import DEBUG
+from config import Config
 
 
 class ApiError(Exception):
@@ -96,7 +96,7 @@ def error_response(error: Exception):
     print(repr(error))
     http_status, response_status = ERROR_STATUS_MAP.get(type(error).__name__, (500, ResponseStatus.SERVER_ERROR))
     if not isinstance(error, ApiError):
-        if DEBUG: raise error
+        if Config.FLASK_DEBUG: raise error
         api_error = ApiError(name='SERVER', data=repr(error))
     else:
         api_error = error

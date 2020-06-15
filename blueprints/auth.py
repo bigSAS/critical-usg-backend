@@ -58,3 +58,11 @@ def authenticate():
     user = authenticate_user(email, psswd)
     if not user: raise AuthError('Invalid credentials')
     return ok_response({'token': create_access_token(identity=user.as_dict())})
+
+
+@auth_blueprint.route('/token-ping', methods=('GET',))
+@jwt_required
+def ping():
+    return {
+        'msg': 'pong!'
+    }

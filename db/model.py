@@ -12,7 +12,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=True)
     email = db.Column(db.String(200), unique=True, nullable=False)
-    _password = db.Column(db.Binary(100))
+    _password = db.Column(db.LargeBinary(100))
     is_superuser = db.Column(db.Boolean, default=False)
 
     def __init__(self, email: str,  plaintext_password: str, username: str = None, is_superuser: bool = False):

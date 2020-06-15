@@ -2,7 +2,7 @@
 ## Create user from python interpreter   
 ```python
 # run python in (.env)
-from application import db
+from wsgi import app
 from db.model import User
 jimmy = User("jimmy@choo.io", "jimmyh")
 db.session.add(jimmy)
