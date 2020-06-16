@@ -19,6 +19,8 @@ def test_get_jwt(client: TApp, email, password):
     print('response json data:\n', response.json)
     assert response.json['data']['token'] is not None
 
+# todo: test invalid request -> validation
+
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("user_type", ['user', 'admin'])
@@ -31,3 +33,27 @@ def test_token_ping_with_jwt(client: TApp, get_headers, user_type):
     print('response status code:', response.status_code)
     print('response json data:\n', response.json)
     assert response.json['msg'] == 'pong!'
+
+# todo: test invalid token -> validation
+
+
+@pytest.mark.e2e
+@pytest.mark.debug
+def test_register_user(client: TApp):
+    """ test registering user """
+    # parametrize two iterations
+    data = {
+        "email": "foo@bar.io",
+        "password": "12341234",
+        "password_repeat": "12341234",
+        "username": "test"  # todo: with no username
+    }
+    response = client.post_json('/api/register-user', data)
+
+    print('response status code:', response.status_code)
+    print('response json data:\n', response.json)
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['email'] == data['email']
+
+
+# todo: test invalid request -> validation
