@@ -16,25 +16,28 @@ class TokenAuthEventValidator(EventValidator):
         ])
 
 
-class TokenAuthEventHanlder(EventHandler):
+class TokenAuthEventHandler(EventHandler):
     def __init__(self, request: Request):
         super().__init__(request, TokenAuthEventValidator(request))
 
     def get_response(self) -> JsonResponse:
         user = self.__auth_user()
         if not user: raise AuthError('Invalid credentials')
-        return ok_response({'token': create_access_token(identity=user.as_dict())})
+        identity = user.as_dict()
+        identity['user_groups'] = ['foo', 'bar']  # todo: user groups model
+        return ok_response({'token': create_access_token(identity=identity)})
 
     def __auth_user(self):
-        usr = User.query.filter_by(email=self.request.json['email']).first()
-        if usr and usr.password_is_valid(self.request.json['password']):
+        usr = User.query.filter_by(email=self.request.json['email'].strip()).first()
+        if usr and usr.password_is_valid(self.request.json['password'].strip()):
             return usr
 
 
 class RegisterUserEventValidator(EventValidator):
     """
-    todo: more password rules
-    todo: username exclude special chars, only allow . and - (inside of username)
+    todo: @validation
+    * more password rules
+    * username exclude special chars, only allow . and - (inside of username)
     """
     def __init__(self, request: Request):
         super().__init__([
@@ -49,7 +52,7 @@ class RegisterUserEventValidator(EventValidator):
         ])
 
 
-class RegisterUserEventHanlder(EventHandler):
+class RegisterUserEventHandler(EventHandler):
     def __init__(self, request: Request):
         super().__init__(request, RegisterUserEventValidator(request))
 

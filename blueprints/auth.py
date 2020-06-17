@@ -2,6 +2,7 @@ from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, JWTManager
 from jwt import DecodeError
 
+from events.auth import TokenAuthEventHandler, RegisterUserEventHandler
 from events.factorys import event_handler_for
 from utils.http import AuthError, error_response
 
@@ -36,19 +37,23 @@ def token_not_fresh():
     raise AuthError(f'Not authorized')
 
 
+# noinspection PyTypeChecker
 @auth_blueprint.route('/token-auth', methods=('POST',))
 def authenticate():
     """ Obtain JWT """
-    return event_handler_for(request).get_response()
+    handler: TokenAuthEventHandler = event_handler_for(request)
+    return handler.get_response()
 
 
+# noinspection PyTypeChecker
 @auth_blueprint.route('/register-user', methods=('POST',))
 def register():
     """ Register new user (not admin) """
-    return event_handler_for(request).get_response()
+    handler: RegisterUserEventHandler = event_handler_for(request)
+    return handler.get_response()
 
 
-@auth_blueprint.route('/token-ping', methods=('GET',))
+@auth_blueprint.route('/token-ping', methods=('GET', 'POST'))
 @jwt_required
 def ping():
     return {

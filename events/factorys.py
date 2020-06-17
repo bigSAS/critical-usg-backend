@@ -1,11 +1,11 @@
 from flask import Request
 
-from events.auth import TokenAuthEventHanlder, RegisterUserEventHanlder
+from events.auth import TokenAuthEventHandler, RegisterUserEventHandler
 from events.core import EventHandler
 
 ENDPOINT_MAPPING = {
-    'auth.authenticate': TokenAuthEventHanlder,
-    'auth.register': RegisterUserEventHanlder
+    'auth.authenticate': TokenAuthEventHandler,
+    'auth.register': RegisterUserEventHandler
 }
 
 

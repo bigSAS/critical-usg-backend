@@ -42,10 +42,16 @@ class AuthError(ApiError):
         super().__init__('AUTH', description)
 
 
+class ForbiddenError(ApiError):
+    def __init__(self, description: str = 'Forbidden'):
+        super().__init__('PERMISSION', description)
+
+
 class ResponseStatus(Enum):
     OK = 'OK'
     NOT_FOUND = 'NOT_FOUND'
     AUTH_ERROR = "AUTH_ERROR"
+    FORBIDDEN = "FORBIDDEN"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     SERVER_ERROR = 'SERVER_ERROR'
 
@@ -79,7 +85,8 @@ class JsonResponse(Response):
 ERROR_STATUS_MAP = {
     'NotFound': (404, ResponseStatus.NOT_FOUND),
     'AuthError': (401, ResponseStatus.AUTH_ERROR),
-    'ValidationError': (400, ResponseStatus.VALIDATION_ERROR)
+    'ValidationError': (400, ResponseStatus.VALIDATION_ERROR),
+    'ForbiddenError': (403, ResponseStatus.FORBIDDEN)
 }
 
 

@@ -19,7 +19,7 @@ class TheSame(Validator):
         self.second_field_name = second_field_name
 
     def validate(self):
-        if self.value != self.second_value:
+        if self.cleaned_value() != self.second_value.strip():
             raise ValidationError([f'Value must be the same as {self.second_field_name}'], self.field_name)
 
 
@@ -30,7 +30,7 @@ class MinLen(Validator):
         self.min_len = min_len
 
     def validate(self):
-        if self.has_value() and len(self.value) < self.min_len:
+        if self.has_value() and len(self.cleaned_value()) < self.min_len:
             raise ValidationError([f'Minimum length is {self.min_len}'], self.field_name)
 
 
@@ -41,7 +41,7 @@ class MaxLen(Validator):
         self.max_len = max_len
 
     def validate(self):
-        if self.has_value() and len(self.value) > self.max_len:
+        if self.has_value() and len(self.cleaned_value()) > self.max_len:
             raise ValidationError([f'Maximum length is {self.max_len}'], self.field_name)
 
 
@@ -51,5 +51,5 @@ class EmailCorrect(Validator):
         super().__init__(value, field_name, optional)
 
     def validate(self):  # todo: validate email via regex
-        if self.has_value() and '@' not in self.value:
+        if self.has_value() and '@' not in self.cleaned_value():
             raise ValidationError([f'Email address is invalid'], self.field_name)

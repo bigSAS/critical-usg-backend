@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from blueprints.auth import auth_blueprint, jwt
 
 from db.model import db, bcrypt
-from utils.http import error_response, ValidationError
+from utils.http import ValidationError
 from config import Config
 
 
@@ -27,8 +27,14 @@ app = create_app()
 
 @app.before_request
 def check_json_content_type():
-    if 'application/json' not in request.content_type:
-        return error_response(ValidationError(['Content-Type - application/json only']))
+    if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
+        raise ValidationError(['Content-Type - application/json only'])
+
+
+@app.errorhandler
+def handle_error(error: Exception):
+    return handle_error(error)
+
 
 if __name__ == '__main__':
     app.run(debug=Config.FLASK_DEBUG)

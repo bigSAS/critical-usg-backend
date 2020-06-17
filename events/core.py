@@ -1,9 +1,10 @@
 from typing import Any, List
 from flask import Request
 from utils.http import JsonResponse, ValidationError
+from abc import ABC
 
 
-class Validator:
+class Validator(ABC):
     """
     Parent Validator class
     @:param value - value to be validated
@@ -19,16 +20,19 @@ class Validator:
     def has_value(self):
         return self.value is not None
 
+    def cleaned_value(self):
+        return self.value.strip() if isinstance(self.value, str) else self.value
+
     def validate(self):
         """ must raise ValidationError when validation fails """
         raise NotImplementedError('Implement in child class')
 
     def __validate_required(self):
-        if not self.optional and (not self.has_value() or self.value == ''):
+        if not self.optional and (not self.has_value() or self.cleaned_value() == ''):
             raise ValidationError(['Field is required'], self.field_name)
 
 
-class EventValidator:
+class EventValidator(ABC):
     def __init__(self, validators: List[Validator] = tuple()):
         self.__validators = validators
 
@@ -41,7 +45,7 @@ class EventValidator:
             validator.validate()
 
 
-class EventHandler:
+class EventHandler(ABC):
     """ Base event handler class """
     def __init__(self, request: Request, event_validator: EventValidator = None):
         self.__request = request
@@ -51,10 +55,6 @@ class EventHandler:
     @property
     def request(self):
         return self.__request
-
-    @property
-    def event_validator(self):
-        return self.__event_validator
 
     def validate(self):
         if self.__event_validator:
