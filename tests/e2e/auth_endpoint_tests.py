@@ -68,6 +68,9 @@ def test_register_user(client: TApp):
     print('response json data:\n', response.json)
     assert response.json['status'] == 'OK'
     assert response.json['data']['email'] == data['email']
+    expected_groups = ('USER',)
+    for expected_group in expected_groups:
+        assert expected_group in response.json['data']['groups']
 
 
 # todo: test invalid request -> validation

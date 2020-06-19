@@ -45,7 +45,7 @@ class User(db.Model):
             'email': self.email,
             'username': self.username,
             'is_superuser': self.is_superuser,
-            'groups': [ug.as_dict() for ug in self.user_groups]
+            'groups': [ug.name for ug in self.user_groups]
         }
 
     def __repr__(self):

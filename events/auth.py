@@ -1,7 +1,9 @@
+from typing import List
+
 from flask import Request
 from flask_jwt_extended import create_access_token
 
-from db.model import User, db
+from db.model import db, User, UserGroup, GroupUser
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen
 from utils.http import JsonResponse, AuthError, ok_response
@@ -24,7 +26,6 @@ class TokenAuthEventHandler(EventHandler):
         user = self.__auth_user()
         if not user: raise AuthError('Invalid credentials')
         identity = user.as_dict()
-        identity['user_groups'] = ['foo', 'bar']  # todo: user groups model
         return ok_response({'token': create_access_token(identity=identity)})
 
     def __auth_user(self):
@@ -57,11 +58,27 @@ class RegisterUserEventHandler(EventHandler):
         super().__init__(request, RegisterUserEventValidator(request))
 
     def get_response(self) -> JsonResponse:
-        user = User(
+        user = self.__create_new_user()
+        db.session.add(user)
+        db.session.commit()
+        user_groups = self.__add_user_default_groups(user)
+        for ug in user_groups: db.session.add(ug)
+        db.session.commit()
+        return ok_response(user.as_dict())
+
+    def __create_new_user(self) -> User:
+        return User(
             email=self.request.json['email'],
             plaintext_password=self.request.json['password'],
             username=self.request.json.get('username', None)
         )
-        db.session.add(user)
-        db.session.commit()
-        return ok_response(user.as_dict())
+
+    @staticmethod
+    def __add_user_default_groups(user: User) -> List[GroupUser]:
+        user_groups = ('USER',)
+        created_group_users = []
+        for group in user_groups:
+            user_group = UserGroup.query.filter_by(name=group).first()
+            if not user_group: raise ValueError(f'{user_group} user group not exists, check db defaults')
+            created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
+        return created_group_users
