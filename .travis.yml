@@ -1,0 +1,9 @@
+env:
+  - CUSG_TESTING=YES CUSG_DEBUG=YES
+language: python
+install:
+  - pip install -r requirements.txt
+script:
+  - flask db upgrade
+  - python setup_defaults.py
+  - python -m pytest -v
