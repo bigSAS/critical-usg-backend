@@ -1,6 +1,5 @@
 env:
-  - CUSG_TESTING=YES
-  - CUSG_DEBUG=YES
+  - CUSG_TESTING=YES CUSG_DEBUG=YES
 language: python
 install:
   - pip install -r requirements.txt
