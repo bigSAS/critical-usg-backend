@@ -1,5 +1,9 @@
+from datetime import datetime
+from json import loads
+
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 
 
@@ -83,3 +87,65 @@ class GroupUser(db.Model):
 
     def __repr__(self):
         return f'GroupUser({self.as_dict()})'
+
+
+class InstructionDocument(db.Model):
+    """ Istruction Document Entity """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500), nullable=True)
+    created = Column(DateTime)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    updated = Column(DateTime)
+    updated_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    def __init__(self, name: str, description: str, created_by: User):
+        self.name = name
+        self.description = description
+        self.created_by_user_id = created_by.id
+        self.created = datetime.utcnow()
+
+    def update_doc(self, updated_by: User, **kwargs):
+        valid_kwargs = ('name', 'description')
+        self.updated_by_user_id = updated_by.id
+        for k, v in kwargs.items():
+            if k in valid_kwargs: setattr(self, k, v)
+        self.updated = datetime.utcnow()
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'created': str(self.created),
+            'created_by_user_id': self.created_by_user_id,
+            'updated': str(self.updated),
+            'updated_by_user_id': self.created_by_user_id,
+        }
+
+    def __repr__(self):
+        return f'IstructionDocument({self.as_dict()})'
+
+
+class InstructionDocumentPage(db.Model):
+    """ Istruction Document Page Entity """
+    id = db.Column(db.Integer, primary_key=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id'), nullable=False)
+    page_num = db.Column(db.Integer, default=0)
+    json_data = db.Column(db.Text(500_000), nullable=True)
+
+    @property
+    def data(self):
+        return loads(self.json_data) if self.json_data else None
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'document_id': str(self.document_id),
+            'page_num': self.page_num,
+            # 'json_data': self.json_data,  # todo: uncomment for debug
+            'data': self.data
+        }
+
+    def __repr__(self):
+        return f'IstructionDocumentPage({self.as_dict()})'

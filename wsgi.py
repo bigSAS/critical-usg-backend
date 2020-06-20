@@ -1,7 +1,6 @@
 from flask import Flask, request
 from flask_migrate import Migrate
 from blueprints.auth import auth_blueprint, jwt
-
 from db.model import db, bcrypt
 from utils.http import ValidationError
 from config import Config

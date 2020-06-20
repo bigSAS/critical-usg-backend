@@ -1,8 +1,8 @@
 import pytest
 from webtest import TestApp as TApp
 
-from wsgi import app
-from db.model import db, User
+from wsgi import app as application
+from db.model import db as database, User
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -18,20 +18,32 @@ ADMIN = {
 
 
 @pytest.fixture(scope='session')
-def db_init():
-    db.init_app(app)
-    db.init_app(app)
-    with app.app_context():
+def db():
+    return database
+
+
+@pytest.fixture(scope='session')
+def dbsession(db):
+    return db.session
+
+
+@pytest.fixture(scope='session')
+def app(db):
+    apk = application
+    db.init_app(apk)
+    db.init_app(apk)
+    with apk.app_context():
         user = User(**USER)
         admin = User(**ADMIN)
         db.session.add(user)
         db.session.add(admin)
         db.session.commit()
+        return apk
 
 
 @pytest.fixture(scope='session')
-def client(db_init) -> TApp:
-    yield TApp(app)
+def client(app) -> TApp:
+    return TApp(app)
 
 
 @pytest.fixture(scope='function')
