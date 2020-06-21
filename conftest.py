@@ -24,7 +24,7 @@ def db():
 
 @pytest.fixture(scope='session')
 def dbsession(db):
-    return db.session
+    yield db.session
 
 
 @pytest.fixture(scope='session')

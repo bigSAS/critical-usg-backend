@@ -54,8 +54,8 @@ class RegisterUserEventValidator(EventValidator):
 
 
 class RegisterUserEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, RegisterUserEventValidator(request))
+    def __init__(self, request: Request, validate: bool = True):
+        super().__init__(request, RegisterUserEventValidator(request), validate=validate)
 
     def get_response(self) -> JsonResponse:
         user = self.__create_new_user()

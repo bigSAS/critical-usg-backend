@@ -3,9 +3,8 @@ from db.model import InstructionDocument, User
 
 
 @pytest.mark.unit
-@pytest.mark.debug
 def test_instruction_doc_created_autodate(app, dbsession):
-    """ ... """
+    """ test automatic date fields setting """
     with app.app_context():
         creator = User.query.filter_by(id=1).first()
         updator = User.query.filter_by(id=2).first()

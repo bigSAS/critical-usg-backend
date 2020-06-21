@@ -47,10 +47,10 @@ class EventValidator(ABC):
 
 class EventHandler(ABC):
     """ Base event handler class """
-    def __init__(self, request: Request, event_validator: EventValidator = None):
+    def __init__(self, request: Request, event_validator: EventValidator = None, validate: bool = True):
         self.__request = request
         self.__event_validator = event_validator
-        self.validate()
+        if validate: self.validate()
 
     @property
     def request(self):

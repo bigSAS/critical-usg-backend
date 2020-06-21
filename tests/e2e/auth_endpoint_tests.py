@@ -26,6 +26,8 @@ def test_get_jwt(client: TApp, email, password):
     assert response.json['status'] == ResponseStatus.OK.value
     assert response.json['data']['token'] is not None
 
+# todo: test for deleted user -> cannot login
+
 
 @pytest.mark.e2e
 @pytest.mark.parametrize(
@@ -68,6 +70,7 @@ def test_register_user(client: TApp):
     print('response json data:\n', response.json)
     assert response.json['status'] == 'OK'
     assert response.json['data']['email'] == data['email']
+    assert not response.json['data']['is_deleted']
     expected_groups = ('USER',)
     for expected_group in expected_groups:
         assert expected_group in response.json['data']['groups']
