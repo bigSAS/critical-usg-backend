@@ -1,5 +1,9 @@
 env:
   - CUSG_TESTING=YES CUSG_DEBUG=YES
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database cusg_test_db;' -U postgres
 language: python
 install:
   - pip install -r requirements.txt

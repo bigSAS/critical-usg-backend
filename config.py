@@ -22,7 +22,7 @@ SECRET = LOCAL_SECRET if DEBUG else environ.get('CUSG_SECRET', None)
 if not SECRET: raise EnvironmentError('CUSG_SECRET not set!')
 DB_CONNETION_STRING = environ['CUSG_DB_CONNETION_STRING'] \
     if environ.get('CUSG_DB_CONNETION_STRING', None) else 'sqlite:///app.db'
-if TESTING: DB_CONNETION_STRING = 'sqlite:///app_test.db'
+if TESTING: DB_CONNETION_STRING = 'postgresql://postgres:@localhost:5432/cusg_test_db'
 print('DEBUG:', 'yes' if DEBUG else 'no')
 print('TESTING:', 'yes' if TESTING else 'no')
 print('DB CONNECTION STRING:', DB_CONNETION_STRING)
