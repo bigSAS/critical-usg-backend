@@ -16,13 +16,18 @@ print('Configuration')
 print('#' * 50)
 DEBUG = DEBUG_LOCAL if HAS_LOCAL_CONFIG else environ.get('CUSG_DEBUG', 'NO') == 'YES'
 
+
+# todo: !!! simplify config to minimum !!!
+
 TESTING = environ.get('CUSG_TESTING', 'NO') == 'YES'
 LOCAL_SECRET = 'top-secret-local-debug'
 SECRET = LOCAL_SECRET if DEBUG else environ.get('CUSG_SECRET', None)
 if not SECRET: raise EnvironmentError('CUSG_SECRET not set!')
 DB_CONNETION_STRING = environ['CUSG_DB_CONNETION_STRING'] \
-    if environ.get('CUSG_DB_CONNETION_STRING', None) else 'sqlite:///app.db'
-if TESTING: DB_CONNETION_STRING = 'postgresql://postgres:@localhost:5432/cusg_test_db'
+    if environ.get('CUSG_DB_CONNETION_STRING', None) \
+    else 'postgresql://postgres:postgres@localhost:5432/cusg_development_db'
+PGPASSWORD = 'postgres' if HAS_LOCAL_CONFIG else ''
+if TESTING: DB_CONNETION_STRING = f'postgresql://postgres:{PGPASSWORD}@localhost:5432/cusg_test_db'
 print('DEBUG:', 'yes' if DEBUG else 'no')
 print('TESTING:', 'yes' if TESTING else 'no')
 print('DB CONNECTION STRING:', DB_CONNETION_STRING)
