@@ -3,7 +3,7 @@ from typing import List
 from flask import Request
 from flask_jwt_extended import create_access_token
 
-from db.model import db, User, UserGroup, GroupUser
+from db.model import db, User, UserGroup, GroupUser, get_object, ObjectNotFoundError
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen
 from utils.http import JsonResponse, AuthError, ok_response
@@ -28,10 +28,13 @@ class TokenAuthEventHandler(EventHandler):
         identity = user.as_dict()
         return ok_response({'token': create_access_token(identity=identity)})
 
+    # noinspection PyBroadException
     def __auth_user(self):
-        usr = User.query.filter_by(email=self.request.json['email'].strip()).first()
-        if usr and usr.password_is_valid(self.request.json['password'].strip()):
-            return usr
+        try:
+            user = get_object(User, email=self.request.json['email'].strip())
+            if user.password_is_valid(self.request.json['password'].strip()):
+                return user
+        except: return None
 
 
 class RegisterUserEventValidator(EventValidator):
@@ -78,7 +81,9 @@ class RegisterUserEventHandler(EventHandler):
         user_groups = ('USER',)
         created_group_users = []
         for group in user_groups:
-            user_group = UserGroup.query.filter_by(name=group).first()
-            if not user_group: raise ValueError(f'{user_group} user group not exists, check db defaults')
-            created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
+            try:
+                user_group = get_object(UserGroup, name=group)
+                created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
+            except ObjectNotFoundError as e:
+                raise ValueError(f'{group} user group not exists, check db defaults.\n{repr(e)}')
         return created_group_users

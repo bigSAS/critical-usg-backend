@@ -1,5 +1,4 @@
 from datetime import datetime
-from json import loads
 
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +8,16 @@ from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+
+class ObjectNotFoundError(Exception): pass
+
+
+def get_object(entity_class, **kwargs):
+    """ Get Entity object by attrs passed in kwargs """
+    obj = entity_class.query.filter_by(**kwargs).first()
+    if not obj: raise ObjectNotFoundError(f'{entity_class.__name__}({kwargs}) not found.')
+    return obj
 
 
 class User(db.Model):
@@ -57,11 +66,8 @@ class User(db.Model):
             'is_deleted': self.is_deleted
         }
 
-    def __str__(self):
-        return f'User{self.as_dict()}'
-
     def __repr__(self):
-        return self.__str__()
+        return f'User{self.as_dict()}'
 
 
 class UserGroup(db.Model):
@@ -112,6 +118,7 @@ class InstructionDocument(db.Model):
         self.description = description
         self.created_by_user_id = created_by.id
         self.created = datetime.utcnow()
+        self.updated_by_user_id = None
 
     def update_doc(self, updated_by: User, **kwargs):
         valid_kwargs = ('name', 'description')
@@ -119,6 +126,11 @@ class InstructionDocument(db.Model):
         for k, v in kwargs.items():
             if k in valid_kwargs: setattr(self, k, v)
         self.updated = datetime.utcnow()
+
+    @property
+    def page_count(self) -> int:
+        count = InstructionDocumentPage.query.filter_by(document_id=self.id).count()
+        return count
 
     def as_dict(self):
         return {
@@ -142,18 +154,17 @@ class InstructionDocumentPage(db.Model):
     page_num = db.Column(db.Integer, default=0)
     json = db.Column(JSON, nullable=True)
 
-    # @property
-    # def data(self):
-    #     return loads(self.json_data) if self.json_data else None
+    def __init__(self, instruction_document: InstructionDocument, json: dict):
+        self.document_id = instruction_document.id
+        self.page_num = instruction_document.page_count + 1
+        self.json = json
 
     def as_dict(self):
         return {
             'id': self.id,
             'document_id': str(self.document_id),
             'page_num': self.page_num,
-            'json': self.json,
-            # 'json_data': self.json_data,  # todo: uncomment for debug
-            # 'data': self.data
+            'json': self.json
         }
 
     def __repr__(self):

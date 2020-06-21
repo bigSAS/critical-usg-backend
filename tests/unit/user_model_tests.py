@@ -9,6 +9,7 @@ class DummyRequest:
         self.json = json
 
 
+# noinspection PyTypeChecker
 @pytest.mark.unit
 @pytest.mark.debug
 def test_delete_user(app, dbsession):
@@ -28,4 +29,3 @@ def test_delete_user(app, dbsession):
 
         deleted_user: User = dbsession.query(User).filter_by(id=uid).first()
         assert deleted_user.is_deleted
-
