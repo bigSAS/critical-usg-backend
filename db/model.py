@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -14,10 +15,17 @@ class ObjectNotFoundError(Exception): pass
 
 
 def get_object(entity_class, **kwargs):
-    """ Get Entity object by attrs passed in kwargs """
+    """ Get Entity object by attrs passed in kwargs, throws ObjectNotFoundError when object is not found """
     obj = entity_class.query.filter_by(**kwargs).first()
     if not obj: raise ObjectNotFoundError(f'{entity_class.__name__}({kwargs}) not found.')
     return obj
+
+
+def get_objects(entity_class, **kwargs):
+    """ Get Entity objects by attrs passed in kwargs """
+    order_by = kwargs.pop('order_by', None)
+    if order_by: return entity_class.query.filter_by(**kwargs).order_by(order_by)
+    return entity_class.query.filter_by(**kwargs)
 
 
 class User(db.Model):
@@ -128,6 +136,12 @@ class InstructionDocument(db.Model):
         self.updated = datetime.utcnow()
 
     @property
+    def pages(self):
+        # from sqlalchemy import desc
+        # todo -> how to order by in get_objects ? or maybe get_objects().order_by() ???
+        return get_objects(InstructionDocumentPage, document_id=self.id)
+
+    @property
     def page_count(self) -> int:
         count = InstructionDocumentPage.query.filter_by(document_id=self.id).count()
         return count
@@ -154,7 +168,7 @@ class InstructionDocumentPage(db.Model):
     page_num = db.Column(db.Integer, default=0)
     json = db.Column(JSON, nullable=True)
 
-    def __init__(self, instruction_document: InstructionDocument, json: dict):
+    def __init__(self, instruction_document, json: dict):
         self.document_id = instruction_document.id
         self.page_num = instruction_document.page_count + 1
         self.json = json

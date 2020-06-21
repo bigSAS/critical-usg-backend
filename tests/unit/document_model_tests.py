@@ -3,7 +3,6 @@ from db.model import InstructionDocument, User, InstructionDocumentPage, get_obj
 
 
 @pytest.mark.unit
-@pytest.mark.debug
 def test_instruction_doc_created_autodate(app, dbsession):
     """ test automatic date fields setting """
     with app.app_context():
@@ -14,11 +13,11 @@ def test_instruction_doc_created_autodate(app, dbsession):
         dbsession.add(doc)
         dbsession.commit()
 
-        created_doc = InstructionDocument.query.filter_by(id=doc.id).first()
+        created_doc = get_object(InstructionDocument, id=doc.id)
         created_doc.update_doc(updator, name='updated test doc', description='i have desription now :)')
         dbsession.commit()
 
-        updated_doc: InstructionDocument = InstructionDocument.query.filter_by(id=doc.id).first()
+        updated_doc: InstructionDocument = get_object(InstructionDocument, id=doc.id)
         assert updated_doc.updated_by_user_id == updator.id
         assert updated_doc.updated is not None
         assert updated_doc.name == 'updated test doc'
@@ -50,8 +49,10 @@ def test_instruction_doc_with_pages(app, dbsession):
         )
         dbsession.add(page_two)
         dbsession.commit()
-        assert page_one.document_id == doc.id
-        assert page_two.document_id == doc.id
-        assert page_one.page_num == 1
-        assert page_two.page_num == 2
+
+        pages = doc.pages
+        assert pages[0].document_id == doc.id
+        assert pages[1].document_id == doc.id
+        assert pages[0].page_num == 1
+        assert pages[1].page_num == 2
 
