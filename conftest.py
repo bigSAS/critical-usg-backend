@@ -8,13 +8,13 @@ from db.model import db as database, User, get_object
 
 USER = {
     'email': 'jimmy@choo.io',
-    'plaintext_password': 'jimmyh',
+    'plaintext_password': '12341234',
     'is_superuser': False
 }
 
 ADMIN = {
     'email': 'sas@kodzi.io',
-    'plaintext_password': 'sas',
+    'plaintext_password': '12341234',
     'is_superuser': True
 }
 

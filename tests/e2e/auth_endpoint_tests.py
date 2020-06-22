@@ -6,7 +6,7 @@ from db.model import get_object, User
 from utils.http import ResponseStatus
 
 
-def get_token_response(client: TApp, email: str, password: str, status: int = 200):
+def get_token_response(client: TApp, email: str, password: str = '12341234', status: int = 200):
     return client.post_json(
         '/api/token-auth',
         {
@@ -18,10 +18,10 @@ def get_token_response(client: TApp, email: str, password: str, status: int = 20
 
 
 @pytest.mark.e2e
-@pytest.mark.parametrize("email,password", [('jimmy@choo.io', 'jimmyh'), ('sas@kodzi.io', 'sas')])
-def test_get_jwt(client: TApp, email, password):
+@pytest.mark.parametrize("email", ['jimmy@choo.io', 'sas@kodzi.io'])
+def test_get_jwt(client: TApp, email):
     """ test geting jwt token for admin and user """
-    response = get_token_response(client, email, password)
+    response = get_token_response(client, email)
     print('response status code:', response.status_code)
     print('response json data:\n', response.json)
     assert response.json['status'] == ResponseStatus.OK.value

@@ -3,6 +3,7 @@ from typing import List
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from db.model import get_object, User
 from utils.http import ForbiddenError
 
 
@@ -10,10 +11,9 @@ def superuser_only(func):
     @wraps(func)
     @jwt_required
     def wrapper(*args, **kwargs):
-        user: dict = get_jwt_identity()
-        # todo: check admin in db query by user id,
-        #  must add !!!
-        if not user.get('is_superuser', False):
+        user_data: dict = get_jwt_identity()
+        user = get_object(User, id=user_data['id'])
+        if not user.is_superuser:
             raise ForbiddenError('Admin only')
         return func(*args, **kwargs)
     return wrapper
