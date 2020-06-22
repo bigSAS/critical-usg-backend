@@ -1,8 +1,10 @@
+from typing import Callable, Dict
+
 import pytest
 from webtest import TestApp as TApp
 
 from wsgi import app as application
-from db.model import db as database, User
+from db.model import db as database, User, get_object
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -47,7 +49,7 @@ def client(app) -> TApp:
 
 
 @pytest.fixture(scope='function')
-def get_headers(client):
+def get_headers(client) -> Callable[[str], Dict[str, str]]:
     def get_headers_with_auth(role: str = 'user'):
         if role == 'user':
             email = USER['email']
@@ -70,3 +72,15 @@ def get_headers(client):
         }
         return headers
     return get_headers_with_auth
+
+
+@pytest.fixture(scope='function')
+def user(app) -> User:
+    with app.app_context():
+        return get_object(User, id=1)
+
+
+@pytest.fixture(scope='function')
+def admin(app) -> User:
+    with app.app_context():
+        return get_object(User, id=2)

@@ -1,13 +1,13 @@
 import pytest
-from db.model import InstructionDocument, User, InstructionDocumentPage, get_object
+from db.model import InstructionDocument, InstructionDocumentPage, get_object
 
 
 @pytest.mark.unit
-def test_instruction_doc_created_autodate(app, dbsession):
+def test_instruction_doc_created_autodate(app, dbsession, user, admin):
     """ test automatic date fields setting """
     with app.app_context():
-        creator = get_object(User, id=1)
-        updator = get_object(User, id=2)
+        creator = user
+        updator = admin
 
         doc = InstructionDocument(name='test doc', description='...', created_by=creator)
         dbsession.add(doc)
@@ -25,11 +25,11 @@ def test_instruction_doc_created_autodate(app, dbsession):
 
 
 @pytest.mark.unit
-def test_instruction_doc_with_pages(app, dbsession):
+@pytest.mark.debug
+def test_instruction_doc_with_pages(app, dbsession, user):
     """ test creation of doc with pages """
     with app.app_context():
-        creator = get_object(User, id=1)
-
+        creator = user
         doc = InstructionDocument(name='test doc', description='...', created_by=creator)
         dbsession.add(doc)
         dbsession.commit()
@@ -55,4 +55,3 @@ def test_instruction_doc_with_pages(app, dbsession):
         assert pages[1].document_id == doc.id
         assert pages[0].page_num == 1
         assert pages[1].page_num == 2
-

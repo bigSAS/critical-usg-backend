@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import List
-
+from typing import ClassVar, List
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.types import JSON
 
@@ -14,18 +13,20 @@ bcrypt = Bcrypt()
 class ObjectNotFoundError(Exception): pass
 
 
-def get_object(entity_class, **kwargs):
-    """ Get Entity object by attrs passed in kwargs, throws ObjectNotFoundError when object is not found """
+def get_object(entity_class: ClassVar, **kwargs):
+    """ Get Entity object by attrs passed in kwargs,
+    throws ObjectNotFoundError when object is not found """
     obj = entity_class.query.filter_by(**kwargs).first()
     if not obj: raise ObjectNotFoundError(f'{entity_class.__name__}({kwargs}) not found.')
     return obj
 
 
-def get_objects(entity_class, **kwargs):
-    """ Get Entity objects by attrs passed in kwargs """
+def get_objects(entity_class: ClassVar, **kwargs) -> List[object]:
+    """ Get Entity objects by attrs passed in kwargs
+    order_by -> column_name asc/desc """
     order_by = kwargs.pop('order_by', None)
-    if order_by: return entity_class.query.filter_by(**kwargs).order_by(order_by)
-    return entity_class.query.filter_by(**kwargs)
+    if order_by: return entity_class.query.filter_by(**kwargs).order_by(text(order_by)).all()
+    return entity_class.query.filter_by(**kwargs).all()
 
 
 class User(db.Model):
@@ -137,9 +138,8 @@ class InstructionDocument(db.Model):
 
     @property
     def pages(self):
-        # from sqlalchemy import desc
-        # todo -> how to order by in get_objects ? or maybe get_objects().order_by() ???
-        return get_objects(InstructionDocumentPage, document_id=self.id)
+        # noinspection PyTypeChecker
+        return get_objects(InstructionDocumentPage, document_id=self.id, order_by="page_num")
 
     @property
     def page_count(self) -> int:
