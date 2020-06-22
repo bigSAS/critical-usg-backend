@@ -19,14 +19,15 @@ def get_token_response(client: TApp, email: str, password: str = '12341234', sta
 
 @pytest.mark.e2e
 @pytest.mark.auth
-@pytest.mark.parametrize("email", ['jimmy@choo.io', 'sas@kodzi.io'])
-def test_get_jwt(client: TApp, email):
+def test_get_jwt(client: TApp, user, admin, superuser):
     """ test geting jwt token for admin and user """
-    response = get_token_response(client, email)
-    print('response status code:', response.status_code)
-    print('response json data:\n', response.json)
-    assert response.json['status'] == ResponseStatus.OK.value
-    assert response.json['data']['token'] is not None
+    users = [user, admin, superuser]
+    for usr in users:
+        response = get_token_response(client, usr.email)
+        print('response status code:', response.status_code)
+        print('response json data:\n', response.json)
+        assert response.json['status'] == ResponseStatus.OK.value
+        assert response.json['data']['token'] is not None
 
 
 @pytest.mark.e2e

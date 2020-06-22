@@ -4,7 +4,7 @@ import pytest
 from webtest import TestApp as TApp
 
 from wsgi import app as application
-from db.model import db as database, User, get_object
+from db.model import db as database, User, get_object, ObjectNotFoundError
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -41,16 +41,7 @@ def app(db):
     db.init_app(apk)
     db.init_app(apk)
     with apk.app_context():
-        user = User(**USER)
-        admin = User(**ADMIN)
-        superuser = User(**SUPERUSER)
-        db.session.add(user)
-        db.session.add(admin)
-        db.session.add(superuser)
-        db.session.commit()
-        user.add_to_group('USER')
-        user.add_to_group('USER')
-        admin.add_to_group('ADMIN')
+
         return apk
 
 
@@ -89,18 +80,46 @@ def get_headers(client) -> Callable[[str], Dict[str, str]]:
 
 
 @pytest.fixture(scope='function')
-def user(app) -> User:
-    with app.app_context():
-        return get_object(User, email='jimmy@choo.io')
+def get_user(app, dbsession):
+    def getter(user_type='user'):
+        def get_email():
+            if user_type == 'user':
+                return USER['email']
+            elif user_type == 'admin':
+                return ADMIN['email']
+            elif user_type == 'superuser':
+                return SUPERUSER['email']
+            else:
+                raise ValueError(f'invalid user type: {user_type}')
+
+        def add_user(data, group=None):
+            user = User(**data)
+            dbsession.add(user)
+            dbsession.commit()
+            if group is not None: user.add_to_group(group)
+
+        with app.app_context():
+            try:
+                return get_object(User, email=get_email())
+            except ObjectNotFoundError:
+                if user_type == 'user': add_user(USER, 'USER')
+                elif user_type == 'admin': add_user(ADMIN, 'ADMIN')
+                elif user_type == 'superuser': add_user(SUPERUSER, None)
+                return get_object(User, email=get_email())
+
+    return getter
 
 
 @pytest.fixture(scope='function')
-def admin(app) -> User:
-    with app.app_context():
-        return get_object(User, email='admin@choo.io')
+def user(get_user) -> User:
+    return get_user('user')
 
 
 @pytest.fixture(scope='function')
-def superuser(app) -> User:
-    with app.app_context():
-        return get_object(User, email='sas@kodzi.io')
+def admin(get_user) -> User:
+    return get_user('admin')
+
+
+@pytest.fixture(scope='function')
+def superuser(get_user) -> User:
+    return get_user('superuser')

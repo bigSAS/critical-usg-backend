@@ -10,6 +10,4 @@ script:
   - flask db upgrade
   - python setup_defaults.py
   - python -m pytest -v -m unit
-  - psql -c 'drop database cusg_test_db;create database cusg_test_db;' -U postgres
-  - python setup_defaults.py
   - python -m pytest -v -m e2e
