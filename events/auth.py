@@ -31,7 +31,7 @@ class TokenAuthEventHandler(EventHandler):
     # noinspection PyBroadException
     def __auth_user(self):
         try:
-            user = get_object(User, email=self.request.json['email'].strip())
+            user = get_object(User, email=self.request.json['email'].strip(), is_deleted=False)
             if user.password_is_valid(self.request.json['password'].strip()):
                 return user
         except: return None

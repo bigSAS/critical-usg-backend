@@ -5,7 +5,7 @@ from tests.e2e.auth_endpoint_tests import get_token_response
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("email,password", [('jimmy@choo.io', 'jimmyh'), ('sas@kodzi.io', 'sas')])
-def test_todo_name_me(client: TApp, email, password):  # todo: tests
+def test_todo_name_me(client: TApp, email, password):  # todo: tests when event hanlder is done
     """ ... """
     response = get_token_response(client, email, password)
     pass
