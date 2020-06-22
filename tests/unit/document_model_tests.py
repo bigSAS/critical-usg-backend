@@ -3,11 +3,11 @@ from db.model import InstructionDocument, InstructionDocumentPage, get_object
 
 
 @pytest.mark.unit
-def test_instruction_doc_created_autodate(app, dbsession, user, admin):
+def test_instruction_doc_created_autodate(app, dbsession, user, superuser):
     """ test automatic date fields setting """
     with app.app_context():
         creator = user
-        updator = admin
+        updator = superuser
 
         doc = InstructionDocument(name='test doc', description='...', created_by=creator)
         dbsession.add(doc)

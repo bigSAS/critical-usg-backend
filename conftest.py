@@ -81,6 +81,6 @@ def user(app) -> User:
 
 
 @pytest.fixture(scope='function')
-def admin(app) -> User:
+def superuser(app) -> User:
     with app.app_context():
         return get_object(User, id=2)
