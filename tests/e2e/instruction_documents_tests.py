@@ -21,3 +21,6 @@ def test_admin_creates_new_doc(client: TApp, admin, get_headers):
     assert response.json['data']['description'] == data['description']
     assert response.json['data']['updated_by'] is None
     assert response.json['data']['updated'] is None
+
+
+# todo: other tests

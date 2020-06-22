@@ -29,3 +29,5 @@ def test_delete_user(app, dbsession):
 
         deleted_user: User = get_object(User, id=uid)
         assert deleted_user.is_deleted
+
+# todo: other tests

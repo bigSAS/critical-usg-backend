@@ -2,13 +2,14 @@ env:
   - CUSG_TESTING=YES CUSG_DEBUG=YES
 services:
   - postgresql
-before_script:
-  - psql -c 'create database cusg_test_db;' -U postgres
 language: python
 install:
   - pip install -r requirements.txt
 script:
+  - psql -c 'create database cusg_test_db;' -U postgres
   - flask db upgrade
   - python setup_defaults.py
   - python -m pytest -v -m unit
+  - psql -c 'drop database cusg_test_db;create database cusg_test_db;' -U postgres
+  - python setup_defaults.py
   - python -m pytest -v -m e2e

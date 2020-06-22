@@ -57,3 +57,5 @@ def test_instruction_doc_with_pages(app, dbsession, user):
         assert pages[1].document_id == doc.id
         assert pages[0].page_num == 1
         assert pages[1].page_num == 2
+
+# todo: other tests
