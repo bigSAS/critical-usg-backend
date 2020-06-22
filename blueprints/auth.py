@@ -2,7 +2,7 @@ from flask import request, Blueprint
 from flask_jwt_extended import JWTManager
 from jwt import DecodeError
 
-from events.auth import TokenAuthEventHandler, RegisterUserEventHandler
+from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteUserEventHandler
 from events.factorys import event_handler_for
 from utils.http import AuthError, error_response
 from utils.permissions import restricted, superuser_only
@@ -48,9 +48,18 @@ def authenticate():
 
 # noinspection PyTypeChecker
 @auth_blueprint.route('/register-user', methods=('POST',))
-def register():
+def register_user():
     """ Register new user (not admin) """
     handler: RegisterUserEventHandler = event_handler_for(request)
+    return handler.get_response()
+
+
+# noinspection PyTypeChecker
+@auth_blueprint.route('/delete-user', methods=('POST',))
+@restricted('ADMIN')
+def delete_user():
+    """ Register new user (not admin) """
+    handler: DeleteUserEventHandler = event_handler_for(request)
     return handler.get_response()
 
 

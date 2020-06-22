@@ -1,5 +1,5 @@
 import pytest
-from webtest import TestApp as TApp, AppError
+from webtest import TestApp as TApp
 
 # ! important ! :: @pytest.mark.debug -> 4 debugging
 from db.model import get_object, User
@@ -90,7 +90,6 @@ def test_jwt_request_validation(client: TApp, email, password, expected_error_me
 )
 def test_register_user(client: TApp, email, username):
     """ test registering user """
-    # parametrize two iterations
     data = {
         "email": email,
         "password": "12341234",
@@ -109,4 +108,26 @@ def test_register_user(client: TApp, email, username):
         assert expected_group in response.json['data']['groups']
 
 
-# todo: test invalid request -> validation
+@pytest.mark.e2e
+@pytest.mark.auth
+@pytest.mark.debug
+def test_delete_user(client: TApp, app, user, admin, superuser, get_headers):
+    """ test user delete """
+    new_user_data = {
+        "email": "delete.me@later.io",
+        "password": "12341234",
+        "password_repeat": "12341234"
+    }
+    user_id = client.post_json('/api/register-user', new_user_data).json['data']['id']
+    # regular user cannot delete
+    client.post_json('/api/delete-user', {'user_id': user_id}, headers=get_headers('user'), status=403)
+    # admin user can delete
+    response = client.post_json('/api/delete-user', {'user_id': user_id}, headers=get_headers('admin'))
+    print('response status code:', response.status_code)
+    print('response json data:\n', response.json)
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['is_deleted']
+    with app.app_context():
+        assert get_object(User, id=user_id).is_deleted
+    # su can delete
+    client.post_json('/api/delete-user', {'user_id': user_id}, headers=get_headers('superuser'))

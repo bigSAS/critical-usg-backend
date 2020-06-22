@@ -1,3 +1,4 @@
+from db.model import get_object, ObjectNotFoundError
 from events.core import Validator
 from utils.http import ValidationError
 
@@ -53,3 +54,16 @@ class EmailCorrect(Validator):
     def validate(self):  # todo: validate email via regex
         if self.has_value() and '@' not in self.cleaned_value():
             raise ValidationError([f'Email address is invalid'], self.field_name)
+
+
+class ObjectExist(Validator):
+    """ Model object exists """
+    def __init__(self, model_class, object_id: int, field_name: str = "NON_FIELD"):
+        super().__init__(object_id, field_name)
+        self.__model_class = model_class
+
+    def validate(self):
+        try:
+            get_object(self.__model_class, id=self.value)
+        except ObjectNotFoundError as e:
+            raise ValidationError([f'{self.__model_class.__name__}(id={self.value}) not exists'], self.field_name)

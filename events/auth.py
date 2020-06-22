@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token
 
 from db.model import db, User, UserGroup, GroupUser, get_object, ObjectNotFoundError
 from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen
+from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist
 from utils.http import JsonResponse, AuthError, ok_response
 
 
@@ -58,7 +58,7 @@ class RegisterUserEventValidator(EventValidator):
 
 class RegisterUserEventHandler(EventHandler):
     def __init__(self, request: Request, validate: bool = True):
-        super().__init__(request, RegisterUserEventValidator(request), validate=validate)
+        super().__init__(request, RegisterUserEventValidator(request), validate=validate)  # todo: rm validate ???
 
     def get_response(self) -> JsonResponse:
         user = self.__create_new_user()
@@ -87,3 +87,21 @@ class RegisterUserEventHandler(EventHandler):
             except ObjectNotFoundError as e:
                 raise ValueError(f'{group} user group not exists, check db defaults.\n{repr(e)}')
         return created_group_users
+
+
+class DeleteUserEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            ObjectExist(User, request.json.get('user_id', None), 'user_id')
+        ])
+
+
+class DeleteUserEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, DeleteUserEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user = get_object(User, id=self.request.json['user_id'])
+        user.delete()
+        db.session.commit()
+        return ok_response(user.as_dict())
