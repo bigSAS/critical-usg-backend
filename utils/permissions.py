@@ -38,7 +38,7 @@ def restricted(groups: List[str]):
             user_data: dict = get_jwt_identity()
             user = get_object(User, id=user_data['id'])
             if user.is_deleted: ForbiddenError('Account deleted')
-            if not has_group_permission(user, groups):
+            if not has_group_permission(user, groups) and not user.is_superuser:
                 raise ForbiddenError(f'Only alowed for users in groups: {groups}')
             return func(*args, **kwargs)
         return wrapper

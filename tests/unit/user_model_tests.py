@@ -11,7 +11,7 @@ class DummyRequest:
 
 # noinspection PyTypeChecker
 @pytest.mark.unit
-@pytest.mark.debug
+@pytest.mark.model
 def test_delete_user(app, dbsession):
     """ test user deletion """
     with app.app_context():

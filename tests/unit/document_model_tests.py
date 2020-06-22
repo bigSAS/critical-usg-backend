@@ -3,6 +3,7 @@ from db.model import InstructionDocument, InstructionDocumentPage, get_object
 
 
 @pytest.mark.unit
+@pytest.mark.docs
 def test_instruction_doc_created_autodate(app, dbsession, user, superuser):
     """ test automatic date fields setting """
     with app.app_context():
@@ -25,7 +26,8 @@ def test_instruction_doc_created_autodate(app, dbsession, user, superuser):
 
 
 @pytest.mark.unit
-@pytest.mark.debug
+@pytest.mark.model
+@pytest.mark.docs
 def test_instruction_doc_with_pages(app, dbsession, user):
     """ test creation of doc with pages """
     with app.app_context():

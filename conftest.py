@@ -13,6 +13,12 @@ USER = {
 }
 
 ADMIN = {
+    'email': 'admin@choo.io',
+    'plaintext_password': '12341234',
+    'is_superuser': False
+}
+
+SUPERUSER = {
     'email': 'sas@kodzi.io',
     'plaintext_password': '12341234',
     'is_superuser': True
@@ -37,9 +43,14 @@ def app(db):
     with apk.app_context():
         user = User(**USER)
         admin = User(**ADMIN)
+        superuser = User(**SUPERUSER)
         db.session.add(user)
         db.session.add(admin)
+        db.session.add(superuser)
         db.session.commit()
+        user.add_to_group('USER')
+        user.add_to_group('USER')
+        admin.add_to_group('ADMIN')
         return apk
 
 
@@ -57,6 +68,9 @@ def get_headers(client) -> Callable[[str], Dict[str, str]]:
         elif role == 'admin':
             email = ADMIN['email']
             password = ADMIN['plaintext_password']
+        elif role == 'superuser':
+            email = SUPERUSER['email']
+            password = SUPERUSER['plaintext_password']
         else: raise ValueError(f'invalid role: {role}')
         response = client.post_json(
             '/api/token-auth',
@@ -77,10 +91,16 @@ def get_headers(client) -> Callable[[str], Dict[str, str]]:
 @pytest.fixture(scope='function')
 def user(app) -> User:
     with app.app_context():
-        return get_object(User, id=1)
+        return get_object(User, email='jimmy@choo.io')
+
+
+@pytest.fixture(scope='function')
+def admin(app) -> User:
+    with app.app_context():
+        return get_object(User, email='admin@choo.io')
 
 
 @pytest.fixture(scope='function')
 def superuser(app) -> User:
     with app.app_context():
-        return get_object(User, id=2)
+        return get_object(User, email='sas@kodzi.io')

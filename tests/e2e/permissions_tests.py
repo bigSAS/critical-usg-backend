@@ -6,6 +6,7 @@ from utils.http import ResponseStatus
 
 
 @pytest.mark.e2e
+@pytest.mark.permissions
 @pytest.mark.skip('not impl yet')
 def test_superuser_only_endpoint(client: TApp, user, superuser, get_headers):  # todo: impl <-
     """ test superuser protected endpoint - regular user should not have access """
@@ -18,6 +19,7 @@ def test_superuser_only_endpoint(client: TApp, user, superuser, get_headers):  #
 
 
 @pytest.mark.e2e
+@pytest.mark.permissions
 @pytest.mark.skip('not impl yet')
 def test_group_only_endpoint(client: TApp, user, superuser, get_headers):  # todo: impl <-
     """ test user group protected endpoint - user should not have access when not belong to group """
@@ -30,6 +32,7 @@ def test_group_only_endpoint(client: TApp, user, superuser, get_headers):  # tod
 
 
 @pytest.mark.e2e
+@pytest.mark.permissions
 @pytest.mark.skip('not impl yet')
 def test_open_endpoint(client: TApp, user, superuser, get_headers):  # todo: impl <-
     """ test open endpoint - all have access """

@@ -10,4 +10,5 @@ install:
 script:
   - flask db upgrade
   - python setup_defaults.py
-  - python -m pytest -v
+  - python -m pytest -v -m unit
+  - python -m pytest -v -m e2e

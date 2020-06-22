@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
@@ -65,6 +66,19 @@ class User(db.Model):
     def delete(self):
         self.is_deleted = True
 
+    def belongs_to_group(self, group):
+        # noinspection PyTypeChecker
+        belongs = group in self.user_groups
+        return belongs
+
+    def add_to_group(self, group_name: str):
+        # noinspection PyTypeChecker
+        group = get_object(UserGroup, name=group_name)
+        if not self.belongs_to_group(group):
+            user_in_group = GroupUser(group_id=group.id, user_id=self.id)
+            db.session.add(user_in_group)
+            db.session.commit()
+
     def as_dict(self):
         return {
             'id': self.id,
@@ -121,6 +135,8 @@ class InstructionDocument(db.Model):
     created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     updated = Column(DateTime)
     updated_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_by = relationship("User", foreign_keys=[created_by_user_id])
+    updated_by = relationship("User", foreign_keys=[updated_by_user_id])
 
     def __init__(self, name: str, description: str, created_by: User):
         self.name = name
@@ -152,9 +168,9 @@ class InstructionDocument(db.Model):
             'name': self.name,
             'description': self.description,
             'created': str(self.created),
-            'created_by_user_id': self.created_by_user_id,
-            'updated': str(self.updated),
-            'updated_by_user_id': self.created_by_user_id,
+            'created_by': self.created_by.as_dict(),
+            'updated': str(self.updated_by) if self.updated else None,
+            'updated_by': self.updated_by.as_dict() if self.updated_by else None
         }
 
     def __repr__(self):

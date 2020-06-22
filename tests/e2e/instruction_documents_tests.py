@@ -1,16 +1,23 @@
 import pytest
 from webtest import TestApp as TApp
-from tests.e2e.auth_endpoint_tests import get_token_response
+
+from utils.http import ResponseStatus
 
 
 @pytest.mark.e2e
-@pytest.mark.skip('not impl yet')
-@pytest.mark.parametrize("email", ['jimmy@choo.io', 'sas@kodzi.io'])
-def test_todo_name_me(client: TApp, email):  # todo: tests when event hanlder is done
-    """ ... """
-    response = get_token_response(client, email)
-    pass
-    # print('response status code:', response.status_code)
-    # print('response json data:\n', response.json)
-    # assert response.json['status'] == ResponseStatus.OK.value
-    # assert response.json['data']['token'] is not None
+@pytest.mark.docs
+def test_admin_creates_new_doc(client: TApp, admin, get_headers):
+    """ corret doc creation by admin user """
+    data = {
+        'name': 'some cool new doc',
+        'description': '. . .'
+    }
+    response = client.post_json('/api/instruction-documents/add-doc', data, headers=get_headers('admin'))
+    print('response status code:', response.status_code)
+    print('response json data:\n', response.json)
+    assert response.json['status'] == ResponseStatus.OK.value
+    assert response.json['data']['created_by']['id'] == admin.id
+    assert response.json['data']['name'] == data['name']
+    assert response.json['data']['description'] == data['description']
+    assert response.json['data']['updated_by'] is None
+    assert response.json['data']['updated'] is None

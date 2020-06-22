@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_migrate import Migrate
 from blueprints.auth import auth_blueprint, jwt
+from blueprints.instruction_document import instruction_document_blueprint
 from db.model import db, bcrypt
 from utils.http import ValidationError
 from config import Config
@@ -18,6 +19,7 @@ def create_app():
     bcrypt.init_app(application)
     jwt.init_app(application)
     application.register_blueprint(auth_blueprint, url_prefix='/api')
+    application.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     return application
 
 

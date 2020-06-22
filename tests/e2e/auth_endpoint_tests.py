@@ -18,6 +18,7 @@ def get_token_response(client: TApp, email: str, password: str = '12341234', sta
 
 
 @pytest.mark.e2e
+@pytest.mark.auth
 @pytest.mark.parametrize("email", ['jimmy@choo.io', 'sas@kodzi.io'])
 def test_get_jwt(client: TApp, email):
     """ test geting jwt token for admin and user """
@@ -29,6 +30,7 @@ def test_get_jwt(client: TApp, email):
 
 
 @pytest.mark.e2e
+@pytest.mark.auth
 def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
     """ deleted user -> cannot get token """
     data = {
@@ -51,6 +53,7 @@ def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
 
 
 @pytest.mark.e2e
+@pytest.mark.auth
 @pytest.mark.parametrize(
     "email, password, expected_error_message",
     [
@@ -76,6 +79,7 @@ def test_jwt_request_validation(client: TApp, email, password, expected_error_me
 
 
 @pytest.mark.e2e
+@pytest.mark.auth
 @pytest.mark.parametrize(
     "email, username",
     [
