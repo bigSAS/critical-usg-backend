@@ -13,10 +13,19 @@ def superuser_only(func):
     def wrapper(*args, **kwargs):
         user_data: dict = get_jwt_identity()
         user = get_object(User, id=user_data['id'])
-        if not user.is_superuser:
-            raise ForbiddenError('Admin only')
+        if user.is_deleted: ForbiddenError('Account deleted')
+        if not user.is_superuser: raise ForbiddenError('Admin only')
         return func(*args, **kwargs)
     return wrapper
+
+
+def has_group_permission(user: User, groups: List[str]) -> bool:
+    has_permission = False
+    for group in [ug.name for ug in user.user_groups]:
+        if group in groups:
+            has_permission = True
+            break
+    return has_permission
 
 
 def restricted(groups: List[str]):
@@ -26,16 +35,10 @@ def restricted(groups: List[str]):
         @wraps(func)
         @jwt_required
         def wrapper(*args, **kwargs):
-            user_groups = get_jwt_identity().get('user_groups', [])
-            # todo: user groups from db?
-            #  checking groups from jwt requires re-authenticate to refresh (maybe token refresh endpoint)
-            #  checking permissions from db requires db call every request is made (performance related ???)
-            has_permission = False
-            for group in user_groups:
-                if group in groups:
-                    has_permission = True
-                    break
-            if not has_permission:
+            user_data: dict = get_jwt_identity()
+            user = get_object(User, id=user_data['id'])
+            if user.is_deleted: ForbiddenError('Account deleted')
+            if not has_group_permission(user, groups):
                 raise ForbiddenError(f'Only alowed for users in groups: {groups}')
             return func(*args, **kwargs)
         return wrapper
