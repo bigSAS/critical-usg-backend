@@ -3,7 +3,7 @@ from typing import List
 from flask import Request
 from flask_jwt_extended import create_access_token
 
-from db.model import db, User, UserGroup, GroupUser, get_object, ObjectNotFoundError
+from db.model import db, User, UserGroup, GroupUser
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist
 from utils.http import JsonResponse, AuthError, ok_response
@@ -31,9 +31,11 @@ class TokenAuthEventHandler(EventHandler):
     # noinspection PyBroadException
     def __auth_user(self):
         try:
-            user = get_object(User, email=self.request.json['email'].strip(), is_deleted=False)
-            if user.password_is_valid(self.request.json['password'].strip()):
-                return user
+            # todo: ! user from repo
+            # user = get_object(User, email=self.request.json['email'].strip(), is_deleted=False)
+            # if user.password_is_valid(self.request.json['password'].strip()):
+            #     return user
+            return None
         except: return None
 
 
@@ -80,12 +82,13 @@ class RegisterUserEventHandler(EventHandler):
     def __add_user_default_groups(user: User) -> List[GroupUser]:
         user_groups = ('USER',)
         created_group_users = []
-        for group in user_groups:
-            try:
-                user_group = get_object(UserGroup, name=group)
-                created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
-            except ObjectNotFoundError as e:
-                raise ValueError(f'{group} user group not exists, check db defaults.\n{repr(e)}')
+        # todo: ! use repo
+        # for group in user_groups:
+        #     try:
+        #         user_group = get_object(UserGroup, name=group)
+        #         created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
+        #     except ObjectNotFoundError as e:
+        #         raise ValueError(f'{group} user group not exists, check db defaults.\n{repr(e)}')
         return created_group_users
 
 
@@ -101,7 +104,9 @@ class DeleteUserEventHandler(EventHandler):
         super().__init__(request, DeleteUserEventValidator(request))
 
     def get_response(self) -> JsonResponse:
-        user = get_object(User, id=self.request.json['user_id'])
-        user.delete()
-        db.session.commit()
-        return ok_response(user.as_dict())
+        # todo: ! use repo
+        return None
+        # user = get_object(User, id=self.request.json['user_id'])
+        # user.delete()
+        # db.session.commit()
+        # return ok_response(user.as_dict())

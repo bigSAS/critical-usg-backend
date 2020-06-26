@@ -1,33 +1,13 @@
 from datetime import datetime
-from typing import ClassVar, List
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime, text
+from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-
-
-class ObjectNotFoundError(Exception): pass  # todo: rm from here -> db interactions with repository
-
-
-def get_object(entity_class: ClassVar, **kwargs):
-    """ Get Entity object by attrs passed in kwargs,
-    throws ObjectNotFoundError when object is not found """
-    obj = entity_class.query.filter_by(**kwargs).first()
-    if not obj: raise ObjectNotFoundError(f'{entity_class.__name__}({kwargs}) not found.')
-    return obj
-
-
-def get_objects(entity_class: ClassVar, **kwargs) -> List[object]:
-    """ Get Entity objects by attrs passed in kwargs
-    order_by -> column_name asc/desc """
-    order_by = kwargs.pop('order_by', None)
-    if order_by: return entity_class.query.filter_by(**kwargs).order_by(text(order_by)).all()
-    return entity_class.query.filter_by(**kwargs).all()
 
 
 class User(db.Model):
@@ -70,14 +50,6 @@ class User(db.Model):
         # noinspection PyTypeChecker
         belongs = group in self.user_groups
         return belongs
-
-    def add_to_group(self, group_name: str):
-        # noinspection PyTypeChecker
-        group = get_object(UserGroup, name=group_name)
-        if not self.belongs_to_group(group):
-            user_in_group = GroupUser(group_id=group.id, user_id=self.id)
-            db.session.add(user_in_group)
-            db.session.commit()
 
     def as_dict(self):
         return {
@@ -155,7 +127,8 @@ class InstructionDocument(db.Model):
     @property
     def pages(self):
         # noinspection PyTypeChecker
-        return get_objects(InstructionDocumentPage, document_id=self.id, order_by="page_num")
+        # todo: ! from repo
+        return []
 
     @property
     def page_count(self) -> int:

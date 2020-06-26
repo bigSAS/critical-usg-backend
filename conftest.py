@@ -3,8 +3,10 @@ from typing import Callable, Dict
 import pytest
 from webtest import TestApp as TApp
 
+from repository.base import ObjectNotFoundError
+from repository.repos import UserRepository
 from wsgi import app as application
-from db.model import db as database, User, get_object, ObjectNotFoundError
+from db.model import db as database, User
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -100,12 +102,12 @@ def get_user(app, dbsession):
 
         with app.app_context():
             try:
-                return get_object(User, email=get_email())
+                return UserRepository().get_by(email=get_email())
             except ObjectNotFoundError:
                 if user_type == 'user': add_user(USER, 'USER')
                 elif user_type == 'admin': add_user(ADMIN, 'ADMIN')
                 elif user_type == 'superuser': add_user(SUPERUSER, None)
-                return get_object(User, email=get_email())
+                return UserRepository().get_by(email=get_email())
 
     return getter
 

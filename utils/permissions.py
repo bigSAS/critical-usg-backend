@@ -3,7 +3,7 @@ from typing import List
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from db.model import get_object, User
+from db.model import User
 from utils.http import ForbiddenError
 
 
@@ -11,10 +11,11 @@ def superuser_only(func):
     @wraps(func)
     @jwt_required
     def wrapper(*args, **kwargs):
-        user_data: dict = get_jwt_identity()
-        user = get_object(User, id=user_data['id'])
-        if user.is_deleted: ForbiddenError('Account deleted')
-        if not user.is_superuser: raise ForbiddenError('Admin only')
+        # todo: from repo
+        # user_data: dict = get_jwt_identity()
+        # user = get_object(User, id=user_data['id'])
+        # if user.is_deleted: ForbiddenError('Account deleted')
+        # if not user.is_superuser: raise ForbiddenError('Admin only')
         return func(*args, **kwargs)
     return wrapper
 
@@ -35,11 +36,12 @@ def restricted(groups: List[str]):
         @wraps(func)
         @jwt_required
         def wrapper(*args, **kwargs):
-            user_data: dict = get_jwt_identity()
-            user = get_object(User, id=user_data['id'])
-            if user.is_deleted: ForbiddenError('Account deleted')
-            if not has_group_permission(user, groups) and not user.is_superuser:
-                raise ForbiddenError(f'Only alowed for users in groups: {groups}')
+            # todo: from repo
+            # user_data: dict = get_jwt_identity()
+            # user = get_object(User, id=user_data['id'])
+            # if user.is_deleted: ForbiddenError('Account deleted')
+            # if not has_group_permission(user, groups) and not user.is_superuser:
+            #     raise ForbiddenError(f'Only alowed for users in groups: {groups}')
             return func(*args, **kwargs)
         return wrapper
     return decorator

@@ -1,5 +1,6 @@
 import pytest
-from db.model import InstructionDocument, InstructionDocumentPage, get_object
+from db.model import InstructionDocument, InstructionDocumentPage
+from repository.repos import InstructionDocumentRepository
 
 
 @pytest.mark.unit
@@ -14,11 +15,11 @@ def test_instruction_doc_created_autodate(app, dbsession, user, superuser):
         dbsession.add(doc)
         dbsession.commit()
 
-        created_doc = get_object(InstructionDocument, id=doc.id)
+        created_doc = InstructionDocumentRepository().get(doc.id)
         created_doc.update_doc(updator, name='updated test doc', description='i have desription now :)')
         dbsession.commit()
 
-        updated_doc: InstructionDocument = get_object(InstructionDocument, id=doc.id)
+        updated_doc: InstructionDocument = InstructionDocumentRepository().get(doc.id)
         assert updated_doc.updated_by_user_id == updator.id
         assert updated_doc.updated is not None
         assert updated_doc.name == 'updated test doc'

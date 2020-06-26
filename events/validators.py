@@ -1,4 +1,3 @@
-from db.model import get_object, ObjectNotFoundError
 from events.core import Validator
 from utils.http import ValidationError
 
@@ -63,7 +62,9 @@ class ObjectExist(Validator):
         self.__model_class = model_class
 
     def validate(self):
-        try:
-            get_object(self.__model_class, id=self.value)
-        except ObjectNotFoundError as e:
-            raise ValidationError([f'{self.__model_class.__name__}(id={self.value}) not exists'], self.field_name)
+        pass
+        # todo: from repo
+        # try:
+        #     get_object(self.__model_class, id=self.value)
+        # except ObjectNotFoundError as e:
+        #     raise ValidationError([f'{self.__model_class.__name__}(id={self.value}) not exists'], self.field_name)

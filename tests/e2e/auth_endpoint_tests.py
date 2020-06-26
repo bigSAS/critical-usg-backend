@@ -2,7 +2,8 @@ import pytest
 from webtest import TestApp as TApp
 
 # ! important ! :: @pytest.mark.debug -> 4 debugging
-from db.model import get_object, User
+from db.model import User
+from repository.repos import UserRepository
 from utils.http import ResponseStatus
 
 
@@ -42,7 +43,7 @@ def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
     }
     created_user_id = client.post_json('/api/register-user', data).json['data']['id']
     with app.app_context():
-        created_user = get_object(User, id=created_user_id)
+        created_user = UserRepository().get(created_user_id)
         created_user.delete()
         dbsession.commit()
 
@@ -128,6 +129,6 @@ def test_delete_user(client: TApp, app, user, admin, superuser, get_headers):
     assert response.json['status'] == 'OK'
     assert response.json['data']['is_deleted']
     with app.app_context():
-        assert get_object(User, id=user_id).is_deleted
+        assert UserRepository().get(user_id).is_deleted
     # su can delete
     client.post_json('/api/delete-user', {'user_id': user_id}, headers=get_headers('superuser'))
