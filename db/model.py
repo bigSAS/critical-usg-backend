@@ -11,7 +11,7 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 
 
-class ObjectNotFoundError(Exception): pass
+class ObjectNotFoundError(Exception): pass  # todo: rm from here -> db interactions with repository
 
 
 def get_object(entity_class: ClassVar, **kwargs):
