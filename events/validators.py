@@ -1,4 +1,5 @@
 from events.core import Validator
+from repository.base import ObjectNotFoundError
 from utils.http import ValidationError
 
 
@@ -57,14 +58,12 @@ class EmailCorrect(Validator):
 
 class ObjectExist(Validator):
     """ Model object exists """
-    def __init__(self, model_class, object_id: int, field_name: str = "NON_FIELD"):
+    def __init__(self, repository_class, object_id: int, field_name: str = "NON_FIELD"):
         super().__init__(object_id, field_name)
-        self.__model_class = model_class
+        self.__repository_class = repository_class
 
     def validate(self):
-        pass
-        # todo: from repo
-        # try:
-        #     get_object(self.__model_class, id=self.value)
-        # except ObjectNotFoundError as e:
-        #     raise ValidationError([f'{self.__model_class.__name__}(id={self.value}) not exists'], self.field_name)
+        try:
+            self.__repository_class().get(self.value)
+        except ObjectNotFoundError as e:
+            raise ValidationError([repr(e)], self.field_name)

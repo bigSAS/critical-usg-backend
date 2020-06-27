@@ -4,9 +4,9 @@ import pytest
 from webtest import TestApp as TApp
 
 from repository.base import ObjectNotFoundError
-from repository.repos import UserRepository
+from repository.repos import UserRepository, GroupUserRepository, UserGroupRepository
 from wsgi import app as application
-from db.model import db as database, User
+from db.model import db as database, User, GroupUser, UserGroup
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -96,9 +96,10 @@ def get_user(app, dbsession):
 
         def add_user(data, group=None):
             user = User(**data)
-            dbsession.add(user)
-            dbsession.commit()
-            if group is not None: user.add_to_group(group)
+            UserRepository().save(user)
+            if group is not None:
+                g: UserGroup = UserGroupRepository().get_by(name=group)
+                GroupUserRepository().save(GroupUser(group_id=g.id, user_id=user.id))
 
         with app.app_context():
             try:

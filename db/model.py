@@ -38,31 +38,8 @@ class User(db.Model):
     def password_is_valid(self, password: str) -> bool:
         return bcrypt.check_password_hash(self.password, password)
 
-    @property
-    def user_groups(self):
-        group_ids = set([gu.group_id for gu in self.groups])
-        return UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
-
-    def delete(self):
-        self.is_deleted = True
-
-    def belongs_to_group(self, group):
-        # noinspection PyTypeChecker
-        belongs = group in self.user_groups
-        return belongs
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-            'username': self.username,
-            'is_superuser': self.is_superuser,
-            'groups': [ug.name for ug in self.user_groups],
-            'is_deleted': self.is_deleted
-        }
-
     def __repr__(self):
-        return f'User{self.as_dict()}'
+        return f'User'
 
 
 class UserGroup(db.Model):
@@ -71,14 +48,8 @@ class UserGroup(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=True)
     users = db.relationship('GroupUser', backref='group', lazy=True)
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name
-        }
-
     def __repr__(self):
-        return f'UserGroup({self.as_dict()})'
+        return f'UserGroup()'
 
 
 class GroupUser(db.Model):
@@ -87,15 +58,8 @@ class GroupUser(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('user_group.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'group_id': self.group_id,
-            'user_id': self.user_id
-        }
-
     def __repr__(self):
-        return f'GroupUser({self.as_dict()})'
+        return f'GroupUser()'
 
 
 class InstructionDocument(db.Model):
@@ -117,37 +81,8 @@ class InstructionDocument(db.Model):
         self.created = datetime.utcnow()
         self.updated_by_user_id = None
 
-    def update_doc(self, updated_by: User, **kwargs):
-        valid_kwargs = ('name', 'description')
-        self.updated_by_user_id = updated_by.id
-        for k, v in kwargs.items():
-            if k in valid_kwargs: setattr(self, k, v)
-        self.updated = datetime.utcnow()
-
-    @property
-    def pages(self):
-        # noinspection PyTypeChecker
-        # todo: ! from repo
-        return []
-
-    @property
-    def page_count(self) -> int:
-        count = InstructionDocumentPage.query.filter_by(document_id=self.id).count()
-        return count
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'created': str(self.created),
-            'created_by': self.created_by.as_dict(),
-            'updated': str(self.updated_by) if self.updated else None,
-            'updated_by': self.updated_by.as_dict() if self.updated_by else None
-        }
-
     def __repr__(self):
-        return f'IstructionDocument({self.as_dict()})'
+        return f'IstructionDocument()'
 
 
 class InstructionDocumentPage(db.Model):
@@ -157,18 +92,16 @@ class InstructionDocumentPage(db.Model):
     page_num = db.Column(db.Integer, default=0)
     json = db.Column(JSON, nullable=True)
 
-    def __init__(self, instruction_document, json: dict):
-        self.document_id = instruction_document.id
-        self.page_num = instruction_document.page_count + 1
-        self.json = json
+    @hybrid_method
+    def doc(self, document_id: int):
+        return self.document_id == document_id
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'document_id': str(self.document_id),
-            'page_num': self.page_num,
-            'json': self.json
-        }
+    def __init__(self, instruction_document, json: dict):
+        pass
+        # todo: simpler init -> manager handles page count etc -> override repo save ?
+        # self.document_id = instruction_document.id
+        # self.page_num = InstructionDocumentManager(ins) instruction_document.page_count + 1
+        # self.json = json
 
     def __repr__(self):
-        return f'IstructionDocumentPage({self.as_dict()})'
+        return f'IstructionDocumentPage()'

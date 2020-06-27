@@ -6,6 +6,7 @@ from utils.http import ResponseStatus
 
 @pytest.mark.e2e
 @pytest.mark.docs
+@pytest.mark.debug
 def test_admin_creates_new_doc(client: TApp, admin, get_headers):
     """ corret doc creation by admin user """
     data = {

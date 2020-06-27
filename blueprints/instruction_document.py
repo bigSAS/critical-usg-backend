@@ -9,7 +9,7 @@ instruction_document_blueprint = Blueprint('instruction_document', __name__)
 
 # noinspection PyTypeChecker
 @instruction_document_blueprint.route('/add-doc', methods=('POST',))
-@restricted('ADMIN')
+@restricted(['ADMIN'])
 def add_doc():
     """ Create new instruction document """
     handler: AddInstructionDocumentEventHandler = event_handler_for(request)

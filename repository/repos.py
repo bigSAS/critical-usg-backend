@@ -1,4 +1,4 @@
-from db.model import InstructionDocument, User, GroupUser, UserGroup
+from db.model import InstructionDocument, User, GroupUser, UserGroup, InstructionDocumentPage
 from repository.base import Repository
 
 
@@ -16,3 +16,7 @@ class GroupUserRepository(Repository):
 
 class InstructionDocumentRepository(Repository):
     entity = InstructionDocument
+
+
+class InstructionDocumentPageRepository(Repository):
+    entity = InstructionDocumentPage

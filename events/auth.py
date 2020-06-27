@@ -3,9 +3,12 @@ from typing import List
 from flask import Request
 from flask_jwt_extended import create_access_token
 
-from db.model import db, User, UserGroup, GroupUser
+from db.model import db, User, GroupUser
+from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist
+from repository.base import ObjectNotFoundError
+from repository.repos import UserRepository, UserGroupRepository
 from utils.http import JsonResponse, AuthError, ok_response
 
 
@@ -25,16 +28,18 @@ class TokenAuthEventHandler(EventHandler):
     def get_response(self) -> JsonResponse:
         user = self.__auth_user()
         if not user: raise AuthError('Invalid credentials')
-        identity = user.as_dict()
+        identity = UserSerializer(user).data
         return ok_response({'token': create_access_token(identity=identity)})
 
     # noinspection PyBroadException
     def __auth_user(self):
         try:
-            # todo: ! user from repo
-            # user = get_object(User, email=self.request.json['email'].strip(), is_deleted=False)
-            # if user.password_is_valid(self.request.json['password'].strip()):
-            #     return user
+            user = UserRepository().get_by(
+                email=self.request.json['email'].strip(),
+                is_deleted=False
+            )
+            if user.password_is_valid(self.request.json['password'].strip()):
+                return user
             return None
         except: return None
 
@@ -63,39 +68,33 @@ class RegisterUserEventHandler(EventHandler):
         super().__init__(request, RegisterUserEventValidator(request), validate=validate)  # todo: rm validate ???
 
     def get_response(self) -> JsonResponse:
-        user = self.__create_new_user()
-        db.session.add(user)
-        db.session.commit()
-        user_groups = self.__add_user_default_groups(user)
-        for ug in user_groups: db.session.add(ug)
-        db.session.commit()
-        return ok_response(user.as_dict())
-
-    def __create_new_user(self) -> User:
-        return User(
+        user = User(
             email=self.request.json['email'],
             plaintext_password=self.request.json['password'],
             username=self.request.json.get('username', None)
         )
+        UserRepository().save(user)
+        self.__add_user_to_default_groups(user)
+        data = UserSerializer(user).data
+        return ok_response(data)
 
     @staticmethod
-    def __add_user_default_groups(user: User) -> List[GroupUser]:
+    def __add_user_to_default_groups(user: User):
         user_groups = ('USER',)
-        created_group_users = []
-        # todo: ! use repo
-        # for group in user_groups:
-        #     try:
-        #         user_group = get_object(UserGroup, name=group)
-        #         created_group_users.append(GroupUser(group_id=user_group.id, user_id=user.id))
-        #     except ObjectNotFoundError as e:
-        #         raise ValueError(f'{group} user group not exists, check db defaults.\n{repr(e)}')
-        return created_group_users
+        for group_name in user_groups:
+            try:
+                repo = UserGroupRepository()
+                user_group = repo.get_by(name=group_name)
+                group_user = GroupUser(group_id=user_group.id, user_id=user.id)
+                repo.save(group_user)
+            except ObjectNotFoundError as e:
+                raise ValueError(f'{group_name} user group not exists, check db defaults.\n{repr(e)}')
 
 
 class DeleteUserEventValidator(EventValidator):
     def __init__(self, request: Request):
         super().__init__([
-            ObjectExist(User, request.json.get('user_id', None), 'user_id')
+            ObjectExist(UserRepository, request.json.get('user_id', None), 'user_id')
         ])
 
 
@@ -104,9 +103,9 @@ class DeleteUserEventHandler(EventHandler):
         super().__init__(request, DeleteUserEventValidator(request))
 
     def get_response(self) -> JsonResponse:
-        # todo: ! use repo
-        return None
-        # user = get_object(User, id=self.request.json['user_id'])
-        # user.delete()
-        # db.session.commit()
-        # return ok_response(user.as_dict())
+        repo = UserRepository()
+        user: User = repo.get(self.request.json['user_id'])
+        user.is_deleted = True
+        repo.save(user)
+        serializer = UserSerializer(user)
+        return ok_response(serializer.data)

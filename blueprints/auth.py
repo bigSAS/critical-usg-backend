@@ -56,7 +56,7 @@ def register_user():
 
 # noinspection PyTypeChecker
 @auth_blueprint.route('/delete-user', methods=('POST',))
-@restricted('ADMIN')
+@restricted(['ADMIN'])
 def delete_user():
     """ Register new user (not admin) """
     handler: DeleteUserEventHandler = event_handler_for(request)
@@ -64,7 +64,7 @@ def delete_user():
 
 
 @auth_blueprint.route('/user-ping', methods=('GET', 'POST'))
-@restricted('USER')
+@restricted(['USER'])
 def user_ping():
     return {
         'msg': 'pong!'

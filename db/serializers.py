@@ -1,5 +1,4 @@
-from wsgi import app
-from db.model import User, UserGroup, GroupUser
+from db.model import User, UserGroup, GroupUser, InstructionDocument
 from repository.repos import GroupUserRepository, UserGroupRepository, UserRepository
 
 
@@ -18,7 +17,6 @@ class Serializer:
 
     @property
     def data(self):
-        # todo: SerializationError ???
         data = dict()
         try:
             for field in self.fields:
@@ -43,13 +41,40 @@ class UserSerializer(Serializer):
         return [UserGroupSerializer(g).data for g in groups]
 
 
+# todo: UserRelationSerializer for objects with user FK -> present less data, id, email, username, is_deleted
+
+
 class UserGroupSerializer(Serializer):
     fields = ('id', 'name')
 
 
-if __name__ == '__main__':
-    with app.app_context():
-        user = UserRepository().get(1)
-        s = UserSerializer(user)
-        print(s.data)
+class GroupUserSerializer(Serializer):
+    fields = ('id', 'group_id', 'user_id')
 
+
+class InstructionDocumentSerializer(Serializer):
+    fields = ('id', 'name', 'description', 'created', 'updated')
+    method_fields = ('created_by', 'updated_by')
+
+    def get_created_by(self):
+        o: InstructionDocument = self.get_object()
+        usr: User = UserRepository().get(o.created_by_user_id)
+        return UserSerializer(usr).data
+
+    def get_updated_by(self):
+        o: InstructionDocument = self.get_object()
+        usr: User = UserRepository().get(o.updated_by_user_id, ignore_not_found=True)
+        if not usr: return None
+        return UserSerializer(usr).data
+
+
+class InstructionDocumentPageSerializer(Serializer):
+    fields = ('id', 'document_id', 'page_num', 'json')
+
+
+# if __name__ == '__main__':
+#     # test serializers ->
+#     with app.app_context():
+#         user = UserRepository().get(1)
+#         s = UserSerializer(user)
+#         print(s.data)

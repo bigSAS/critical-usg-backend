@@ -43,9 +43,9 @@ def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
     }
     created_user_id = client.post_json('/api/register-user', data).json['data']['id']
     with app.app_context():
-        created_user = UserRepository().get(created_user_id)
-        created_user.delete()
-        dbsession.commit()
+        created_user: User = UserRepository().get(created_user_id)
+        created_user.is_deleted = True
+        UserRepository().save(created_user)
 
     response = get_token_response(client, data['email'], data['password'], status=401)
     print('response status code:', response.status_code)
@@ -105,8 +105,9 @@ def test_register_user(client: TApp, email, username):
     assert response.json['data']['email'] == data['email']
     assert not response.json['data']['is_deleted']
     expected_groups = ('USER',)
+    user_groups = [g['name'] for g in response.json['data']['groups']]
     for expected_group in expected_groups:
-        assert expected_group in response.json['data']['groups']
+        assert expected_group in user_groups
 
 
 @pytest.mark.e2e
