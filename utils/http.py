@@ -90,7 +90,7 @@ ERROR_STATUS_MAP = {
 }
 
 
-def ok_response(data: dict):
+def ok_response(data: dict = None):
     return JsonResponse(
         status=200,
         json=ResponseBody(ResponseStatus.OK, data=data).body

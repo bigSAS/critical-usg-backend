@@ -3,6 +3,10 @@ from db.model import InstructionDocument, InstructionDocumentPage
 from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 from utils.managers import InstructionDocumentManager
 
+
+# todo: .gitingore <-
+
+
 if __name__ == '__main__':
     with app.app_context():
         usr = UserRepository().get(1)

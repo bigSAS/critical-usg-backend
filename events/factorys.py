@@ -2,13 +2,14 @@ from flask import Request
 
 from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteUserEventHandler
 from events.core import EventHandler
-from events.instruction_documents import AddInstructionDocumentEventHandler
+from events.instruction_documents import AddInstructionDocumentEventHandler, DeleteInstructionDocumentEventHandler
 
 ENDPOINT_MAPPING = {
     'auth.authenticate': TokenAuthEventHandler,
     'auth.register_user': RegisterUserEventHandler,
+    'auth.delete_user': DeleteUserEventHandler,
     'instruction_document.add_doc': AddInstructionDocumentEventHandler,
-    'auth.delete_user': DeleteUserEventHandler
+    'instruction_document.delete_doc': DeleteInstructionDocumentEventHandler,
 }
 
 

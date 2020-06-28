@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 from db.model import User, InstructionDocument
 from db.serializers import InstructionDocumentSerializer
 from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, MinLen
+from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
 from repository.repos import UserRepository, InstructionDocumentRepository
 from utils.http import JsonResponse, ok_response
 
@@ -35,3 +35,23 @@ class AddInstructionDocumentEventHandler(EventHandler):
         serializer = InstructionDocumentSerializer(document)
         return ok_response(serializer.data)
 
+
+class DeleteInstructionDocumentEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
+            ObjectExist(
+                field_name='document_id',
+                repository_class=InstructionDocumentRepository,
+                object_id=request.json.get('document_id', None)
+            )
+        ])
+
+
+class DeleteInstructionDocumentEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, DeleteInstructionDocumentEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        InstructionDocumentRepository().delete(self.request.json['document_id'])
+        return ok_response()

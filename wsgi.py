@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
 from db.model import db, bcrypt
-from utils.http import ValidationError
+from utils.http import ValidationError, error_response
 from config import Config
 
 
@@ -34,7 +34,7 @@ def check_json_content_type():
 
 @app.errorhandler
 def handle_error(error: Exception):
-    return handle_error(error)
+    return error_response(error)
 
 
 if __name__ == '__main__':
