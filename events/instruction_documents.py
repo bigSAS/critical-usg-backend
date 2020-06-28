@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Request
 from flask_jwt_extended import get_jwt_identity
 
@@ -14,8 +16,8 @@ class AddInstructionDocumentEventValidator(EventValidator):
         super().__init__([
             MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
             MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
-            MinLen(field_name='description', min_len=1, value=request.json.get('name', None), optional=True),
-            MaxLen(field_name='description', max_len=500, value=request.json.get('name', None), optional=True)
+            MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
+            MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
         ])
 
 
@@ -25,14 +27,14 @@ class AddInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         user: User = UserRepository().get(get_jwt_identity()['id'])
-        document = InstructionDocument(
+        doc = InstructionDocument(
             created_by=user,
             name=self.request.json['name'].strip(),
             description=self.request.json.get('description', None)
         )
-        InstructionDocumentRepository().save(document)
+        InstructionDocumentRepository().save(doc)
 
-        serializer = InstructionDocumentSerializer(document)
+        serializer = InstructionDocumentSerializer(doc)
         return ok_response(serializer.data)
 
 
@@ -55,3 +57,36 @@ class DeleteInstructionDocumentEventHandler(EventHandler):
     def get_response(self) -> JsonResponse:
         InstructionDocumentRepository().delete(self.request.json['document_id'])
         return ok_response()
+
+
+class UpdateInstructionDocumentEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
+            ObjectExist(
+                field_name='document_id',
+                repository_class=InstructionDocumentRepository,
+                object_id=request.json.get('document_id', None)
+            ),
+            MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
+            MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
+            MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
+            MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
+        ])
+
+
+class UpdateInstructionDocumentEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, UpdateInstructionDocumentEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user_id = get_jwt_identity()['id']
+        doc_repo = InstructionDocumentRepository()
+        doc: InstructionDocument = doc_repo.get(self.request.json['document_id'])
+        doc.name = self.request.json['name']
+        doc.description = self.request.json.get('description', None)
+        doc.updated_by_user_id = user_id
+        doc.updated = datetime.utcnow()
+        doc_repo.save(doc)
+        serializer = InstructionDocumentSerializer(doc)
+        return ok_response(serializer.data)
