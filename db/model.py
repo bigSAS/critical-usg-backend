@@ -96,12 +96,5 @@ class InstructionDocumentPage(db.Model):
     def doc(self, document_id: int):
         return self.document_id == document_id
 
-    def __init__(self, instruction_document, json: dict):
-        pass
-        # todo: simpler init -> manager handles page count etc -> override repo save ?
-        # self.document_id = instruction_document.id
-        # self.page_num = InstructionDocumentManager(ins) instruction_document.page_count + 1
-        # self.json = json
-
     def __repr__(self):
         return f'IstructionDocumentPage()'
