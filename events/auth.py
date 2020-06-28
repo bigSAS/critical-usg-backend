@@ -10,6 +10,7 @@ from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen,
 from repository.base import ObjectNotFoundError
 from repository.repos import UserRepository, UserGroupRepository
 from utils.http import JsonResponse, AuthError, ok_response
+from utils.managers import UserManager
 
 
 class TokenAuthEventValidator(EventValidator):
@@ -103,9 +104,7 @@ class DeleteUserEventHandler(EventHandler):
         super().__init__(request, DeleteUserEventValidator(request))
 
     def get_response(self) -> JsonResponse:
-        repo = UserRepository()
-        user: User = repo.get(self.request.json['user_id'])
-        user.is_deleted = True
-        repo.save(user)
-        serializer = UserSerializer(user)
+        managed_user = UserManager(user_id=self.request.json['user_id'])
+        managed_user.delete()
+        serializer = UserSerializer(managed_user.user)
         return ok_response(serializer.data)

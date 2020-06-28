@@ -36,3 +36,7 @@ class Repository:
     def save(self, entity):
         self.session.add(entity)
         self.session.commit()
+
+    def delete(self, entity_id: int):
+        self.session.query(self.entity).filter(self.entity.id == entity_id).delete()
+        self.session.commit()

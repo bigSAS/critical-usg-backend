@@ -92,6 +92,11 @@ class InstructionDocumentPage(db.Model):
     page_num = db.Column(db.Integer, default=0)
     json = db.Column(JSON, nullable=True)
 
+    def __init__(self, document_id: int, json: dict, page_num: int = None):
+        self.document_id = document_id
+        self.json = json
+        if page_num: self.page_num = page_num
+
     @hybrid_method
     def doc(self, document_id: int):
         return self.document_id == document_id

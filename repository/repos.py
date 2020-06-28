@@ -5,6 +5,9 @@ from repository.base import Repository
 class UserRepository(Repository):
     entity = User
 
+    def delete(self, entity_id: int):
+        raise ValueError('User repository cannot delete users!')
+
 
 class UserGroupRepository(Repository):
     entity = UserGroup
