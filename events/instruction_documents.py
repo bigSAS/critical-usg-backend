@@ -3,12 +3,13 @@ from datetime import datetime
 from flask import Request
 from flask_jwt_extended import get_jwt_identity
 
-from db.model import User, InstructionDocument
-from db.serializers import InstructionDocumentSerializer
+from db.model import User, InstructionDocument, InstructionDocumentPage
+from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
 from repository.repos import UserRepository, InstructionDocumentRepository
 from utils.http import JsonResponse, ok_response
+from utils.managers import InstructionDocumentManager
 
 
 class AddInstructionDocumentEventValidator(EventValidator):
@@ -89,4 +90,33 @@ class UpdateInstructionDocumentEventHandler(EventHandler):
         doc.updated = datetime.utcnow()
         doc_repo.save(doc)
         serializer = InstructionDocumentSerializer(doc)
+        return ok_response(serializer.data)
+
+
+class AddInstructionDocumentPageEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
+            ObjectExist(
+                field_name='document_id',
+                repository_class=InstructionDocumentRepository,
+                object_id=request.json.get('document_id', None)
+            ),
+        ])
+
+
+class AddInstructionDocumentPageEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, AddInstructionDocumentPageEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user_id = get_jwt_identity()['id']
+        doc_id = self.request.json['document_id']
+        page = InstructionDocumentPage(
+            document_id=doc_id,
+            json=self.request.json.get('json', None)
+        )
+        managed_doc = InstructionDocumentManager(document_id=doc_id)
+        page = managed_doc.add_page(page, user_id)
+        serializer = InstructionDocumentPageSerializer(page)
         return ok_response(serializer.data)

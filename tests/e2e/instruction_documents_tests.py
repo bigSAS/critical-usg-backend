@@ -1,6 +1,8 @@
 import pytest
 from webtest import TestApp as TApp
 
+from db.model import InstructionDocument
+from repository.repos import InstructionDocumentRepository
 from utils.http import ResponseStatus
 
 
@@ -97,3 +99,40 @@ def test_updates_doc(client: TApp, admin, user, get_headers, user_type, descript
     assert response.json['data']['updated'] is not None
 
 # todo: other tests -> validation etc
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+@pytest.mark.debug
+def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
+    """ corret doc page addition """
+    create_doc_data = {
+        "name": "doc with pages",
+        "description": "..."
+    }
+    created_doc_id = client.post_json(
+        '/api/instruction-documents/add-doc',
+        create_doc_data,
+        headers=get_headers('admin')).json['data']['id']
+
+    assert created_doc_id is not None
+    doc_pages_data = {
+        "document_id": created_doc_id,
+        "json": {
+            "bar": "baz"
+        }
+    }
+
+    response = client.post_json(
+        '/api/instruction-documents/add-page',
+        doc_pages_data,
+        headers=get_headers('admin')
+    )
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['id'] is not None
+    assert response.json['data']['document_id'] == created_doc_id
+    assert response.json['data']['json'] == doc_pages_data['json']
+    with app.app_context():
+        doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+        assert doc.updated_by_user_id == admin.id
+        assert doc.updated is not None

@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 
 from db.model import User, UserGroup, InstructionDocument, InstructionDocumentPage
 from repository.base import ObjectNotFoundError
@@ -44,9 +45,12 @@ class InstructionDocumentManager:
     def page_count(self) -> int:
         return len(self.pages())
 
-    def add_page(self, page: InstructionDocumentPage) -> InstructionDocumentPage:
+    def add_page(self, page: InstructionDocumentPage, user_id: int) -> InstructionDocumentPage:
         page.page_num = self.page_count() + 1
         self.__page_repo.save(page)
+        self.__document.updated_by_user_id = user_id
+        self.__document.updated = datetime.utcnow()
+        self.__doc_repo.save(self.__document)
         return page
 
     def delete_page(self, page_num: int):
