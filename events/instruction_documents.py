@@ -7,7 +7,7 @@ from db.model import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
-from repository.repos import UserRepository, InstructionDocumentRepository
+from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
 
@@ -84,11 +84,12 @@ class UpdateInstructionDocumentEventHandler(EventHandler):
         user_id = get_jwt_identity()['id']
         doc_repo = InstructionDocumentRepository()
         doc: InstructionDocument = doc_repo.get(self.request.json['document_id'])
-        doc.name = self.request.json['name']
-        doc.description = self.request.json.get('description', None)
-        doc.updated_by_user_id = user_id
-        doc.updated = datetime.utcnow()
-        doc_repo.save(doc)
+        managed_doc = InstructionDocumentManager(document=doc)
+        managed_doc.update(
+            user_id,
+            name=self.request.json['name'],
+            description=self.request.json.get('description', None)
+        )
         serializer = InstructionDocumentSerializer(doc)
         return ok_response(serializer.data)
 
@@ -118,5 +119,36 @@ class AddInstructionDocumentPageEventHandler(EventHandler):
         )
         managed_doc = InstructionDocumentManager(document_id=doc_id)
         page = managed_doc.add_page(page, user_id)
+        serializer = InstructionDocumentPageSerializer(page)
+        return ok_response(serializer.data)
+
+
+class UpdateInstructionDocumentPageEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
+            ObjectExist(
+                field_name='page_id',
+                repository_class=InstructionDocumentPageRepository,
+                object_id=request.json.get('page_id', None)
+            ),
+        ])
+
+
+class UpdateInstructionDocumentPageEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user_id = get_jwt_identity()['id']
+        page_id = self.request.json['page_id']
+        repo = InstructionDocumentPageRepository()
+
+        page: InstructionDocumentPage = repo.get(page_id)
+        page.json = self.request.json.get('json', None)
+        repo.save(page)
+
+        managed_doc = InstructionDocumentManager(document_id=page.document_id)
+        managed_doc.update(user_id)
         serializer = InstructionDocumentPageSerializer(page)
         return ok_response(serializer.data)

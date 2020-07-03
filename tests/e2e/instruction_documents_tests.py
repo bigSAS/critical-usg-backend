@@ -30,8 +30,6 @@ def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
     client.post_json('/api/instruction-documents/add-doc', data, headers=get_headers('user'), status=403)
 
 
-# todo: other tests (validation etc)
-
 @pytest.mark.e2e
 @pytest.mark.docs
 def test_deletes_doc(client: TApp, admin, user, get_headers):
@@ -53,9 +51,6 @@ def test_deletes_doc(client: TApp, admin, user, get_headers):
     client.post_json('/api/instruction-documents/delete-doc', delete_doc_data, headers=get_headers('admin'))
     # user cannnot delete
     client.post_json('/api/instruction-documents/delete-doc', delete_doc_data, headers=get_headers('user'), status=403)
-
-
-# todo: other tests -> validation etc
 
 
 @pytest.mark.e2e
@@ -98,8 +93,6 @@ def test_updates_doc(client: TApp, admin, user, get_headers, user_type, descript
     assert response.json['data']['updated_by']['id'] == admin.id if user_type == 'admin' else user.id
     assert response.json['data']['updated'] is not None
 
-# todo: other tests -> validation etc
-
 
 @pytest.mark.e2e
 @pytest.mark.docs
@@ -135,4 +128,52 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
+        assert doc.updated is not None
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+@pytest.mark.debug
+def test_updates_doc_page(app, client: TApp, admin, user, get_headers):
+    """ corret doc page edittion """
+    create_doc_data = {
+        "name": "doc with pages to update",
+        "description": "..."
+    }
+    created_doc_id = client.post_json(
+        '/api/instruction-documents/add-doc',
+        create_doc_data,
+        headers=get_headers('admin')).json['data']['id']
+
+    assert created_doc_id is not None
+    doc_pages_data = {
+        "document_id": created_doc_id,
+        "json": {
+            "bar": "baz"
+        }
+    }
+
+    page_id = client.post_json(
+        '/api/instruction-documents/add-page',
+        doc_pages_data,
+        headers=get_headers('admin')
+    ).json['data']['id']
+    update_page_data = {
+        "page_id": page_id,
+        "json": {
+            "cool": "update"
+        }
+    }
+
+    response = client.post_json(
+        '/api/instruction-documents/update-page',
+        update_page_data,
+        headers=get_headers('user')
+    )
+
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['json'] == update_page_data['json']
+    with app.app_context():
+        doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+        assert doc.updated_by_user_id == user.id
         assert doc.updated is not None

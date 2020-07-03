@@ -39,6 +39,14 @@ class InstructionDocumentManager:
         self.__document = self.__doc_repo.get(document_id) if document_id else document
         if not self.__document: raise ValueError(f'Document not provided!')
 
+    def update(self, user_id: int, **kwargs):
+        valid_kwargs = ('name', 'description')
+        for k, v in kwargs.items():
+            if k in valid_kwargs: setattr(self.__document, k, v)
+        self.__document.updated_by_user_id = user_id
+        self.__document.updated = datetime.utcnow()
+        self.__doc_repo.save(self.__document)
+
     def pages(self) -> List[InstructionDocumentPage]:
         return self.__page_repo.filter(InstructionDocumentPage.doc(self.__document.id))
 

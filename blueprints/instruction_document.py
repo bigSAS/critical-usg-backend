@@ -2,7 +2,8 @@ from flask import request, Blueprint
 
 from events.factorys import event_handler_for
 from events.instruction_documents import AddInstructionDocumentEventHandler, DeleteInstructionDocumentEventHandler, \
-    UpdateInstructionDocumentEventHandler, AddInstructionDocumentPageEventHandler
+    UpdateInstructionDocumentEventHandler, AddInstructionDocumentPageEventHandler, \
+    UpdateInstructionDocumentPageEventHandler
 from utils.http import error_response
 from utils.permissions import restricted
 
@@ -47,4 +48,13 @@ def update_doc():
 def add_page():
     """ Create new instruction document page """
     handler: AddInstructionDocumentPageEventHandler = event_handler_for(request)
+    return handler.get_response()
+
+
+# noinspection PyTypeChecker
+@instruction_document_blueprint.route('/update-page', methods=('POST',))
+@restricted(['ADMIN', 'USER'])
+def update_page():
+    """ Create new instruction document page """
+    handler: UpdateInstructionDocumentPageEventHandler = event_handler_for(request)
     return handler.get_response()
