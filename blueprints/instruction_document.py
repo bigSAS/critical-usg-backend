@@ -52,3 +52,17 @@ def update_page():
 def delete_page():
     """ Delete instruction document page """
     return event_handler_for(request).get_response()
+
+
+@instruction_document_blueprint.route('/list-docs', methods=('POST',))
+@restricted(['ADMIN', 'USER'])
+def list_docs():
+    """ List instruction documents """
+    pass  # todo: impl
+
+
+@instruction_document_blueprint.route('/get-doc', methods=('POST',))
+@restricted(['ADMIN', 'USER'])
+def get_doc():
+    """ List instruction documents """
+    pass  # todo: impl

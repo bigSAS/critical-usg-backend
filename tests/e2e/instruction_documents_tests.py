@@ -229,3 +229,64 @@ def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
         assert doc.updated is not None
         magaged_doc = InstructionDocumentManager(document=doc)
         assert magaged_doc.page_count() == 0
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+def test_lists_docs(app, client: TApp, admin, user, get_headers):
+    """ corret doc listing """
+    assert False, "todo: impl"
+    # create_doc_data = {
+    #     "name": "doc with pages to delete",
+    #     "description": "..."
+    # }
+    # created_doc_id = client.post_json(
+    #     '/api/instruction-documents/add-doc',
+    #     create_doc_data,
+    #     headers=get_headers('admin')).json['data']['id']
+    #
+    # assert created_doc_id is not None
+    # doc_pages_data = {
+    #     "document_id": created_doc_id,
+    #     "json": {
+    #         "bar": "baz"
+    #     }
+    # }
+    #
+    # page_id = client.post_json(
+    #     '/api/instruction-documents/add-page',
+    #     doc_pages_data,
+    #     headers=get_headers('admin')
+    # ).json['data']['id']
+    # with app.app_context():
+    #     doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+    #     assert doc.updated_by_user_id == admin.id
+    #     assert doc.updated is not None
+    #     magaged_doc = InstructionDocumentManager(document=doc)
+    #     assert magaged_doc.page_count() == 1
+    #
+    # deletion_data = {
+    #     "page_id": page_id
+    # }
+    #
+    # response = client.post_json(
+    #     '/api/instruction-documents/delete-page',
+    #     deletion_data,
+    #     headers=get_headers('admin')
+    # )
+    # assert response.json['status'] == 'OK'
+    # assert response.json['data'] is None
+    #
+    # with app.app_context():
+    #     doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+    #     assert doc.updated_by_user_id == admin.id
+    #     assert doc.updated is not None
+    #     magaged_doc = InstructionDocumentManager(document=doc)
+    #     assert magaged_doc.page_count() == 0
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+def test_gets_doc(app, client: TApp, admin, user, get_headers):
+    """ corret doc getting """
+    assert False, "todo: impl"
