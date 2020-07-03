@@ -152,3 +152,30 @@ class UpdateInstructionDocumentPageEventHandler(EventHandler):
         managed_doc.update(user_id)
         serializer = InstructionDocumentPageSerializer(page)
         return ok_response(serializer.data)
+
+
+class DeleteInstructionDocumentPageEventValidator(EventValidator):  # todo: duplicate ?
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
+            ObjectExist(
+                field_name='page_id',
+                repository_class=InstructionDocumentPageRepository,
+                object_id=request.json.get('page_id', None)
+            ),
+        ])
+
+
+class DeleteInstructionDocumentPageEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user_id = get_jwt_identity()['id']
+        page_id = self.request.json['page_id']
+        repo = InstructionDocumentPageRepository()
+
+        page: InstructionDocumentPage = repo.get(page_id)
+        managed_doc = InstructionDocumentManager(document_id=page.document_id)
+        managed_doc.delete_page(user_id, page_num=page.page_num)
+        return ok_response()

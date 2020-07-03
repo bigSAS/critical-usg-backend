@@ -4,17 +4,20 @@ from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteU
 from events.core import EventHandler
 from events.instruction_documents import AddInstructionDocumentEventHandler, DeleteInstructionDocumentEventHandler, \
     UpdateInstructionDocumentEventHandler, AddInstructionDocumentPageEventHandler, \
-    UpdateInstructionDocumentPageEventHandler
+    UpdateInstructionDocumentPageEventHandler, DeleteInstructionDocumentPageEventHandler
 
 ENDPOINT_MAPPING = {
     'auth.authenticate': TokenAuthEventHandler,
     'auth.register_user': RegisterUserEventHandler,
     'auth.delete_user': DeleteUserEventHandler,
+
     'instruction_document.add_doc': AddInstructionDocumentEventHandler,
     'instruction_document.delete_doc': DeleteInstructionDocumentEventHandler,
     'instruction_document.update_doc': UpdateInstructionDocumentEventHandler,
+
     'instruction_document.add_page': AddInstructionDocumentPageEventHandler,
-    'instruction_document.update_page': UpdateInstructionDocumentPageEventHandler
+    'instruction_document.update_page': UpdateInstructionDocumentPageEventHandler,
+    'instruction_document.delete_page': DeleteInstructionDocumentPageEventHandler
 }
 
 

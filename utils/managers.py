@@ -61,10 +61,14 @@ class InstructionDocumentManager:
         self.__doc_repo.save(self.__document)
         return page
 
-    def delete_page(self, page_num: int):
+    def delete_page(self, user_id: int, page_num: int):
         page = self.__page_repo.get_by(document_id=self.__document.id, page_num=page_num)
         self.__page_repo.delete(page.id)
         for page in self.pages():
             if page.page_num > page_num:
                 page.page_num = page.page_num - 1
                 self.__page_repo.save(page)
+
+        self.__document.updated_by_user_id = user_id
+        self.__document.updated = datetime.utcnow()
+        self.__doc_repo.save(self.__document)

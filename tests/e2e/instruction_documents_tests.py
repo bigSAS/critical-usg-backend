@@ -4,6 +4,7 @@ from webtest import TestApp as TApp
 from db.model import InstructionDocument
 from repository.repos import InstructionDocumentRepository
 from utils.http import ResponseStatus
+from utils.managers import InstructionDocumentManager
 
 
 @pytest.mark.e2e
@@ -59,12 +60,10 @@ def test_deletes_doc(client: TApp, admin, user, get_headers):
     "user_type, description",
     [
         ('admin', 'new desc'),
-        ('user', 'new desc'),
         ('admin', None),
-        ('user', None),
     ]
 )
-def test_updates_doc(client: TApp, admin, user, get_headers, user_type, description):
+def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
     """ correct document object update """
     create_doc_data = {
         'name': 'some cool new doc fo edition',
@@ -90,13 +89,12 @@ def test_updates_doc(client: TApp, admin, user, get_headers, user_type, descript
     assert response.json['data']['id'] == update_doc_data['document_id']
     assert response.json['data']['name'] == update_doc_data['name']
     assert response.json['data']['description'] == update_doc_data['description']
-    assert response.json['data']['updated_by']['id'] == admin.id if user_type == 'admin' else user.id
+    assert response.json['data']['updated_by']['id'] == admin.id
     assert response.json['data']['updated'] is not None
 
 
 @pytest.mark.e2e
 @pytest.mark.docs
-@pytest.mark.debug
 def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     """ corret doc page addition """
     create_doc_data = {
@@ -129,12 +127,13 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
         assert doc.updated is not None
+        magaged_doc = InstructionDocumentManager(document=doc)
+        assert magaged_doc.page_count() == 1
 
 
 @pytest.mark.e2e
 @pytest.mark.docs
-@pytest.mark.debug
-def test_updates_doc_page(app, client: TApp, admin, user, get_headers):
+def test_updates_doc_page(app, client: TApp, admin, get_headers):
     """ corret doc page edittion """
     create_doc_data = {
         "name": "doc with pages to update",
@@ -168,12 +167,65 @@ def test_updates_doc_page(app, client: TApp, admin, user, get_headers):
     response = client.post_json(
         '/api/instruction-documents/update-page',
         update_page_data,
-        headers=get_headers('user')
+        headers=get_headers('admin')
     )
 
     assert response.json['status'] == 'OK'
     assert response.json['data']['json'] == update_page_data['json']
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
-        assert doc.updated_by_user_id == user.id
+        assert doc.updated_by_user_id == admin.id
         assert doc.updated is not None
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
+    """ corret doc page deletion """
+    create_doc_data = {
+        "name": "doc with pages to delete",
+        "description": "..."
+    }
+    created_doc_id = client.post_json(
+        '/api/instruction-documents/add-doc',
+        create_doc_data,
+        headers=get_headers('admin')).json['data']['id']
+
+    assert created_doc_id is not None
+    doc_pages_data = {
+        "document_id": created_doc_id,
+        "json": {
+            "bar": "baz"
+        }
+    }
+
+    page_id = client.post_json(
+        '/api/instruction-documents/add-page',
+        doc_pages_data,
+        headers=get_headers('admin')
+    ).json['data']['id']
+    with app.app_context():
+        doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+        assert doc.updated_by_user_id == admin.id
+        assert doc.updated is not None
+        magaged_doc = InstructionDocumentManager(document=doc)
+        assert magaged_doc.page_count() == 1
+
+    deletion_data = {
+        "page_id": page_id
+    }
+
+    response = client.post_json(
+        '/api/instruction-documents/delete-page',
+        deletion_data,
+        headers=get_headers('admin')
+    )
+    assert response.json['status'] == 'OK'
+    assert response.json['data'] is None
+
+    with app.app_context():
+        doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
+        assert doc.updated_by_user_id == admin.id
+        assert doc.updated is not None
+        magaged_doc = InstructionDocumentManager(document=doc)
+        assert magaged_doc.page_count() == 0

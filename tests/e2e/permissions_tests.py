@@ -62,7 +62,6 @@ def test_group_only_endpoint(client: TApp, user, admin, superuser, get_headers):
 
 @pytest.mark.e2e
 @pytest.mark.permissions
-# @pytest.mark.debug
 def test_open_endpoint(client: TApp, user, admin, superuser, get_headers):
     """ test open endpoint - all have access """
     # no user -> should be ok

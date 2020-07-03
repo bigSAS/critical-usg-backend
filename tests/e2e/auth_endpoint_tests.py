@@ -1,7 +1,6 @@
 import pytest
 from webtest import TestApp as TApp
 
-# ! important ! :: @pytest.mark.debug -> 4 debugging
 from db.model import User
 from repository.repos import UserRepository
 from utils.http import ResponseStatus
@@ -112,7 +111,6 @@ def test_register_user(client: TApp, email, username):
 
 @pytest.mark.e2e
 @pytest.mark.auth
-@pytest.mark.debug
 def test_delete_user(client: TApp, app, user, admin, superuser, get_headers):
     """ test user delete """
     new_user_data = {

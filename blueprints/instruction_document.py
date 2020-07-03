@@ -1,9 +1,6 @@
 from flask import request, Blueprint
 
 from events.factorys import event_handler_for
-from events.instruction_documents import AddInstructionDocumentEventHandler, DeleteInstructionDocumentEventHandler, \
-    UpdateInstructionDocumentEventHandler, AddInstructionDocumentPageEventHandler, \
-    UpdateInstructionDocumentPageEventHandler
 from utils.http import error_response
 from utils.permissions import restricted
 
@@ -20,8 +17,7 @@ def handle_error(error: Exception):
 @restricted(['ADMIN'])
 def add_doc():
     """ Create new instruction document """
-    handler: AddInstructionDocumentEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
 # noinspection PyTypeChecker
@@ -29,17 +25,15 @@ def add_doc():
 @restricted(['ADMIN'])
 def delete_doc():
     """ Delete instruction document """
-    handler: DeleteInstructionDocumentEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
 # noinspection PyTypeChecker
 @instruction_document_blueprint.route('/update-doc', methods=('POST',))
-@restricted(['ADMIN', 'USER'])  # todo: admin only ???
+@restricted(['ADMIN'])
 def update_doc():
     """ Update instruction document """
-    handler: UpdateInstructionDocumentEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
 # noinspection PyTypeChecker
@@ -47,14 +41,20 @@ def update_doc():
 @restricted(['ADMIN'])
 def add_page():
     """ Create new instruction document page """
-    handler: AddInstructionDocumentPageEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
 # noinspection PyTypeChecker
 @instruction_document_blueprint.route('/update-page', methods=('POST',))
-@restricted(['ADMIN', 'USER'])
+@restricted(['ADMIN'])
 def update_page():
-    """ Create new instruction document page """
-    handler: UpdateInstructionDocumentPageEventHandler = event_handler_for(request)
-    return handler.get_response()
+    """ Update instruction document page """
+    return event_handler_for(request).get_response()
+
+
+# noinspection PyTypeChecker
+@instruction_document_blueprint.route('/delete-page', methods=('POST',))
+@restricted(['ADMIN'])
+def delete_page():
+    """ Delete instruction document page """
+    return event_handler_for(request).get_response()
