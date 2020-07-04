@@ -1,7 +1,7 @@
 import pytest
 from webtest import TestApp as TApp
 
-from db.model import InstructionDocument
+from db.model import InstructionDocument, InstructionDocumentPage
 from repository.repos import InstructionDocumentRepository, UserRepository
 from utils.http import ResponseStatus
 from utils.managers import InstructionDocumentManager
@@ -262,7 +262,7 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
 
 @pytest.mark.e2e
 @pytest.mark.docs
-def test_lists_docs(app, client: TApp, admin, user, get_headers):
+def test_search_docs(app, client: TApp, admin, user, get_headers):
     """ corret doc searching """
     added_count = 0
     with app.app_context():
@@ -274,11 +274,18 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
                 admin
             ))
             added_count += 1
+        for i in range(1, 6):
+            repo.save(InstructionDocument(
+                f'[{i}] ...',
+                f'xyz {i} searched doc',
+                admin
+            ))
+            added_count += 1
 
     search_docs_data = {
         "search": "SearChed dOc",
         "page": 1,
-        "limit": 10
+        "limit": 100
     }
     response = client.post_json(
         '/api/instruction-documents/search-docs',
@@ -295,5 +302,34 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
 @pytest.mark.docs
 def test_gets_doc(app, client: TApp, admin, user, get_headers):
     """ corret doc getting """
-    pytest.skip("todo: impl")
-    assert False, "todo: impl"
+    doc_id = None
+    page_json = {"foo": "bar"}
+    with app.app_context():
+        repo = InstructionDocumentRepository()
+        doc = InstructionDocument(
+            f'coolish doc',
+            '. . .',
+            admin
+        )
+        managed_doc = InstructionDocumentManager(document=doc)
+        repo.save(doc)
+        page = InstructionDocumentPage(
+            document_id=doc.id,
+            json=page_json
+        )
+        managed_doc.add_page(page, admin.id)
+        doc_id = doc.id
+
+    get_doc_data = {
+        "document_id": doc_id
+    }
+    response = client.post_json(
+        '/api/instruction-documents/get-doc',
+        get_doc_data,
+        headers=get_headers('nouser'))
+
+    assert response.json['status'] == 'OK'
+    assert len(response.json['data']['pages']) == 1
+    assert response.json['data']['pages'][0]['page_num'] == 1
+    assert response.json['data']['pages'][0]['document_id'] == doc_id
+    assert response.json['data']['pages'][0]['json'] == page_json

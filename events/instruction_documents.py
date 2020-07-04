@@ -1,11 +1,10 @@
-from datetime import datetime
-
 from flask import Request
 from flask_jwt_extended import get_jwt_identity
+from sqlalchemy import or_
 
 from db.model import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer, \
-    ListInstructionDocumentSerializer
+    ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
 from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
@@ -226,9 +225,33 @@ class SearchInstructionDocumentEventHandler(EventHandler):
         search = self.request.json['search'].lower()
         docs_paginated = InstructionDocumentRepository() \
             .filter_paginated(
-                f=InstructionDocument.name.ilike(f'%{search}%'),
+                f=or_(
+                    InstructionDocument.name.ilike(f'%{search}%'),
+                    InstructionDocument.description.ilike(f'%{search}%')
+                ),
                 page=page,
                 limit=limit
             )
         serializer = ListInstructionDocumentSerializer(docs_paginated)
+        return ok_response(serializer.data)
+
+
+class GetInstructionDocumentEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
+            ObjectExist(
+                field_name='document_id', repository_class=InstructionDocumentRepository,
+                object_id=request.json.get('document_id', None)
+            )
+        ])
+
+
+class GetInstructionDocumentEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, GetInstructionDocumentEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        doc = InstructionDocumentRepository().get(self.request.json['document_id'])
+        serializer = GetInstructionDocumentSerializer(doc)
         return ok_response(serializer.data)

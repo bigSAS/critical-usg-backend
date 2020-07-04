@@ -42,8 +42,10 @@ class Repository:
         return self.session.query(self.entity).filter(f).all()
 
     def filter_paginated(self, f, page: int = 1, limit: int = 10, order: str = None):
-        if order: return self.session.query(self.entity).filter(f).order_by(text(order)).paginate(page, limit, False)
-        return self.session.query(self.entity).filter(f).paginate(page, limit, False)
+        q = None
+        if order: q = self.session.query(self.entity).filter(f).order_by(text(order)).paginate(page, limit, False)
+        else: q = self.session.query(self.entity).filter(f).paginate(page, limit, False)
+        return q
 
     def save(self, entity):
         self.session.add(entity)

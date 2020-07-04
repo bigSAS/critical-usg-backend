@@ -69,4 +69,4 @@ def search_docs():
 @instruction_document_blueprint.route('/get-doc', methods=('POST',))
 def get_doc():
     """ List instruction documents """
-    pass  # todo: impl
+    return event_handler_for(request).get_response()

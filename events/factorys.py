@@ -5,7 +5,7 @@ from events.core import EventHandler
 from events.instruction_documents import AddInstructionDocumentEventHandler, DeleteInstructionDocumentEventHandler, \
     UpdateInstructionDocumentEventHandler, AddInstructionDocumentPageEventHandler, \
     UpdateInstructionDocumentPageEventHandler, DeleteInstructionDocumentPageEventHandler, \
-    ListInstructionDocumentEventHandler, SearchInstructionDocumentEventHandler
+    ListInstructionDocumentEventHandler, SearchInstructionDocumentEventHandler, GetInstructionDocumentEventHandler
 
 ENDPOINT_MAPPING = {
     'auth.authenticate': TokenAuthEventHandler,
@@ -20,7 +20,8 @@ ENDPOINT_MAPPING = {
     'instruction_document.update_page': UpdateInstructionDocumentPageEventHandler,
     'instruction_document.delete_page': DeleteInstructionDocumentPageEventHandler,
     'instruction_document.list_docs': ListInstructionDocumentEventHandler,
-    'instruction_document.search_docs': SearchInstructionDocumentEventHandler
+    'instruction_document.search_docs': SearchInstructionDocumentEventHandler,
+    'instruction_document.get_doc': GetInstructionDocumentEventHandler
 }
 
 
