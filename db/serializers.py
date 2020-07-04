@@ -1,3 +1,5 @@
+from typing import List
+
 from db.model import User, UserGroup, GroupUser, InstructionDocument
 from repository.repos import GroupUserRepository, UserGroupRepository, UserRepository
 
@@ -72,3 +74,10 @@ class InstructionDocumentSerializer(Serializer):
 class InstructionDocumentPageSerializer(Serializer):
     fields = ('id', 'document_id', 'page_num', 'json')
 
+
+class ListInstructionDocumentSerializer(Serializer):
+    fields = ('page', 'prev_num', 'next_num', 'total')
+    method_fields = ('results',)
+
+    def get_results(self):
+        return [InstructionDocumentSerializer(item).data for item in self.get_object().items]

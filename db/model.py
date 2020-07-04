@@ -88,7 +88,7 @@ class InstructionDocument(db.Model):
 class InstructionDocumentPage(db.Model):
     """ Istruction Document Page Entity """
     id = db.Column(db.Integer, primary_key=True)
-    document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id'), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id', ondelete='CASCADE'), nullable=False)
     page_num = db.Column(db.Integer, default=0)
     json = db.Column(JSON, nullable=True)
 

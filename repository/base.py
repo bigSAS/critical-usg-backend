@@ -29,9 +29,21 @@ class Repository:
             raise ObjectNotFoundError(f'{self.entity.__name__}[{kwargs}] not found.')
         return entity
 
+    def all(self, order: str = None):
+        if order: return self.session.query(self.entity).order_by(text(order)).all()
+        return self.session.query(self.entity).all()
+
+    def all_paginated(self, page: int = 1, limit: int = 10, order: str = None):
+        if order: return self.session.query(self.entity).order_by(text(order)).paginate(page, limit, False)
+        return self.session.query(self.entity).paginate(page, limit, False)
+
     def filter(self, f, order: str = None):
         if order: return self.session.query(self.entity).filter(f).order_by(text(order)).all()
         return self.session.query(self.entity).filter(f).all()
+
+    def filter_paginated(self, f, page: int = 1, limit: int = 10, order: str = None):
+        if order: return self.session.query(self.entity).filter(f).order_by(text(order)).paginate(page, limit, False)
+        return self.session.query(self.entity).filter(f).paginate(page, limit, False)
 
     def save(self, entity):
         self.session.add(entity)

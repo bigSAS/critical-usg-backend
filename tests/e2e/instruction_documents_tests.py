@@ -2,7 +2,7 @@ import pytest
 from webtest import TestApp as TApp
 
 from db.model import InstructionDocument
-from repository.repos import InstructionDocumentRepository
+from repository.repos import InstructionDocumentRepository, UserRepository
 from utils.http import ResponseStatus
 from utils.managers import InstructionDocumentManager
 
@@ -235,58 +235,34 @@ def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
 @pytest.mark.docs
 def test_lists_docs(app, client: TApp, admin, user, get_headers):
     """ corret doc listing """
-    assert False, "todo: impl"
-    # create_doc_data = {
-    #     "name": "doc with pages to delete",
-    #     "description": "..."
-    # }
-    # created_doc_id = client.post_json(
-    #     '/api/instruction-documents/add-doc',
-    #     create_doc_data,
-    #     headers=get_headers('admin')).json['data']['id']
-    #
-    # assert created_doc_id is not None
-    # doc_pages_data = {
-    #     "document_id": created_doc_id,
-    #     "json": {
-    #         "bar": "baz"
-    #     }
-    # }
-    #
-    # page_id = client.post_json(
-    #     '/api/instruction-documents/add-page',
-    #     doc_pages_data,
-    #     headers=get_headers('admin')
-    # ).json['data']['id']
-    # with app.app_context():
-    #     doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
-    #     assert doc.updated_by_user_id == admin.id
-    #     assert doc.updated is not None
-    #     magaged_doc = InstructionDocumentManager(document=doc)
-    #     assert magaged_doc.page_count() == 1
-    #
-    # deletion_data = {
-    #     "page_id": page_id
-    # }
-    #
-    # response = client.post_json(
-    #     '/api/instruction-documents/delete-page',
-    #     deletion_data,
-    #     headers=get_headers('admin')
-    # )
-    # assert response.json['status'] == 'OK'
-    # assert response.json['data'] is None
-    #
-    # with app.app_context():
-    #     doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
-    #     assert doc.updated_by_user_id == admin.id
-    #     assert doc.updated is not None
-    #     magaged_doc = InstructionDocumentManager(document=doc)
-    #     assert magaged_doc.page_count() == 0
+    with app.app_context():
+        repo = InstructionDocumentRepository()
+        for i in range(1, 10):
+            repo.save(InstructionDocument(
+                f'[{i}]test doc',
+                'foo',
+                admin
+            ))
+
+    list_docs_data = {
+        "page": 2,
+        "limit": 3
+    }
+    response = client.post_json(
+        '/api/instruction-documents/list-docs',
+        list_docs_data,
+        headers=get_headers('admin'))  # todo: anonymous headers
+
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['page'] == list_docs_data['page']
+    assert response.json['data']['prev_num'] == list_docs_data['page'] - 1
+    assert response.json['data']['next_num'] == list_docs_data['page'] + 1
+    assert len(response.json['data']['results']) == 3
 
 
 @pytest.mark.e2e
 @pytest.mark.docs
 def test_gets_doc(app, client: TApp, admin, user, get_headers):
     """ corret doc getting """
+    pytest.skip("todo: impl")
     assert False, "todo: impl"
