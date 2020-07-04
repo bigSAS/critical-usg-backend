@@ -55,7 +55,9 @@ def client(app) -> TApp:
 @pytest.fixture(scope='function')
 def get_headers(client) -> Callable[[str], Dict[str, str]]:
     def get_headers_with_auth(role: str = 'user'):
-        if role == 'user':
+        if role == 'nouser':
+            return {'Content-type': 'application/json'}
+        elif role == 'user':
             email = USER['email']
             password = USER['plaintext_password']
         elif role == 'admin':

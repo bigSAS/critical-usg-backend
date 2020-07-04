@@ -197,6 +197,38 @@ class ListInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
-            .all_paginated(self.request.json['page'], self.request.json['limit'])
+            .all_paginated(
+                page=self.request.json['page'],
+                limit=self.request.json['limit']
+            )
+        serializer = ListInstructionDocumentSerializer(docs_paginated)
+        return ok_response(serializer.data)
+
+
+class SearchInstructionDocumentEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            MinLen(field_name='search', min_len=3, value=request.json.get('search', None)),
+            MaxLen(field_name='search', max_len=100, value=request.json.get('search', None)),
+            IsRequired(field_name='page', value=request.json.get('page', None)),
+            IsRequired(field_name='limit', value=request.json.get('limit', None)),
+            # todo: min page, max limit validation
+        ])
+
+
+class SearchInstructionDocumentEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, SearchInstructionDocumentEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        page = self.request.json['page']
+        limit = self.request.json['limit']
+        search = self.request.json['search'].lower()
+        docs_paginated = InstructionDocumentRepository() \
+            .filter_paginated(
+                f=InstructionDocument.name.ilike(f'%{search}%'),
+                page=page,
+                limit=limit
+            )
         serializer = ListInstructionDocumentSerializer(docs_paginated)
         return ok_response(serializer.data)

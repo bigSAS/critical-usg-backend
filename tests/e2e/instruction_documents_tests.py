@@ -251,13 +251,44 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
     response = client.post_json(
         '/api/instruction-documents/list-docs',
         list_docs_data,
-        headers=get_headers('admin'))  # todo: anonymous headers
+        headers=get_headers('nouser'))
 
     assert response.json['status'] == 'OK'
     assert response.json['data']['page'] == list_docs_data['page']
     assert response.json['data']['prev_num'] == list_docs_data['page'] - 1
     assert response.json['data']['next_num'] == list_docs_data['page'] + 1
     assert len(response.json['data']['results']) == 3
+
+
+@pytest.mark.e2e
+@pytest.mark.docs
+def test_lists_docs(app, client: TApp, admin, user, get_headers):
+    """ corret doc searching """
+    added_count = 0
+    with app.app_context():
+        repo = InstructionDocumentRepository()
+        for i in range(1, 10):
+            repo.save(InstructionDocument(
+                f'[{i}] searched doc',
+                'foo',
+                admin
+            ))
+            added_count += 1
+
+    search_docs_data = {
+        "search": "SearChed dOc",
+        "page": 1,
+        "limit": 10
+    }
+    response = client.post_json(
+        '/api/instruction-documents/search-docs',
+        search_docs_data,
+        headers=get_headers('nouser'))
+
+    assert response.json['status'] == 'OK'
+    assert response.json['data']['page'] == 1
+    assert len(response.json['data']['results']) == added_count
+    pass
 
 
 @pytest.mark.e2e
