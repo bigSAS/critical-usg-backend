@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_migrate import Migrate
+from flask_cors import CORS
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
 from db.model import db, bcrypt
@@ -7,11 +8,10 @@ from utils.http import ValidationError, error_response
 from config import Config
 
 
-class App(Flask): pass
-
-
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
+    allow_origins = ['http://localhost:8899']
+    CORS(application, origins=allow_origins)
     application.config.from_object(Config)
     db.init_app(application)
     mirgate = Migrate()
