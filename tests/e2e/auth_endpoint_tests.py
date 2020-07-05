@@ -131,3 +131,24 @@ def test_delete_user(client: TApp, app, user, admin, superuser, get_headers):
         assert UserRepository().get(user_id).is_deleted
     # su can delete
     client.post_json('/api/delete-user', {'user_id': user_id}, headers=get_headers('superuser'))
+
+
+@pytest.mark.e2e
+@pytest.mark.auth
+@pytest.mark.debug
+def test_get_user_data_user(client: TApp, app, user, admin, superuser, get_headers):
+    """ test get user data """
+    get_admin_data = {
+        "user_id": admin.id
+    }
+    admin_data_response = client.post_json('/api/get-user-data', get_admin_data, headers=get_headers('user'))
+
+    assert admin_data_response.json['status'] == 'OK'
+    assert admin_data_response.json['data']['id'] == admin.id
+
+    own_user_data = {}
+
+    user_data_response = client.post_json('/api/get-user-data', own_user_data, headers=get_headers('user'))
+
+    assert user_data_response.json['status'] == 'OK'
+    assert user_data_response.json['data']['id'] == user.id

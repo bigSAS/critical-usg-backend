@@ -58,12 +58,13 @@ class EmailCorrect(Validator):
 
 class ObjectExist(Validator):
     """ Model object exists """
-    def __init__(self, repository_class, object_id: int, field_name: str = "NON_FIELD"):
-        super().__init__(object_id, field_name)
+    def __init__(self, repository_class, object_id: int, field_name: str = "NON_FIELD", optional: bool = False):
+        super().__init__(object_id, field_name, optional)
         self.__repository_class = repository_class
 
     def validate(self):
-        try:
-            self.__repository_class().get(self.value)
-        except ObjectNotFoundError as e:
-            raise ValidationError([repr(e)], self.field_name)
+        if not self.optional and self.value is not None:
+            try:
+                self.__repository_class().get(self.value)
+            except ObjectNotFoundError as e:
+                raise ValidationError([repr(e)], self.field_name)

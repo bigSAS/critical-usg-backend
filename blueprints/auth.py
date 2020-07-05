@@ -38,29 +38,30 @@ def token_not_fresh():
     raise AuthError(f'Not authorized')
 
 
-# noinspection PyTypeChecker
 @auth_blueprint.route('/token-auth', methods=('POST',))
 def authenticate():
     """ Obtain JWT """
-    handler: TokenAuthEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
-# noinspection PyTypeChecker
 @auth_blueprint.route('/register-user', methods=('POST',))
 def register_user():
     """ Register new user (not admin) """
-    handler: RegisterUserEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
-# noinspection PyTypeChecker
 @auth_blueprint.route('/delete-user', methods=('POST',))
 @restricted(['ADMIN'])
 def delete_user():
     """ Register new user (not admin) """
-    handler: DeleteUserEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
+
+
+@auth_blueprint.route('/get-user-data', methods=('POST',))
+@restricted(['ADMIN', 'USER'])
+def get_user_data():
+    """ Register new user (not admin) """
+    return event_handler_for(request).get_response()
 
 
 @auth_blueprint.route('/user-ping', methods=('GET', 'POST'))

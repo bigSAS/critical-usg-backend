@@ -1,7 +1,7 @@
 from typing import List
 
 from flask import Request
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity
 
 from db.model import db, User, GroupUser
 from db.serializers import UserSerializer
@@ -107,4 +107,23 @@ class DeleteUserEventHandler(EventHandler):
         managed_user = UserManager(user_id=self.request.json['user_id'])
         managed_user.delete()
         serializer = UserSerializer(managed_user.user)
+        return ok_response(serializer.data)
+
+
+class GetUserDataEventValidator(EventValidator):
+    def __init__(self, request: Request):
+        super().__init__([
+            ObjectExist(UserRepository, request.json.get('user_id', None), 'user_id', optional=True)
+        ])
+
+
+class GetUserDataEventHandler(EventHandler):
+    def __init__(self, request: Request):
+        super().__init__(request, GetUserDataEventValidator(request))
+
+    def get_response(self) -> JsonResponse:
+        user_id = self.request.json.get('user_id', None)
+        if not user_id: user_id = get_jwt_identity()['id']
+        user = UserRepository().get(user_id)
+        serializer = UserSerializer(user)
         return ok_response(serializer.data)
