@@ -17,6 +17,7 @@ COPY . /opt/app
 RUN chown -R www-data:www-data /opt/app
 
 WORKDIR /opt/app
+RUN chmod 777 start-server.sh
 RUN pipenv install
 
 EXPOSE 80
