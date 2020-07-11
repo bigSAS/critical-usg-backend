@@ -10,7 +10,7 @@ from config import Config
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
-    allow_origins = ['http://localhost:8899']
+    allow_origins = ['*']  # read from config in production
     CORS(application, origins=allow_origins)
     application.config.from_object(Config)
     db.init_app(application)
