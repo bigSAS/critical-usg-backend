@@ -14,8 +14,8 @@ pipeline {
 
     stage('Stop + delete container') {
       steps {
-        sh 'docker stop $contaier_name || true'
-        sh 'docker rm $contaier_name || true'
+        sh 'docker stop $container_name || true'
+        sh 'docker rm $container_name || true'
       }
     }
 
