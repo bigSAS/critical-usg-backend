@@ -1,17 +1,17 @@
 from flask import Flask, request
 from flask_migrate import Migrate
+from flask_cors import CORS
 from blueprints.auth import auth_blueprint, jwt
-
+from blueprints.instruction_document import instruction_document_blueprint
 from db.model import db, bcrypt
-from utils.http import ValidationError
+from utils.http import ValidationError, error_response
 from config import Config
-
-
-class App(Flask): pass
 
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
+    allow_origins = ['*']  # read from config in production
+    CORS(application, origins=allow_origins)
     application.config.from_object(Config)
     db.init_app(application)
     mirgate = Migrate()
@@ -19,6 +19,7 @@ def create_app():
     bcrypt.init_app(application)
     jwt.init_app(application)
     application.register_blueprint(auth_blueprint, url_prefix='/api')
+    application.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     return application
 
 
@@ -33,7 +34,7 @@ def check_json_content_type():
 
 @app.errorhandler
 def handle_error(error: Exception):
-    return handle_error(error)
+    return error_response(error)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+from repository.repos import UserGroupRepository
 from wsgi import app
 from db.model import db, UserGroup
 
@@ -9,9 +10,10 @@ def create_default_groups():
         print('Create default user groups')
         created_groups = []
         for user_group in DEFAULT_USER_GROUPS:
-            if UserGroup.query.filter_by(name=user_group).first() is None:
+            existing_ug = UserGroupRepository().get_by(name=user_group, ignore_not_found=True)
+            if not existing_ug:
                 user_group = UserGroup(name=user_group)
-                db.session.add(user_group)
+                UserGroupRepository().save(user_group)
                 created_groups.append(user_group)
         db.session.commit()
         if len(created_groups) > 0:

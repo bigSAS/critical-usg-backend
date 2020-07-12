@@ -1,7 +1,10 @@
+from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-
+from sqlalchemy.orm import relationship
+from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -15,6 +18,7 @@ class User(db.Model):
     _password = db.Column(db.LargeBinary(100))
     is_superuser = db.Column(db.Boolean, default=False)
     groups = db.relationship('GroupUser', backref='user', lazy=True)
+    is_deleted = db.Column(db.Boolean, default=False)
 
     def __init__(self, email: str,  plaintext_password: str, username: str = None, is_superuser: bool = False):
         self.email = email
@@ -34,22 +38,8 @@ class User(db.Model):
     def password_is_valid(self, password: str) -> bool:
         return bcrypt.check_password_hash(self.password, password)
 
-    @property
-    def user_groups(self):
-        group_ids = set([gu.group_id for gu in self.groups])
-        return UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-            'username': self.username,
-            'is_superuser': self.is_superuser,
-            'groups': [ug.name for ug in self.user_groups]
-        }
-
     def __repr__(self):
-        return f'User{self.as_dict()}'
+        return f'User'
 
 
 class UserGroup(db.Model):
@@ -58,14 +48,8 @@ class UserGroup(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=True)
     users = db.relationship('GroupUser', backref='group', lazy=True)
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name
-        }
-
     def __repr__(self):
-        return f'UserGroup({self.as_dict()})'
+        return f'UserGroup()'
 
 
 class GroupUser(db.Model):
@@ -74,12 +58,48 @@ class GroupUser(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('user_group.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'group_id': self.group_id,
-            'user_id': self.user_id
-        }
+    def __repr__(self):
+        return f'GroupUser()'
+
+
+class InstructionDocument(db.Model):
+    """ Istruction Document Entity """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500), nullable=True)
+    created = Column(DateTime)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    updated = Column(DateTime)
+    updated_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_by = relationship("User", foreign_keys=[created_by_user_id])
+    updated_by = relationship("User", foreign_keys=[updated_by_user_id])
+
+    def __init__(self, name: str, description: str, created_by: User):
+        self.name = name
+        self.description = description
+        self.created_by_user_id = created_by.id
+        self.created = datetime.utcnow()
+        self.updated_by_user_id = None
 
     def __repr__(self):
-        return f'GroupUser({self.as_dict()})'
+        return f'IstructionDocument()'
+
+
+class InstructionDocumentPage(db.Model):
+    """ Istruction Document Page Entity """
+    id = db.Column(db.Integer, primary_key=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id', ondelete='CASCADE'), nullable=False)
+    page_num = db.Column(db.Integer, default=0)
+    json = db.Column(JSON, nullable=True)
+
+    def __init__(self, document_id: int, json: dict, page_num: int = None):
+        self.document_id = document_id
+        self.json = json
+        if page_num: self.page_num = page_num
+
+    @hybrid_method
+    def doc(self, document_id: int):
+        return self.document_id == document_id
+
+    def __repr__(self):
+        return f'IstructionDocumentPage()'

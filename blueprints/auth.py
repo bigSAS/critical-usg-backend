@@ -1,10 +1,11 @@
 from flask import request, Blueprint
-from flask_jwt_extended import jwt_required, JWTManager
+from flask_jwt_extended import JWTManager
 from jwt import DecodeError
 
-from events.auth import TokenAuthEventHandler, RegisterUserEventHandler
+from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteUserEventHandler
 from events.factorys import event_handler_for
 from utils.http import AuthError, error_response
+from utils.permissions import restricted, superuser_only
 
 auth_blueprint = Blueprint('auth', __name__)
 jwt = JWTManager()  # https://flask-jwt-extended.readthedocs.io/en/stable/api/
@@ -37,25 +38,50 @@ def token_not_fresh():
     raise AuthError(f'Not authorized')
 
 
-# noinspection PyTypeChecker
 @auth_blueprint.route('/token-auth', methods=('POST',))
 def authenticate():
     """ Obtain JWT """
-    handler: TokenAuthEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
-# noinspection PyTypeChecker
 @auth_blueprint.route('/register-user', methods=('POST',))
-def register():
+def register_user():
     """ Register new user (not admin) """
-    handler: RegisterUserEventHandler = event_handler_for(request)
-    return handler.get_response()
+    return event_handler_for(request).get_response()
 
 
-@auth_blueprint.route('/token-ping', methods=('GET', 'POST'))
-@jwt_required
-def ping():
+@auth_blueprint.route('/delete-user', methods=('POST',))
+@restricted(['ADMIN'])
+def delete_user():
+    """ Register new user (not admin) """
+    return event_handler_for(request).get_response()
+
+
+@auth_blueprint.route('/get-user-data', methods=('POST',))
+@restricted(['ADMIN', 'USER'])
+def get_user_data():
+    """ Register new user (not admin) """
+    return event_handler_for(request).get_response()
+
+
+@auth_blueprint.route('/user-ping', methods=('GET', 'POST'))
+@restricted(['USER'])
+def user_ping():
     return {
         'msg': 'pong!'
+    }
+
+
+@auth_blueprint.route('/superuser-ping', methods=('GET', 'POST'))
+@superuser_only
+def superuser_ping():
+    return {
+        'msg': 'super!'
+    }
+
+
+@auth_blueprint.route('/open-ping', methods=('GET', 'POST'))
+def open_ping():
+    return {
+        'msg': 'hello!'
     }
