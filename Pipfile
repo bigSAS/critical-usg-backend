@@ -16,8 +16,6 @@ pytest = "5.4.3"
 WebTest = "2.0.35"
 Werkzeug = "1.0.1"
 psycopg2-binary = "2.7.4"
-gunicorn = "20.0.4"
-
 
 [requires]
 python_version = "3.8"
