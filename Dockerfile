@@ -20,6 +20,7 @@ RUN chown -R www-data:www-data /opt/app
 WORKDIR /opt/app
 RUN pipenv install
 RUN pipenv install gunicorn
+RUN chmod +x start-server.sh
 
 EXPOSE 80
 STOPSIGNAL SIGTERM
