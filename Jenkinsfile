@@ -4,6 +4,10 @@ pipeline {
       label 'vps-master'
     }
 
+  triggers {
+    pollSCM('*/5 * * * *')
+  }
+
   }
   stages {
     stage('Build docker image') {
