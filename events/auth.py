@@ -1,9 +1,7 @@
-from typing import List
-
 from flask import Request
 from flask_jwt_extended import create_access_token, get_jwt_identity
 
-from db.model import db, User, GroupUser
+from db.model import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist

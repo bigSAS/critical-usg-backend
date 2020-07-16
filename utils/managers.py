@@ -14,7 +14,7 @@ class UserManager:
     def __init__(self, user_id: int = None, user: User = None):
         self.__user_repo = UserRepository()
         self.__user = self.__user_repo.get(user_id) if user_id else user
-        if not self.__user: raise ValueError(f'User not provided!')
+        if not self.__user: raise ValueError('User not provided!')
 
     @property
     def user(self) -> User:
@@ -37,7 +37,7 @@ class InstructionDocumentManager:
         self.__page_repo = InstructionDocumentPageRepository()
         self.__doc_repo = InstructionDocumentRepository()
         self.__document = self.__doc_repo.get(document_id) if document_id else document
-        if not self.__document: raise ValueError(f'Document not provided!')
+        if not self.__document: raise ValueError('Document not provided!')
 
     def update(self, user_id: int, **kwargs):
         valid_kwargs = ('name', 'description')

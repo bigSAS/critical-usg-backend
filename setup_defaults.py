@@ -21,5 +21,6 @@ def create_default_groups():
         else:
             print('No new user groups created...')
 
+
 if __name__ == '__main__':
     create_default_groups()
