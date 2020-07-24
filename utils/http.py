@@ -4,6 +4,7 @@ from flask import Response
 from flask.json import dumps
 
 from config import Config
+from db.model import OrmModel
 
 
 class ApiError(Exception):
@@ -56,14 +57,15 @@ class ResponseStatus(Enum):
     SERVER_ERROR = 'SERVER_ERROR'
 
 
-class ResponseBody:
-    def __init__(self, status: ResponseStatus, api_error: ApiError = None, data: dict = None):
+class ResponseBody:  # todo: pydantic with generic data [T]
+    def __init__(self, status: ResponseStatus, api_error: ApiError = None, data: dict = None, data_model: OrmModel = None):  # todo: data always from PydanticModel().dict() -> typi
+        # todo: validate -> only data or data_model can be passed ! ! !
         self.status = status.value
         self.api_error = api_error
         self.data = data
 
     @property
-    def body(self):
+    def body(self):  # todo: return ResponseBodyModel(self.status, self.api_error, self.data).data()
         return {
             'status': self.status,
             'errors': self.api_error.errros if self.api_error else [],

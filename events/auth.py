@@ -1,12 +1,16 @@
+from typing import List, Optional
+
 from flask import Request
 from flask_jwt_extended import create_access_token, get_jwt_identity
+from pydantic.main import BaseModel
+from pydantic.networks import EmailStr
 
-from db.model import User, GroupUser
+from db.model import User, GroupUser, OrmModel, UserGroup
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist
 from repository.base import ObjectNotFoundError
-from repository.repos import UserRepository, UserGroupRepository
+from repository.repos import UserRepository, UserGroupRepository, GroupUserRepository
 from utils.http import JsonResponse, AuthError, ok_response
 from utils.managers import UserManager
 
@@ -108,20 +112,41 @@ class DeleteUserEventHandler(EventHandler):
         return ok_response(serializer.data)
 
 
-class GetUserDataEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            ObjectExist(UserRepository, request.json.get('user_id', None), 'user_id', optional=True)
-        ])
+class UserGroupModel(OrmModel):
+    id: int
+    name: str
+
+
+class GetUserModel(OrmModel):
+    id: int
+    username: str
+    email: EmailStr
+    is_superuser: bool
+    is_deleted: bool
+    groups: List[UserGroupModel]
+
+
+class GetUserDataRequestModel(BaseModel):
+    user_id: Optional[int]
+    # user_id: int  # -> debug
 
 
 class GetUserDataEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, GetUserDataEventValidator(request))
+    request_model_class = GetUserDataRequestModel
 
     def get_response(self) -> JsonResponse:
-        user_id = self.request.json.get('user_id', None)
-        if not user_id: user_id = get_jwt_identity()['id']
+        r = GetUserDataRequestModel(**self.request.json)
+        user_id = r.user_id if r.user_id else get_jwt_identity()['id']
         user = UserRepository().get(user_id)
-        serializer = UserSerializer(user)
-        return ok_response(serializer.data)
+        user_groups = GroupUserRepository().filter(GroupUser.user_id == user.id)
+        group_ids = list(set([ug.group_id for ug in user_groups]))
+        groups = UserGroupRepository().filter(UserGroup.id.in_(group_ids))
+        user_model = GetUserModel.construct(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_superuser=user.is_superuser,
+            is_deleted=user.is_deleted,
+            groups=[UserGroupModel.construct(id=g.id, name=g.name) for g in groups]
+        )
+        return ok_response(user_model.dict())

@@ -1,6 +1,9 @@
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from pydantic.main import BaseModel
+from pydantic.networks import EmailStr
+from pydantic.types import constr
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
@@ -8,6 +11,11 @@ from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+
+class OrmModel(BaseModel):
+    class Config:
+        orm_mode = True
 
 
 class User(db.Model):
