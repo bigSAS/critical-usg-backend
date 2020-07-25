@@ -56,7 +56,7 @@ def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
 @pytest.mark.e2e
 @pytest.mark.auth
 @pytest.mark.parametrize(
-    "email, password, expected_error_message",
+    "email, password",
     [
         ('', 'jimmyh'),
         ('sas@kodzi.io', ''),
