@@ -4,10 +4,10 @@ services:
   - postgresql
 language: python
 install:
-  - pip install -r requirements.txt
+  - python -m pip install pipenv
+  - pipenv sync
 script:
   - psql -c 'create database cusg_test_db;' -U postgres
   - flask db upgrade
-  - python setup_defaults.py
-  - python -m pytest -v -m unit
-  - python -m pytest -v -m e2e
+  - pipenv run python setup_defaults.py
+  - pipenv run python -m pytest -v --log-cli-level=DEBUG
