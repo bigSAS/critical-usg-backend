@@ -1,5 +1,10 @@
+import uuid
 from enum import Enum
-from typing import List
+from typing import List, Union, Generic, TypeVar, Optional, Any
+
+from pydantic import BaseModel, UUID4
+from pydantic.generics import GenericModel
+
 from flask import Response
 from flask.json import dumps
 
@@ -8,7 +13,7 @@ from db.model import OrmModel
 
 
 class ApiError(Exception):
-    def __init__(self, name: str, data):
+    def __init__(self, name: str, data: Union[List, str]):
         self.name = name
         self.data = data
 
@@ -26,10 +31,15 @@ class ApiError(Exception):
             'message': self.data
         }]
 
+    def to_api_error_model(self):
+        return ApiErrorModel(
+            name=self.name,
+            message=self.data
+        )
+
 
 class ValidationError(ApiError):
     def __init__(self, messages: List[str], field_name: str = 'NON_FIELD', ):
-        if len(messages) == 0: raise ValueError('no messages passed in constructor')
         super().__init__(field_name, messages)
 
 
@@ -48,7 +58,7 @@ class ForbiddenError(ApiError):
         super().__init__('PERMISSION', description)
 
 
-class ResponseStatus(Enum):
+class ResponseStatus(str, Enum):
     OK = 'OK'
     NOT_FOUND = 'NOT_FOUND'
     AUTH_ERROR = "AUTH_ERROR"
@@ -57,31 +67,39 @@ class ResponseStatus(Enum):
     SERVER_ERROR = 'SERVER_ERROR'
 
 
-class ResponseBody:  # todo: pydantic with generic data [T]
-    def __init__(self, status: ResponseStatus, api_error: ApiError = None, data: dict = None, data_model: OrmModel = None):  # todo: data always from PydanticModel().dict() -> typi
-        # todo: validate -> only data or data_model can be passed ! ! !
-        self.status = status.value
-        self.api_error = api_error
-        self.data = data
+class ApiErrorModel(BaseModel):
+    name: str
+    message: str
 
-    @property
-    def body(self):  # todo: return ResponseBodyModel(self.status, self.api_error, self.data).data()
-        return {
-            'status': self.status,
-            'errors': self.api_error.errros if self.api_error else [],
-            'data': self.data
-        }
+
+class ResponseModel(BaseModel):
+    status: ResponseStatus
+    data: Optional[dict]
+    errors: List[ApiErrorModel] = []
+    uid: UUID4 = uuid.uuid4()
+
+# todo: rm ???
+# class ResponseBody:  # todo: pydantic with generic data [T]
+#     def __init__(self, status: ResponseStatus, api_error: ApiError = None, data: dict = None,
+#                  data_model: OrmModel = None):  # todo: data always from PydanticModel().dict() -> typi
+#         # todo: validate -> only data or data_model can be passed ! ! !
+#         self.status = status.value
+#         self.api_error = api_error
+#         self.data = data
+#
+#     @property
+#     def body(self):  # todo: return ResponseBodyModel(self.status, self.api_error, self.data).data()
+#         return {
+#             'status': self.status,
+#             'errors': self.api_error.errros if self.api_error else [],
+#             'data': self.data
+#         }
 
 
 class JsonResponse(Response):
     """ Json Response for api views """
     default_mimetype = 'application/json'
     default_status = 200
-
-    def __init__(self, *args, **kwargs):
-        json_obj = kwargs.pop('json', None)
-        kwargs['response'] = dumps(json_obj) if json_obj else None
-        super().__init__(*args, **kwargs)
 
 
 ERROR_STATUS_MAP = {
@@ -92,14 +110,23 @@ ERROR_STATUS_MAP = {
 }
 
 
-def ok_response(data: dict = None):
+def ok_response(data: Union[dict, BaseModel] = None):
+    if isinstance(data, dict):
+        data_obj = data
+    elif isinstance(data, BaseModel):
+        data_obj = data.dict()
+    else:
+        raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
     return JsonResponse(
         status=200,
-        json=ResponseBody(ResponseStatus.OK, data=data).body
+        response=ResponseModel(
+            status=ResponseStatus.OK,
+            data=data_obj
+        ).json()
     )
 
 
-def error_response(error: Exception):
+def error_response(error: Exception = None):
     """ error handler for App """
     print("ERROR:")
     print(repr(error))
@@ -111,5 +138,8 @@ def error_response(error: Exception):
         api_error = error
     return JsonResponse(
         status=http_status,
-        json=ResponseBody(response_status, api_error).body
+        response=ResponseModel(
+            status=ResponseStatus.OK,
+            errors=[error.to_api_error_model()]
+        ).json()
     )
