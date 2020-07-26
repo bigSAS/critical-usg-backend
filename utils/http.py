@@ -109,7 +109,7 @@ ERROR_STATUS_MAP = {
 
 
 def ok_response(data: Union[dict, BaseModel] = None):
-    if not isinstance(data, dict) and not isinstance(data, BaseModel):
+    if data and not isinstance(data, dict) and not isinstance(data, BaseModel):
         raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
 
     data_obj = data
