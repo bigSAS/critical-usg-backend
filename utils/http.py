@@ -135,7 +135,7 @@ def error_response(error: Exception = None):
     else:
         api_error = error
     return JsonResponse(
-        status=http_status,
+        status=response_status,
         response=ResponseModel(
             status=ResponseStatus.OK,
             errors=[error.to_api_error_model()]
