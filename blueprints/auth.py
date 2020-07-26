@@ -2,7 +2,6 @@ from flask import request, Blueprint
 from flask_jwt_extended import JWTManager
 from jwt import DecodeError
 
-from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteUserEventHandler
 from events.factorys import event_handler_for
 from utils.http import AuthError, error_response
 from utils.permissions import restricted, superuser_only
@@ -30,12 +29,12 @@ def token_invalid(message: str):
 
 @jwt.needs_fresh_token_loader
 def token_not_fresh():
-    raise AuthError(f'Fresh token required')
+    raise AuthError('Fresh token required')
 
 
 @jwt.revoked_token_loader
-def token_not_fresh():
-    raise AuthError(f'Not authorized')
+def token_revoked():
+    raise AuthError('Not authorized')
 
 
 @auth_blueprint.route('/token-auth', methods=('POST',))

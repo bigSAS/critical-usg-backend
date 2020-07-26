@@ -1,6 +1,9 @@
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from pydantic.main import BaseModel
+from pydantic.networks import EmailStr
+from pydantic.types import constr
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
@@ -8,6 +11,11 @@ from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+
+class OrmModel(BaseModel):
+    class Config:
+        orm_mode = True
 
 
 class User(db.Model):
@@ -20,7 +28,7 @@ class User(db.Model):
     groups = db.relationship('GroupUser', backref='user', lazy=True)
     is_deleted = db.Column(db.Boolean, default=False)
 
-    def __init__(self, email: str,  plaintext_password: str, username: str = None, is_superuser: bool = False):
+    def __init__(self, email: str, plaintext_password: str, username: str = None, is_superuser: bool = False):
         self.email = email
         self.password = plaintext_password
         self.username = username
@@ -39,7 +47,7 @@ class User(db.Model):
         return bcrypt.check_password_hash(self.password, password)
 
     def __repr__(self):
-        return f'User'
+        return 'User'
 
 
 class UserGroup(db.Model):
@@ -49,7 +57,7 @@ class UserGroup(db.Model):
     users = db.relationship('GroupUser', backref='group', lazy=True)
 
     def __repr__(self):
-        return f'UserGroup()'
+        return 'UserGroup()'
 
 
 class GroupUser(db.Model):
@@ -59,7 +67,7 @@ class GroupUser(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f'GroupUser()'
+        return 'GroupUser()'
 
 
 class InstructionDocument(db.Model):
@@ -82,7 +90,7 @@ class InstructionDocument(db.Model):
         self.updated_by_user_id = None
 
     def __repr__(self):
-        return f'IstructionDocument()'
+        return 'IstructionDocument()'
 
 
 class InstructionDocumentPage(db.Model):
@@ -102,4 +110,4 @@ class InstructionDocumentPage(db.Model):
         return self.document_id == document_id
 
     def __repr__(self):
-        return f'IstructionDocumentPage()'
+        return 'IstructionDocumentPage()'

@@ -196,10 +196,7 @@ class ListInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
-            .all_paginated(
-                page=self.request.json['page'],
-                limit=self.request.json['limit']
-            )
+            .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'])
         serializer = ListInstructionDocumentSerializer(docs_paginated)
         return ok_response(serializer.data)
 
@@ -224,14 +221,10 @@ class SearchInstructionDocumentEventHandler(EventHandler):
         limit = self.request.json['limit']
         search = self.request.json['search'].lower()
         docs_paginated = InstructionDocumentRepository() \
-            .filter_paginated(
-                f=or_(
-                    InstructionDocument.name.ilike(f'%{search}%'),
-                    InstructionDocument.description.ilike(f'%{search}%')
-                ),
-                page=page,
-                limit=limit
-            )
+            .filter_paginated(f=or_(InstructionDocument.name.ilike(f'%{search}%'),
+                                    InstructionDocument.description.ilike(f'%{search}%')),
+                              page=page,
+                              limit=limit)
         serializer = ListInstructionDocumentSerializer(docs_paginated)
         return ok_response(serializer.data)
 

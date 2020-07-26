@@ -21,7 +21,7 @@ class TheSame(Validator):
 
     def validate(self):
         if self.cleaned_value() != self.second_value.strip():
-            raise ValidationError([f'Value must be the same as {self.second_field_name}'], self.field_name)
+            raise ValidationError(f'Wartość musi być taka sama jak pola {self.second_field_name}', self.field_name)
 
 
 class MinLen(Validator):
@@ -32,7 +32,7 @@ class MinLen(Validator):
 
     def validate(self):
         if self.has_value() and len(self.cleaned_value()) < self.min_len:
-            raise ValidationError([f'Minimum length is {self.min_len}'], self.field_name)
+            raise ValidationError(f'Minimalna ilość znaków to {self.min_len}', self.field_name)
 
 
 class MaxLen(Validator):
@@ -43,7 +43,7 @@ class MaxLen(Validator):
 
     def validate(self):
         if self.has_value() and len(self.cleaned_value()) > self.max_len:
-            raise ValidationError([f'Maximum length is {self.max_len}'], self.field_name)
+            raise ValidationError(f'Maksymalna ilość znaków to {self.max_len}', self.field_name)
 
 
 class EmailCorrect(Validator):
@@ -53,7 +53,7 @@ class EmailCorrect(Validator):
 
     def validate(self):  # todo: validate email via regex
         if self.has_value() and '@' not in self.cleaned_value():
-            raise ValidationError([f'Email address is invalid'], self.field_name)
+            raise ValidationError('Niepoprawny adres email', self.field_name)
 
 
 class ObjectExist(Validator):
@@ -67,4 +67,4 @@ class ObjectExist(Validator):
             try:
                 self.__repository_class().get(self.value)
             except ObjectNotFoundError as e:
-                raise ValidationError([repr(e)], self.field_name)
+                raise ValidationError(repr(e), self.field_name)

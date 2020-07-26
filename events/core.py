@@ -1,7 +1,9 @@
+import json
 from typing import Any, List
 from flask import Request
 from utils.http import JsonResponse, ValidationError
 from abc import ABC
+from pydantic import ValidationError as VError
 
 
 class Validator(ABC):
@@ -29,7 +31,7 @@ class Validator(ABC):
 
     def __validate_required(self):
         if not self.optional and (not self.has_value() or self.cleaned_value() == ''):
-            raise ValidationError(['Field is required'], self.field_name)
+            raise ValidationError('Field is required', self.field_name)
 
 
 class EventValidator(ABC):
@@ -46,15 +48,22 @@ class EventValidator(ABC):
 
 
 class EventHandler(ABC):
+    request_model_class = None
     """ Base event handler class """
     def __init__(self, request: Request, event_validator: EventValidator = None, validate: bool = True):
         self.__request = request
-        self.__event_validator = event_validator
-        if validate: self.validate()
+        self.__request_model = self.__get_request_model(request)
+
+        self.__event_validator = event_validator  # todo: rm when refactor done
+        if validate: self.validate()  # todo: rm when refactor done
 
     @property
     def request(self):
         return self.__request
+
+    @property
+    def request_model(self):
+        return self.__request_model
 
     def validate(self):
         if self.__event_validator:
@@ -62,3 +71,23 @@ class EventHandler(ABC):
 
     def get_response(self) -> JsonResponse:
         raise NotImplementedError('Implement in child class')
+
+    def __get_request_model(self, request):
+        if not self.request_model_class:
+            print('request_model_class not set')
+        # todo: enable when refactor done
+        # if not self.request_model_class: raise NotImplementedError('request_model_class not set')
+        else:
+            try:
+                return self.request_model_class(**request.json)
+            except VError as e:
+                field_name, message = extract_error(e)
+                raise ValidationError(
+                    field_name=field_name,
+                    message=message,
+                )
+
+
+def extract_error(error: VError):
+    first_error = error.errors[0]
+    return first_error['loc'][0], first_error['msg']
