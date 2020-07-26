@@ -3,6 +3,8 @@ env:
 services:
   - postgresql
 language: python
+python:
+  - "3.8"
 install:
   - python -m pip install pipenv
   - pipenv sync
