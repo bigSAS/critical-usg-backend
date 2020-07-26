@@ -109,12 +109,13 @@ ERROR_STATUS_MAP = {
 
 
 def ok_response(data: Union[dict, BaseModel] = None):
-    if isinstance(data, dict):
-        data_obj = data
-    elif isinstance(data, BaseModel):
-        data_obj = data.dict()
-    else:
+    if not isinstance(data, dict) and not isinstance(data, BaseModel):
         raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
+
+    data_obj = data
+    if isinstance(data, BaseModel):
+        data_obj = data.dict()
+
     return JsonResponse(
         status=200,
         response=ResponseModel(
@@ -135,9 +136,9 @@ def error_response(error: Exception = None):
     else:
         api_error = error
     return JsonResponse(
-        status=response_status,
+        status=http_status,
         response=ResponseModel(
-            status=ResponseStatus.OK,
+            status=response_status,
             errors=[error.to_api_error_model()]
         ).json()
     )
