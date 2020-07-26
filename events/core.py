@@ -31,7 +31,7 @@ class Validator(ABC):
 
     def __validate_required(self):
         if not self.optional and (not self.has_value() or self.cleaned_value() == ''):
-            raise ValidationError(['Field is required'], self.field_name)
+            raise ValidationError('Field is required', self.field_name)
 
 
 class EventValidator(ABC):
@@ -81,12 +81,13 @@ class EventHandler(ABC):
             try:
                 return self.request_model_class(**request.json)
             except VError as e:
-                field_name, messages = extract_error(e)
+                field_name, message = extract_error(e)
                 raise ValidationError(
                     field_name=field_name,
-                    messages=messages,
+                    message=message,
                 )
 
 
 def extract_error(error: VError):
-    return error.errors()[0]['loc'][0], [e['msg'] for e in error.errors()]
+    first_error = error.errors[0]
+    return first_error['loc'][0], first_error['msg']

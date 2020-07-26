@@ -1,18 +1,16 @@
 import uuid
 from enum import Enum
-from typing import List, Union, Generic, TypeVar, Optional, Any
+from typing import List, Union, Optional
 
 from pydantic import BaseModel, UUID4
-from pydantic.generics import GenericModel
 
 from flask import Response
-from flask.json import dumps
 
 from config import Config
-from db.model import OrmModel
 
 
 class ApiError(Exception):
+    # todo: refactor list of errors ? or first err 4eva ?
     def __init__(self, name: str, data: Union[List, str]):
         self.name = name
         self.data = data
@@ -39,8 +37,8 @@ class ApiError(Exception):
 
 
 class ValidationError(ApiError):
-    def __init__(self, messages: List[str], field_name: str = 'NON_FIELD', ):
-        super().__init__(field_name, messages)
+    def __init__(self, message: str, field_name: str = 'NON_FIELD', ):
+        super().__init__(field_name, message)
 
 
 class ServerError(ApiError):

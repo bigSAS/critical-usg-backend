@@ -29,7 +29,7 @@ app = create_app()
 @app.before_request
 def check_json_content_type():
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
-        raise ValidationError(['Content-Type - application/json only'])
+        raise ValidationError('Content-Type - application/json only')
 
 
 @app.errorhandler
