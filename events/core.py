@@ -91,5 +91,5 @@ class EventHandler(ABC):
 
 
 def extract_error(error: VError):
-    first_error = error.errors[0]
+    first_error = error.errors()[0]
     return first_error['loc'][0], first_error['msg']
