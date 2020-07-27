@@ -5,11 +5,11 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
 
 from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseModel, UserEntityModel, \
-    UserGroupEntityModel
+    UserGroupEntityModel, RegisterUserEventRequestModel
 from db.schema import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, EmailCorrect, TheSame, MinLen, ObjectExist
+from events.validators import ObjectExist
 from repository.base import ObjectNotFoundError
 from repository.repos import UserRepository, UserGroupRepository
 from utils.http import JsonResponse, AuthError, ok_response
@@ -35,7 +35,7 @@ class TokenAuthEventHandler(EventHandler):
         response_model = TokenAuthEventResponseModel.construct(
             token=create_access_token(identity=user_model.dict())
         )
-        return ok_response(response_model.dict())
+        return ok_response(response_model)
 
     # noinspection PyBroadException
     def __auth_user(self) -> Optional[User]:
@@ -50,39 +50,28 @@ class TokenAuthEventHandler(EventHandler):
         except: return None
 
 
-class RegisterUserEventValidator(EventValidator):
-    """
-    todo: @validation
-    * more password rules
-    * username exclude special chars, only allow . and - (inside of username)
-    """
-    def __init__(self, request: Request):
-        super().__init__([
-            EmailCorrect(field_name='email', value=request.json.get('email', None)),
-            MinLen(field_name='email', min_len=6, value=request.json.get('email', None)),
-            MaxLen(field_name='email', max_len=200, value=request.json.get('email', None)),
-            MinLen(field_name='password', min_len=8, value=request.json.get('password', None)),
-            MaxLen(field_name='password', max_len=50, value=request.json.get('password', None)),
-            TheSame(field_name='password_repeat', second_field_name='password',
-                    value=request.json.get('password_repeat', None), second_value=request.json.get('password', None)),
-            MaxLen(field_name='username', max_len=50, value=request.json.get('username', None), optional=True),
-        ])
-
-
 class RegisterUserEventHandler(EventHandler):
-    def __init__(self, request: Request, validate: bool = True):
-        super().__init__(request, RegisterUserEventValidator(request), validate=validate)  # todo: rm validate ???
+    request_model_class = RegisterUserEventRequestModel
 
     def get_response(self) -> JsonResponse:
+        rmodel: RegisterUserEventRequestModel = self.request_model
         user = User(
-            email=self.request.json['email'],
-            plaintext_password=self.request.json['password'],
-            username=self.request.json.get('username', None)
+            email=rmodel.email,
+            plaintext_password=rmodel.password,
+            username=rmodel.username
         )
         UserRepository().save(user)
         self.__add_user_to_default_groups(user)
-        data = UserSerializer(user).data
-        return ok_response(data)
+        managed_user = UserManager(user=user)
+        user_model = UserEntityModel.construct(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_superuser=user.is_superuser,
+            is_deleted=user.is_deleted,
+            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
+        )
+        return ok_response(user_model)
 
     @staticmethod
     def __add_user_to_default_groups(user: User):
@@ -113,20 +102,6 @@ class DeleteUserEventHandler(EventHandler):
         managed_user.delete()
         serializer = UserSerializer(managed_user.user)
         return ok_response(serializer.data)
-
-
-# class UserGroupModel(OrmModel):
-#     id: int
-#     name: str
-#
-#
-# class GetUserModel(OrmModel):
-#     id: int
-#     username: str
-#     email: EmailStr
-#     is_superuser: bool
-#     is_deleted: bool
-#     groups: List[UserGroupModel]
 
 
 class GetUserDataRequestModel(BaseModel):

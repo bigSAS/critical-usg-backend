@@ -2,7 +2,7 @@ from typing import Any, List
 from flask import Request
 from utils.http import JsonResponse, ValidationError
 from abc import ABC
-from pydantic import ValidationError as VError
+from pydantic import ValidationError as VError, BaseModel
 
 
 class Validator(ABC):
@@ -71,14 +71,14 @@ class EventHandler(ABC):
     def get_response(self) -> JsonResponse:
         raise NotImplementedError('Implement in child class')
 
-    def __get_request_model(self, request):
+    def __get_request_model(self, request) -> BaseModel:
         if not self.request_model_class:
             print('request_model_class not set')
         # todo: enable when refactor done
         # if not self.request_model_class: raise NotImplementedError('request_model_class not set')
         else:
             try:
-                rmodel = self.request_model_class(**request.json)
+                return self.request_model_class(**request.json)
             except VError as e:
                 field_name, message = extract_error(e)
                 raise ValidationError(
