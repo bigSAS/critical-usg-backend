@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, UUID4, EmailStr, constr
+from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
 
 class OrmModel(BaseModel):
@@ -47,14 +47,24 @@ class UserEntityModel(OrmModel):
     groups: List[UserGroupEntityModel]
 
 
-# @event models
+# @events
 class TokenAuthEventRequestModel(BaseModel):
     uid: UUID4 = uuid.uuid4()
-    email: EmailStr = constr(max_length=200)
-    passwrod: str = constr(max_length=50)
+    email: EmailStr
+    passwrod: constr(max_length=50)
 
 
 class TokenAuthEventResponseModel(BaseModel):
     token: str
 
 
+class RegisterUserEventRequestModel(BaseModel):
+    email: EmailStr
+    passwrod: constr(min_length=8, max_length=50)
+    passwrod_repeat: constr(min_length=8, max_length=50)  # todo: add comare psswds validation l8r
+    username: Optional[str]
+
+    @validator('username')
+    def username_max_len(cls, v: str):
+        if len(v) > 50: raise ValueError('Max 50 chars')
+        return v.strip()
