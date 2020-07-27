@@ -67,10 +67,10 @@ class RegisterUserEventRequestModel(BaseModel):
     @validator('username')
     def username_max_len(cls, v: str):
         if v and len(v) > 50: raise ValueError('Max 50 chars')
-        return v.strip()
+        return v
 
     @validator('password_repeat')
     def passwords_match(cls, v, values, **kwargs):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
-            return v
+        return v
