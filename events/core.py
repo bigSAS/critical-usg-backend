@@ -78,11 +78,8 @@ class EventHandler(ABC):
         # if not self.request_model_class: raise NotImplementedError('request_model_class not set')
         else:
             try:
-                print('REQUEST.json', request.json)
                 rmodel = self.request_model_class(**request.json)
-                print('MODEL', rmodel)
             except VError as e:
-                print('Parsing json error', e)
                 field_name, message = extract_error(e)
                 raise ValidationError(
                     field_name=field_name,

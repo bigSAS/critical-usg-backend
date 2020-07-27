@@ -51,7 +51,7 @@ class UserEntityModel(OrmModel):
 class TokenAuthEventRequestModel(BaseModel):
     uid: UUID4 = uuid.uuid4()
     email: EmailStr
-    passwrod: constr(max_length=50)
+    password: constr(max_length=50)
 
 
 class TokenAuthEventResponseModel(BaseModel):
