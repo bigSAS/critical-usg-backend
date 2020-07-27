@@ -1,41 +1,44 @@
-from typing import List, Optional
+from typing import Optional
 
 from flask import Request
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
-from pydantic.networks import EmailStr
 
-from db.schema import User, GroupUser, OrmModel, UserGroup
+from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseModel, UserEntityModel, \
+    UserGroupEntityModel
+from db.schema import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist
+from events.validators import MaxLen, EmailCorrect, TheSame, MinLen, ObjectExist
 from repository.base import ObjectNotFoundError
-from repository.repos import UserRepository, UserGroupRepository, GroupUserRepository
+from repository.repos import UserRepository, UserGroupRepository
 from utils.http import JsonResponse, AuthError, ok_response
 from utils.managers import UserManager
 
 
-class TokenAuthEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            MaxLen(field_name='email', max_len=200, value=request.json.get('email', None)),
-            EmailCorrect(field_name='email', value=request.json.get('email', None)),
-            IsRequired(field_name='password', value=request.json.get('password', None))
-        ])
-
-
 class TokenAuthEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, TokenAuthEventValidator(request))
+    request_model_class = TokenAuthEventRequestModel
 
     def get_response(self) -> JsonResponse:
         user = self.__auth_user()
         if not user: raise AuthError('Invalid credentials')
-        identity = UserSerializer(user).data
-        return ok_response({'token': create_access_token(identity=identity)})
+
+        managed_user = UserManager(user=user)
+        user_model = UserEntityModel.construct(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_superuser=user.is_superuser,
+            is_deleted=user.is_deleted,
+            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
+        )
+        response_model = TokenAuthEventResponseModel.construct(
+            token=create_access_token(identity=user_model.dict())
+        )
+        return ok_response(response_model.dict())
 
     # noinspection PyBroadException
-    def __auth_user(self):
+    def __auth_user(self) -> Optional[User]:
         try:
             user = UserRepository().get_by(
                 email=self.request.json['email'].strip(),
@@ -112,18 +115,18 @@ class DeleteUserEventHandler(EventHandler):
         return ok_response(serializer.data)
 
 
-class UserGroupModel(OrmModel):
-    id: int
-    name: str
-
-
-class GetUserModel(OrmModel):
-    id: int
-    username: str
-    email: EmailStr
-    is_superuser: bool
-    is_deleted: bool
-    groups: List[UserGroupModel]
+# class UserGroupModel(OrmModel):
+#     id: int
+#     name: str
+#
+#
+# class GetUserModel(OrmModel):
+#     id: int
+#     username: str
+#     email: EmailStr
+#     is_superuser: bool
+#     is_deleted: bool
+#     groups: List[UserGroupModel]
 
 
 class GetUserDataRequestModel(BaseModel):
@@ -137,16 +140,13 @@ class GetUserDataEventHandler(EventHandler):
     def get_response(self) -> JsonResponse:
         r = GetUserDataRequestModel(**self.request.json)
         user_id = r.user_id if r.user_id else get_jwt_identity()['id']
-        user = UserRepository().get(user_id)
-        user_groups = GroupUserRepository().filter(GroupUser.user_id == user.id)
-        group_ids = list(set([ug.group_id for ug in user_groups]))
-        groups = UserGroupRepository().filter(UserGroup.id.in_(group_ids))
-        user_model = GetUserModel.construct(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            is_superuser=user.is_superuser,
-            is_deleted=user.is_deleted,
-            groups=[UserGroupModel.construct(id=g.id, name=g.name) for g in groups]
+        managed_user = UserManager(user_id=user_id)
+        user_model = UserEntityModel.construct(
+            id=managed_user.user.id,
+            username=managed_user.user.username,
+            email=managed_user.user.email,
+            is_superuser=managed_user.user.is_superuser,
+            is_deleted=managed_user.user.is_deleted,
+            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
         )
         return ok_response(user_model.dict())
