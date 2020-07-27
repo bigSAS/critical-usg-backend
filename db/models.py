@@ -62,11 +62,11 @@ class RegisterUserEventRequestModel(BaseModel):
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
-    username: Optional[str]
+    username: Optional[str]  # todo contr regex
 
     @validator('username')
     def username_max_len(cls, v: str):
-        if len(v) > 50: raise ValueError('Max 50 chars')
+        if v and len(v) > 50: raise ValueError('Max 50 chars')
         return v.strip()
 
     @validator('password_repeat')
