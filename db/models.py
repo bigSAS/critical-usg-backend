@@ -60,11 +60,17 @@ class TokenAuthEventResponseModel(BaseModel):
 
 class RegisterUserEventRequestModel(BaseModel):
     email: EmailStr
-    passwrod: constr(min_length=8, max_length=50)
-    passwrod_repeat: constr(min_length=8, max_length=50)  # todo: add comare psswds validation l8r
+    password: constr(min_length=8, max_length=50)
+    password_repeat: constr(min_length=8, max_length=50)
     username: Optional[str]
 
     @validator('username')
     def username_max_len(cls, v: str):
         if len(v) > 50: raise ValueError('Max 50 chars')
         return v.strip()
+
+    @validator('password_repeat')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('passwords do not match')
+        return v
