@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
-from db.model import db, bcrypt
+from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
 

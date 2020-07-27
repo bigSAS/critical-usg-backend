@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
 from pydantic.networks import EmailStr
 
-from db.model import User, GroupUser, OrmModel, UserGroup
+from db.schema import User, GroupUser, OrmModel, UserGroup
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, IsRequired, EmailCorrect, TheSame, MinLen, ObjectExist

@@ -1,4 +1,4 @@
-from db.model import User, UserGroup, GroupUser, InstructionDocument
+from db.schema import User, UserGroup, GroupUser, InstructionDocument
 from repository.repos import GroupUserRepository, UserGroupRepository, UserRepository
 from utils.managers import InstructionDocumentManager
 

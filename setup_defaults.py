@@ -1,6 +1,6 @@
 from repository.repos import UserGroupRepository
 from wsgi import app
-from db.model import db, UserGroup
+from db.schema import db, UserGroup
 
 DEFAULT_USER_GROUPS = ('USER', 'ADMIN')
 

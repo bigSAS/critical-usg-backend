@@ -3,7 +3,7 @@ from typing import List
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from db.model import User
+from db.schema import User
 from utils.managers import UserManager
 from repository.repos import UserRepository, UserGroupRepository
 from utils.http import ForbiddenError

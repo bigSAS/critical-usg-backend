@@ -1,7 +1,7 @@
 import pytest
 from webtest import TestApp as TApp
 
-from db.model import User
+from db.schema import User
 from repository.repos import UserRepository
 from utils.http import ResponseStatus
 

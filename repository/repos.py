@@ -1,4 +1,4 @@
-from db.model import InstructionDocument, User, GroupUser, UserGroup, InstructionDocumentPage
+from db.schema import InstructionDocument, User, GroupUser, UserGroup, InstructionDocumentPage
 from repository.base import Repository
 
 

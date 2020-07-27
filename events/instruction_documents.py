@@ -2,7 +2,7 @@ from flask import Request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
-from db.model import User, InstructionDocument, InstructionDocumentPage
+from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
 from events.core import EventHandler, EventValidator

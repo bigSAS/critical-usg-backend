@@ -1,7 +1,7 @@
 import pytest
 from webtest import TestApp as TApp
 
-from db.model import InstructionDocument, InstructionDocumentPage
+from db.schema import InstructionDocument, InstructionDocumentPage
 from repository.repos import InstructionDocumentRepository, UserRepository
 from utils.http import ResponseStatus
 from utils.managers import InstructionDocumentManager

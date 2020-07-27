@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime
 
-from db.model import User, UserGroup, InstructionDocument, InstructionDocumentPage
+from db.schema import User, UserGroup, InstructionDocument, InstructionDocumentPage
 from repository.base import ObjectNotFoundError
 from repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
     InstructionDocumentRepository

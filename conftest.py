@@ -6,7 +6,7 @@ from webtest import TestApp as TApp
 from repository.base import ObjectNotFoundError
 from repository.repos import UserRepository, GroupUserRepository, UserGroupRepository
 from wsgi import app as application
-from db.model import db as database, User, GroupUser, UserGroup
+from db.schema import db as database, User, GroupUser, UserGroup
 
 USER = {
     'email': 'jimmy@choo.io',
