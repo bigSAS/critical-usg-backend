@@ -1,12 +1,10 @@
-import uuid
-from enum import Enum
-from typing import List, Union, Optional
+from typing import List, Union
 
-from pydantic import BaseModel, UUID4
-
+from pydantic import BaseModel
 from flask import Response
 
 from config import Config
+from db.models import ApiErrorModel, ResponseStatus, ResponseModel
 
 
 class ApiError(Exception):
@@ -54,27 +52,6 @@ class AuthError(ApiError):
 class ForbiddenError(ApiError):
     def __init__(self, description: str = 'Forbidden'):
         super().__init__('PERMISSION', description)
-
-
-class ResponseStatus(str, Enum):
-    OK = 'OK'
-    NOT_FOUND = 'NOT_FOUND'
-    AUTH_ERROR = "AUTH_ERROR"
-    FORBIDDEN = "FORBIDDEN"
-    VALIDATION_ERROR = "VALIDATION_ERROR"
-    SERVER_ERROR = 'SERVER_ERROR'
-
-
-class ApiErrorModel(BaseModel):
-    name: str
-    message: str
-
-
-class ResponseModel(BaseModel):
-    status: ResponseStatus
-    data: Optional[dict]
-    errors: List[ApiErrorModel] = []
-    uid: UUID4 = uuid.uuid4()
 
 
 class JsonResponse(Response):
