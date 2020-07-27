@@ -139,6 +139,6 @@ def error_response(error: Exception = None):
         status=http_status,
         response=ResponseModel(
             status=response_status,
-            errors=[error.to_api_error_model()]
+            errors=[api_error.to_api_error_model()]
         ).json()
     )

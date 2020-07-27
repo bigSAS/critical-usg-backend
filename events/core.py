@@ -1,4 +1,3 @@
-import json
 from typing import Any, List
 from flask import Request
 from utils.http import JsonResponse, ValidationError
