@@ -73,4 +73,4 @@ class RegisterUserEventRequestModel(BaseModel):
     def passwords_match(cls, v, values, **kwargs):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
-        return v
+            return v
