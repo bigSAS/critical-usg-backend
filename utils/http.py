@@ -69,7 +69,7 @@ ERROR_STATUS_MAP = {
 }
 
 
-def ok_response(data: Union[dict, BaseModel] = None, uid=uuid.uuid4()):
+def ok_response(data: Union[dict, BaseModel] = None, uid=None):
     if data and not isinstance(data, dict) and not isinstance(data, BaseModel):
         raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
 
@@ -80,7 +80,7 @@ def ok_response(data: Union[dict, BaseModel] = None, uid=uuid.uuid4()):
     return JsonResponse(
         status=200,
         response=ResponseModel(
-            uid=uid,
+            uid=uid if uid else uuid.uuid4(),
             status=ResponseStatus.OK,
             data=data_obj
         ).json()
