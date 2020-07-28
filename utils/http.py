@@ -87,7 +87,7 @@ def ok_response(data: Union[dict, BaseModel] = None, uid=None):
     )
 
 
-def error_response(error: Exception = None):
+def error_response(error: Exception = None, uid=None):
     """ error handler for App """
     print("ERROR:")
     print(repr(error))
@@ -100,6 +100,7 @@ def error_response(error: Exception = None):
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
+            uid=uid if uid else uuid.uuid4(),
             status=response_status,
             errors=[api_error.to_api_error_model()]
         ).json()
