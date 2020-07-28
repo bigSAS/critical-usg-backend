@@ -1,3 +1,4 @@
+import uuid
 from typing import Any, List
 from flask import Request
 from utils.http import JsonResponse, ValidationError
@@ -63,6 +64,12 @@ class EventHandler(ABC):
     @property
     def request_model(self):
         return self.__request_model
+
+    @property
+    def request_uid(self):
+        uid = getattr(self.request_model, 'uid', None)
+        if not uid: print(f'[WARNING] {self.request_model_class} does not have uid')
+        return uid
 
     def validate(self):
         if self.__event_validator:

@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Union
 
 from pydantic import BaseModel
@@ -68,7 +69,7 @@ ERROR_STATUS_MAP = {
 }
 
 
-def ok_response(data: Union[dict, BaseModel] = None):
+def ok_response(data: Union[dict, BaseModel] = None, uid=uuid.uuid4()):
     if data and not isinstance(data, dict) and not isinstance(data, BaseModel):
         raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
 
@@ -79,6 +80,7 @@ def ok_response(data: Union[dict, BaseModel] = None):
     return JsonResponse(
         status=200,
         response=ResponseModel(
+            uid=uid,
             status=ResponseStatus.OK,
             data=data_obj
         ).json()

@@ -4,8 +4,8 @@ from flask import Request
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
 
-from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseModel, UserEntityModel, \
-    UserGroupEntityModel, RegisterUserEventRequestModel
+from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, UserEntityModel, \
+    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel
 from db.schema import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
@@ -32,10 +32,10 @@ class TokenAuthEventHandler(EventHandler):
             is_deleted=user.is_deleted,
             groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
         )
-        response_model = TokenAuthEventResponseModel.construct(
+        rdata_model = TokenAuthEventResponseDataModel.construct(
             token=create_access_token(identity=user_model.dict())
         )
-        return ok_response(response_model)
+        return ok_response(data=rdata_model, uid=self.request_uid)
 
     # noinspection PyBroadException
     def __auth_user(self) -> Optional[User]:
@@ -62,8 +62,9 @@ class RegisterUserEventHandler(EventHandler):
         )
         UserRepository().save(user)
         self.__add_user_to_default_groups(user)
+
         managed_user = UserManager(user=user)
-        user_model = UserEntityModel.construct(
+        rdata_model = RegisterUserEventResponseDataModel.construct(
             id=user.id,
             username=user.username,
             email=user.email,
@@ -71,7 +72,7 @@ class RegisterUserEventHandler(EventHandler):
             is_deleted=user.is_deleted,
             groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
         )
-        return ok_response(user_model)
+        return ok_response(data=rdata_model, uid=self.request_uid)
 
     @staticmethod
     def __add_user_to_default_groups(user: User):

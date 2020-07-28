@@ -26,10 +26,10 @@ class ApiErrorModel(BaseModel):
 
 
 class ResponseModel(BaseModel):
+    uid: UUID4
     status: ResponseStatus
     data: Optional[dict]
     errors: List[ApiErrorModel] = []
-    uid: UUID4 = uuid.uuid4()
 
 
 # @entities
@@ -54,11 +54,12 @@ class TokenAuthEventRequestModel(BaseModel):
     password: constr(min_length=1, max_length=50, strip_whitespace=True)
 
 
-class TokenAuthEventResponseModel(BaseModel):
+class TokenAuthEventResponseDataModel(BaseModel):
     token: str
 
 
 class RegisterUserEventRequestModel(BaseModel):
+    uid: UUID4 = uuid.uuid4()
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
@@ -74,3 +75,6 @@ class RegisterUserEventRequestModel(BaseModel):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
         return v
+
+
+class RegisterUserEventResponseDataModel(UserEntityModel): pass
