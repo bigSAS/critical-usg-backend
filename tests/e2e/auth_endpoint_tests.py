@@ -27,7 +27,7 @@ def test_get_jwt(client: TApp, user, admin, superuser):
     users = [user, admin, superuser]
     for usr in users:
         uid = uuid.uuid4()
-        response = get_token_response(client, uid, usr.email)
+        response = get_token_response(client, uid=uid, email=usr.email)
         print('response status code:', response.status_code)
         print('response json data:\n', response.json)
         assert response.json['uid'] == str(uid)
@@ -52,7 +52,7 @@ def test_deleted_user_cannot_authenticate(app, dbsession, client: TApp):
         UserRepository().save(created_user)
 
     uid = uuid.uuid4()
-    response = get_token_response(client, uid, data['email'], data['password'], status=401)
+    response = get_token_response(client, uid=uid, email=data['email'], status=401)
     print('response status code:', response.status_code)
     print('response json data:\n', response.json)
     assert response.json['uid'] == str(uid)

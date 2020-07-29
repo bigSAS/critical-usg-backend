@@ -1,6 +1,7 @@
-import uuid
 from typing import Any, List
-from flask import Request
+from flask import Request, g
+
+from db.models import BaseEventRequest
 from utils.http import JsonResponse, ValidationError
 from abc import ABC
 from pydantic import ValidationError as VError, BaseModel
@@ -53,6 +54,7 @@ class EventHandler(ABC):
     def __init__(self, request: Request, event_validator: EventValidator = None, validate: bool = True):
         self.__request = request
         self.__request_model = self.__get_request_model(request)
+        g.request_uid = self.__request_model.uid
 
         self.__event_validator = event_validator  # todo: rm when refactor done
         if validate: self.validate()  # todo: rm when refactor done
@@ -65,12 +67,6 @@ class EventHandler(ABC):
     def request_model(self):
         return self.__request_model
 
-    @property
-    def request_uid(self):
-        uid = getattr(self.request_model, 'uid', None)
-        if not uid: print(f'[WARNING] {self.request_model_class} does not have uid')
-        return uid
-
     def validate(self):
         if self.__event_validator:
             self.__event_validator.validate()
@@ -78,7 +74,7 @@ class EventHandler(ABC):
     def get_response(self) -> JsonResponse:
         raise NotImplementedError('Implement in child class')
 
-    def __get_request_model(self, request) -> BaseModel:
+    def __get_request_model(self, request) -> BaseEventRequest:
         if not self.request_model_class:
             print('request_model_class not set')
         # todo: enable when refactor done

@@ -2,7 +2,7 @@ import uuid
 from typing import List, Union
 
 from pydantic import BaseModel
-from flask import Response
+from flask import Response, g
 
 from config import Config
 from db.models import ApiErrorModel, ResponseStatus, ResponseModel
@@ -69,7 +69,7 @@ ERROR_STATUS_MAP = {
 }
 
 
-def ok_response(data: Union[dict, BaseModel] = None, uid=None):
+def ok_response(data: Union[dict, BaseModel] = None):
     if data and not isinstance(data, dict) and not isinstance(data, BaseModel):
         raise ValueError('Data must be an istance of dict or pydantic.BaseModel')
 
@@ -80,14 +80,14 @@ def ok_response(data: Union[dict, BaseModel] = None, uid=None):
     return JsonResponse(
         status=200,
         response=ResponseModel(
-            uid=uid if uid else uuid.uuid4(),
+            uid=g.get('uid', uuid.uuid4()),
             status=ResponseStatus.OK,
             data=data_obj
         ).json()
     )
 
 
-def error_response(error: Exception = None, uid=None):
+def error_response(error: Exception = None):
     """ error handler for App """
     print("ERROR:")
     print(repr(error))
@@ -100,7 +100,7 @@ def error_response(error: Exception = None, uid=None):
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
-            uid=uid if uid else uuid.uuid4(),
+            uid=g.get('uid', uuid.uuid4()),
             status=response_status,
             errors=[api_error.to_api_error_model()]
         ).json()

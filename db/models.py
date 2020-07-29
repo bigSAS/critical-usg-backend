@@ -48,8 +48,11 @@ class UserEntityModel(OrmModel):
 
 
 # @events
-class TokenAuthEventRequestModel(BaseModel):
+class BaseEventRequest(BaseModel):
     uid: UUID4 = uuid.uuid4()
+
+
+class TokenAuthEventRequestModel(BaseEventRequest):
     email: EmailStr
     password: constr(min_length=1, max_length=50, strip_whitespace=True)
 
@@ -58,8 +61,7 @@ class TokenAuthEventResponseDataModel(BaseModel):
     token: str
 
 
-class RegisterUserEventRequestModel(BaseModel):
-    uid: UUID4 = uuid.uuid4()
+class RegisterUserEventRequestModel(BaseEventRequest):
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check

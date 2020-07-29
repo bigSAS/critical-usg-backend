@@ -35,7 +35,7 @@ class TokenAuthEventHandler(EventHandler):
         rdata_model = TokenAuthEventResponseDataModel.construct(
             token=create_access_token(identity=user_model.dict())
         )
-        return ok_response(data=rdata_model, uid=self.request_uid)
+        return ok_response(data=rdata_model)
 
     # noinspection PyBroadException
     def __auth_user(self) -> Optional[User]:
@@ -72,7 +72,7 @@ class RegisterUserEventHandler(EventHandler):
             is_deleted=user.is_deleted,
             groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
         )
-        return ok_response(data=rdata_model, uid=self.request_uid)
+        return ok_response(data=rdata_model)
 
     @staticmethod
     def __add_user_to_default_groups(user: User):
