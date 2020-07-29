@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
 
 from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, UserEntityModel, \
-    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel
+    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel, DeleteUserEventRequestModel
 from db.schema import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
@@ -87,22 +87,23 @@ class RegisterUserEventHandler(EventHandler):
                 raise ValueError(f'{group_name} user group not exists, check db defaults.\n{repr(e)}')
 
 
-class DeleteUserEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            ObjectExist(UserRepository, request.json.get('user_id', None), 'user_id')
-        ])
-
-
 class DeleteUserEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, DeleteUserEventValidator(request))
+    request_model_class = DeleteUserEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        managed_user = UserManager(user_id=self.request.json['user_id'])
+        rmodel: DeleteUserEventRequestModel = self.request_model
+        managed_user = UserManager(user_id=rmodel.user_id)
         managed_user.delete()
-        serializer = UserSerializer(managed_user.user)
-        return ok_response(serializer.data)
+        user = managed_user.user
+        rdata_model = RegisterUserEventResponseDataModel.construct(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_superuser=user.is_superuser,
+            is_deleted=user.is_deleted,
+            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
+        )
+        return ok_response(data=rdata_model)
 
 
 class GetUserDataRequestModel(BaseModel):

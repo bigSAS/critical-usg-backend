@@ -100,7 +100,7 @@ def error_response(error: Exception = None):
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
-            uid=g.get('uid', uuid.uuid4()),
+            uid=g.pop('uid', None),
             status=response_status,
             errors=[api_error.to_api_error_model()]
         ).json()

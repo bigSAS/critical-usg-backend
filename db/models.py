@@ -4,6 +4,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
+from repository.repos import UserRepository
+
 
 class OrmModel(BaseModel):
     class Config:
@@ -26,7 +28,7 @@ class ApiErrorModel(BaseModel):
 
 
 class ResponseModel(BaseModel):
-    uid: UUID4
+    uid: Optional[UUID4]  # todo: mandatory when refactor done
     status: ResponseStatus
     data: Optional[dict]
     errors: List[ApiErrorModel] = []
@@ -80,3 +82,15 @@ class RegisterUserEventRequestModel(BaseEventRequest):
 
 
 class RegisterUserEventResponseDataModel(UserEntityModel): pass
+
+
+class DeleteUserEventRequestModel(BaseEventRequest):
+    user_id: int
+
+    @validator('user_id')
+    def user_must_exist(cls, v: int):
+        usr = UserRepository().get(entity_id=v, ignore_not_found=True)
+        if not usr: raise ValueError(f'User[{v}] not exists')
+
+
+class DeleteUserEventResponseDataModel(UserEntityModel): pass
