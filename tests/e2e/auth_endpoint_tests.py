@@ -112,6 +112,7 @@ def test_register_user(client: TApp, email, username):
     print('response json data:\n', response.json)
     assert response.json['uid'] == data['uid']
     assert response.json['status'] == 'OK'
+    assert response.json['data']['id'] is not None
     assert response.json['data']['email'] == data['email']
     assert not response.json['data']['is_deleted']
     expected_groups = ('USER',)
