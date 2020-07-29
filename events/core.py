@@ -52,12 +52,9 @@ class EventHandler(ABC):
     request_model_class = None
     """ Base event handler class """
     def __init__(self, request: Request, event_validator: EventValidator = None, validate: bool = True):
+        g.request_uid = request.json.get('uid', None)
         self.__request = request
         self.__request_model = self.__get_request_model(request)
-        try:
-            g.request_uid = self.__request_model.uid
-        except:  # todo: rm after refactor
-            g.request_uid = None
 
         self.__event_validator = event_validator  # todo: rm when refactor done
         if validate: self.validate()  # todo: rm when refactor done
