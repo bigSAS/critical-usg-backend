@@ -77,10 +77,11 @@ def ok_response(data: Union[dict, BaseModel] = None):
     if isinstance(data, BaseModel):
         data_obj = data.dict()
 
+    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=200,
         response=ResponseModel(
-            uid=g.get('uid', uuid.uuid4()),
+            uid=uid,
             status=ResponseStatus.OK,
             data=data_obj
         ).json()
@@ -97,10 +98,12 @@ def error_response(error: Exception = None):
         api_error = ApiError(name='SERVER', data=repr(error))
     else:
         api_error = error
+
+    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
-            uid=g.pop('uid', None),
+            uid=uid,
             status=response_status,
             errors=[api_error.to_api_error_model()]
         ).json()
