@@ -69,13 +69,15 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
     username: Optional[str]  # todo contr regex
 
+    @classmethod
     @validator('username')
     def username_max_len(cls, v: str):
         if v and len(v) > 50: raise ValueError('Max 50 chars')
         return v
 
+    @classmethod
     @validator('password_repeat')
-    def passwords_match(cls, v, values, **kwargs):
+    def passwords_match(cls, v, values):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
         return v
@@ -87,6 +89,7 @@ class RegisterUserEventResponseDataModel(UserEntityModel): pass
 class DeleteUserEventRequestModel(BaseEventRequestModel):
     user_id: int
 
+    @classmethod
     @validator('user_id')
     def user_must_exist(cls, v: int):
         usr = UserRepository().get(entity_id=v, ignore_not_found=True)
