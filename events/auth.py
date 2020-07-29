@@ -5,7 +5,9 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 from pydantic.main import BaseModel
 
 from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, UserEntityModel, \
-    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel, DeleteUserEventRequestModel
+    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel, \
+    DeleteUserEventRequestModel, GetUserDataEventRequestModel, DeleteUserEventResponseDataModel, \
+    GetUserDataEventResponseDataModel
 from db.schema import User, GroupUser
 from db.serializers import UserSerializer
 from events.core import EventHandler, EventValidator
@@ -95,7 +97,7 @@ class DeleteUserEventHandler(EventHandler):
         managed_user = UserManager(user_id=rmodel.user_id)
         managed_user.delete()
         user = managed_user.user
-        rdata_model = RegisterUserEventResponseDataModel.construct(
+        rdata_model = DeleteUserEventResponseDataModel.construct(
             id=user.id,
             username=user.username,
             email=user.email,
@@ -106,19 +108,14 @@ class DeleteUserEventHandler(EventHandler):
         return ok_response(data=rdata_model)
 
 
-class GetUserDataRequestModel(BaseModel):
-    user_id: Optional[int]
-    # user_id: int  # -> debug
-
-
 class GetUserDataEventHandler(EventHandler):
-    request_model_class = GetUserDataRequestModel
+    request_model_class = GetUserDataEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        r = GetUserDataRequestModel(**self.request.json)
-        user_id = r.user_id if r.user_id else get_jwt_identity()['id']
+        rmodel: GetUserDataEventRequestModel = self.request_model
+        user_id = rmodel.user_id if rmodel.user_id else get_jwt_identity()['id']
         managed_user = UserManager(user_id=user_id)
-        user_model = UserEntityModel.construct(
+        rdata_model = GetUserDataEventResponseDataModel.construct(
             id=managed_user.user.id,
             username=managed_user.user.username,
             email=managed_user.user.email,
@@ -126,4 +123,4 @@ class GetUserDataEventHandler(EventHandler):
             is_deleted=managed_user.user.is_deleted,
             groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
         )
-        return ok_response(user_model.dict())
+        return ok_response(data=rdata_model)

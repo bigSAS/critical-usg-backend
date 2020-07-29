@@ -1,7 +1,7 @@
 from typing import Any, List
 from flask import Request, g
 
-from db.models import BaseEventRequest
+from db.models import BaseEventRequestModel
 from utils.http import JsonResponse, ValidationError
 from abc import ABC
 from pydantic import ValidationError as VError, BaseModel
@@ -52,7 +52,8 @@ class EventHandler(ABC):
     request_model_class = None
     """ Base event handler class """
     def __init__(self, request: Request, event_validator: EventValidator = None, validate: bool = True):
-        g.request_uid = request.json.get('uid', None)
+        setattr(g, 'uid', request.json.get('uid', None))
+        print('@G -> request uid:', g.get('uid', None))
         self.__request = request
         self.__request_model = self.__get_request_model(request)
 
@@ -74,7 +75,7 @@ class EventHandler(ABC):
     def get_response(self) -> JsonResponse:
         raise NotImplementedError('Implement in child class')
 
-    def __get_request_model(self, request) -> BaseEventRequest:
+    def __get_request_model(self, request) -> BaseEventRequestModel:
         if not self.request_model_class:
             print('request_model_class not set')
         # todo: enable when refactor done

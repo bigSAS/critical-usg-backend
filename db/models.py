@@ -50,11 +50,11 @@ class UserEntityModel(OrmModel):
 
 
 # @events
-class BaseEventRequest(BaseModel):
+class BaseEventRequestModel(BaseModel):
     uid: UUID4 = uuid.uuid4()
 
 
-class TokenAuthEventRequestModel(BaseEventRequest):
+class TokenAuthEventRequestModel(BaseEventRequestModel):
     email: EmailStr
     password: constr(min_length=1, max_length=50, strip_whitespace=True)
 
@@ -63,7 +63,7 @@ class TokenAuthEventResponseDataModel(BaseModel):
     token: str
 
 
-class RegisterUserEventRequestModel(BaseEventRequest):
+class RegisterUserEventRequestModel(BaseEventRequestModel):
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
@@ -84,7 +84,7 @@ class RegisterUserEventRequestModel(BaseEventRequest):
 class RegisterUserEventResponseDataModel(UserEntityModel): pass
 
 
-class DeleteUserEventRequestModel(BaseEventRequest):
+class DeleteUserEventRequestModel(BaseEventRequestModel):
     user_id: int
 
     @validator('user_id')
@@ -94,3 +94,10 @@ class DeleteUserEventRequestModel(BaseEventRequest):
 
 
 class DeleteUserEventResponseDataModel(UserEntityModel): pass
+
+
+class GetUserDataEventRequestModel(BaseEventRequestModel):
+    user_id: Optional[int]
+
+
+class GetUserDataEventResponseDataModel(UserEntityModel): pass
