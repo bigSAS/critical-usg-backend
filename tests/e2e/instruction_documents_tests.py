@@ -15,7 +15,7 @@ from utils.managers import InstructionDocumentManager
 def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
     """ corret doc creation by admin user """
     data = {
-        'uid': uuid.uuid4(),
+        'uid': str(uuid.uuid4()),
         'name': 'some cool new doc',
         'description': description
     }
@@ -24,7 +24,7 @@ def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
     print('response status code:', response.status_code)
     print('response json data:\n', response.json)
     assert response.json['status'] == ResponseStatus.OK.value
-    assert response.json['uid'] == str(data['uid'])
+    assert response.json['uid'] == data['uid']
     assert response.json['data']['created'] is not None
     assert response.json['data']['created_by_user_id'] == admin.id
     assert response.json['data']['name'] == data['name']
