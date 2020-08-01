@@ -4,7 +4,7 @@ import pytest
 from webtest import TestApp as TApp
 
 from db.schema import InstructionDocument, InstructionDocumentPage
-from repository.repos import InstructionDocumentRepository, UserRepository
+from repository.repos import InstructionDocumentRepository
 from utils.http import ResponseStatus
 from utils.managers import InstructionDocumentManager
 
@@ -307,7 +307,6 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
 @pytest.mark.docs
 def test_gets_doc(app, client: TApp, admin, user, get_headers):
     """ corret doc getting """
-    doc_id = None
     page_json = {"foo": "bar"}
     with app.app_context():
         repo = InstructionDocumentRepository()

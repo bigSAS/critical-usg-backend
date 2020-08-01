@@ -56,8 +56,8 @@ class InstructionDocumentEntityModel(OrmModel):
     description: Optional[constr(min_length=1, max_length=500)]
     created: datetime
     created_by_user_id: int
-    updated: Optional[datetime]
-    updated_by_user_id: Optional[int]
+    updated: Optional[datetime] = None
+    updated_by_user_id: Optional[int] = None
 
 
 # @events
