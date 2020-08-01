@@ -165,3 +165,18 @@ class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
 
 
 class AddInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass
+
+
+class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
+    page_id: int
+    json_data: Optional[dict] = None
+
+    @classmethod
+    @validator('document_id')
+    def doc_must_exist(cls, v: int):  # todo: DRY
+        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
+        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        return v
+
+
+class UpdateInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass

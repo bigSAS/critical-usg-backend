@@ -7,7 +7,8 @@ from sqlalchemy import or_
 from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseDataModel, \
     DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
     UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
-    AddInstructionDocumentPageEventResponseDataModel
+    AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
+    UpdateInstructionDocumentPageEventResponseDataModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -69,52 +70,24 @@ class AddInstructionDocumentPageEventHandler(EventHandler):
         return ok_response(AddInstructionDocumentPageEventResponseDataModel.from_orm(page))
 
 
-class UpdateInstructionDocumentPageEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
-            ObjectExist(
-                field_name='page_id',
-                repository_class=InstructionDocumentPageRepository,
-                object_id=request.json.get('page_id', None)
-            ),
-        ])
-
-
 class UpdateInstructionDocumentPageEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
+    request_model_class = UpdateInstructionDocumentPageEventRequestModel
 
     def get_response(self) -> JsonResponse:
         user_id = get_jwt_identity()['id']
-        page_id = self.request.json['page_id']
-        repo = InstructionDocumentPageRepository()
+        rmodel: UpdateInstructionDocumentPageEventRequestModel = self.request_model
 
-        page: InstructionDocumentPage = repo.get(page_id)
-        page.json = self.request.json.get('json', None)
+        repo = InstructionDocumentPageRepository()
+        page: InstructionDocumentPage = repo.get(rmodel.page_id)
+        page.json_data = rmodel.json_data
         repo.save(page)
 
         managed_doc = InstructionDocumentManager(document_id=page.document_id)
         managed_doc.update(user_id)
-        serializer = InstructionDocumentPageSerializer(page)
-        return ok_response(serializer.data)
-
-
-class DeleteInstructionDocumentPageEventValidator(EventValidator):  # todo: duplicate ?
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
-            ObjectExist(
-                field_name='page_id',
-                repository_class=InstructionDocumentPageRepository,
-                object_id=request.json.get('page_id', None)
-            ),
-        ])
+        return ok_response(UpdateInstructionDocumentPageEventResponseDataModel.from_orm(page))
 
 
 class DeleteInstructionDocumentPageEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
 
     def get_response(self) -> JsonResponse:
         user_id = get_jwt_identity()['id']
