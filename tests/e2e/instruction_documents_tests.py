@@ -1,4 +1,5 @@
 import uuid
+from json import dumps
 
 import pytest
 from webtest import TestApp as TApp
@@ -119,10 +120,11 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
 
     assert created_doc_id is not None
     doc_pages_data = {
+        "uid": str(uuid.uuid4()),
         "document_id": created_doc_id,
-        "json": {
+        "json_data": dumps({
             "bar": "baz"
-        }
+        })
     }
 
     response = client.post_json(
@@ -131,9 +133,10 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
         headers=get_headers('admin')
     )
     assert response.json['status'] == 'OK'
+    assert response.json['uid'] == doc_pages_data['uid']
     assert response.json['data']['id'] is not None
     assert response.json['data']['document_id'] == created_doc_id
-    assert response.json['data']['json'] == doc_pages_data['json']
+    assert response.json['data']['json_data'] == doc_pages_data['json_data']
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
