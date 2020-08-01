@@ -62,7 +62,7 @@ class AddInstructionDocumentPageEventHandler(EventHandler):
         user_id = get_jwt_identity()['id']
         page = InstructionDocumentPage(
             document_id=rmodel.document_id,
-            json=loads(rmodel.json) if rmodel.json else None,
+            json=loads(rmodel.json_data) if rmodel.json_data else None,
         )
         managed_doc = InstructionDocumentManager(document_id=rmodel.document_id)
         page = managed_doc.add_page(page, user_id)
