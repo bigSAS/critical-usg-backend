@@ -90,7 +90,7 @@ class InstructionDocumentPage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id', ondelete='CASCADE'), nullable=False)
     page_num = db.Column(db.Integer, default=0)
-    json = db.Column(JSON, nullable=True)
+    json_data = db.Column(JSON, nullable=True)
 
     def __init__(self, document_id: int, json: dict, page_num: int = None):
         self.document_id = document_id
