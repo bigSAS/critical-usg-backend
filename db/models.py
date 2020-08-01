@@ -206,7 +206,7 @@ class ListInstructionDocumentEventResponseDataModel(BaseModel):
     results: List[InstructionDocumentEntityModel]
 
 
-class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventResponseDataModel):
+class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventRequestModel):
     search: constr(min_length=3, max_length=100)
 
 
