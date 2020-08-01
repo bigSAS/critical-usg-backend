@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
-from repository.repos import UserRepository
+from repository.repos import UserRepository, InstructionDocumentRepository
 
 
 class OrmModel(BaseModel):
@@ -118,3 +118,14 @@ class AddInstructionDocumentEventRequestModel(BaseEventRequestModel):
 
 
 class AddInstructionDocumentEventResponseModel(InstructionDocumentEntityModel): pass
+
+
+class DeleteInstructionDocumentEventRequestModel(BaseEventRequestModel):
+    document_id: int
+
+    @classmethod
+    @validator('document_id')
+    def doc_must_exist(cls, v: int):
+        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
+        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        return v

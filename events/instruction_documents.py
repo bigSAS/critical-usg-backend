@@ -2,7 +2,8 @@ from flask import Request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
-from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseModel
+from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseModel, \
+    DeleteInstructionDocumentEventRequestModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -13,20 +14,8 @@ from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
 
 
-# class AddInstructionDocumentEventValidator(EventValidator):
-#     def __init__(self, request: Request):
-#         super().__init__([
-#             MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
-#             MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
-#             MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
-#             MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
-#         ])
-
-
 class AddInstructionDocumentEventHandler(EventHandler):
     request_model_class = AddInstructionDocumentEventRequestModel
-    # def __init__(self, request: Request):
-    #     super().__init__(request, AddInstructionDocumentEventValidator(request))
 
     def get_response(self) -> JsonResponse:
         user: User = UserRepository().get(get_jwt_identity()['id'])
@@ -36,27 +25,11 @@ class AddInstructionDocumentEventHandler(EventHandler):
             description=self.request.json.get('description', None)
         )
         InstructionDocumentRepository().save(doc)
-
-        # serializer = InstructionDocumentSerializer(doc)
-        rmodel = AddInstructionDocumentEventResponseModel.from_orm(doc)
-        return ok_response(rmodel)
-
-
-class DeleteInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id',
-                repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            )
-        ])
+        return ok_response(AddInstructionDocumentEventResponseModel.from_orm(doc))
 
 
 class DeleteInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, DeleteInstructionDocumentEventValidator(request))
+    request_model_class = DeleteInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         InstructionDocumentRepository().delete(self.request.json['document_id'])
