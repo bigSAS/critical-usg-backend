@@ -8,7 +8,8 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
     UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
     AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
-    UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel
+    UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel, \
+    ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -101,12 +102,20 @@ class DeleteInstructionDocumentPageEventHandler(EventHandler):
 
 
 class ListInstructionDocumentEventHandler(EventHandler):
+    request_model_class = ListInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
             .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'])
-        serializer = ListInstructionDocumentSerializer(docs_paginated)
-        return ok_response(serializer.data)
+        rdata = ListInstructionDocumentEventResponseDataModel(
+            total=docs_paginated.total,
+            page=docs_paginated.page,
+            next_num=docs_paginated.next_num,
+            prev_num=docs_paginated.prev_num,
+            results=docs_paginated.items
+        )
+        # serializer = ListInstructionDocumentSerializer(docs_paginated)
+        return ok_response(rdata)
 
 
 class SearchInstructionDocumentEventValidator(EventValidator):

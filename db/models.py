@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
@@ -191,3 +191,16 @@ class DeleteInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
         page = InstructionDocumentPageRepository().get(entity_id=v, ignore_not_found=True)
         if not page: raise ValueError(f'InstructionDocumentPage[{v}] not exists')
         return v
+
+
+class ListInstructionDocumentEventRequestModel(BaseEventRequestModel):
+    page: int = 1
+    limit: int = 100
+
+
+class ListInstructionDocumentEventResponseDataModel(BaseModel):
+    total: int
+    page: int
+    prev_num: Union[int, None]
+    next_num: Union[int, None]
+    results: List[InstructionDocumentEntityModel]

@@ -263,6 +263,7 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
             ))
 
     list_docs_data = {
+        "uid": str(uuid.uuid4()),
         "page": 2,
         "limit": 3
     }
@@ -272,6 +273,7 @@ def test_lists_docs(app, client: TApp, admin, user, get_headers):
         headers=get_headers('nouser'))
 
     assert response.json['status'] == 'OK'
+    assert response.json['uid'] == list_docs_data['uid']
     assert response.json['data']['page'] == list_docs_data['page']
     assert response.json['data']['prev_num'] == list_docs_data['page'] - 1
     assert response.json['data']['next_num'] == list_docs_data['page'] + 1
