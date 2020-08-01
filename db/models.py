@@ -60,6 +60,13 @@ class InstructionDocumentEntityModel(OrmModel):
     updated_by_user_id: Optional[int] = None
 
 
+class InstructionDocumentPageEntityModel(OrmModel):
+    id: int
+    document_id: int
+    page_num: int
+    json: Optional[dict] = None
+
+
 # @events
 class BaseEventRequestModel(BaseModel):
     uid: UUID4 = uuid.uuid4()
@@ -117,7 +124,7 @@ class AddInstructionDocumentEventRequestModel(BaseEventRequestModel):
     description: Optional[constr(min_length=1, max_length=500)]
 
 
-class AddInstructionDocumentEventResponseModel(InstructionDocumentEntityModel): pass
+class AddInstructionDocumentEventResponseDataModel(InstructionDocumentEntityModel): pass
 
 
 class DeleteInstructionDocumentEventRequestModel(BaseEventRequestModel):
@@ -142,4 +149,19 @@ class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequ
         return v
 
 
-class UpdateInstructionDocumentEventResponseModel(InstructionDocumentEntityModel): pass
+class UpdateInstructionDocumentEventResponseDataModel(InstructionDocumentEntityModel): pass
+
+
+class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
+    document_id: int
+    json: Optional[str] = None
+
+    @classmethod
+    @validator('document_id')
+    def doc_must_exist(cls, v: int):  # todo: DRY
+        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
+        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        return v
+
+
+class AddInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass
