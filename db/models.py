@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
-from repository.repos import UserRepository, InstructionDocumentRepository
+from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 
 
 class OrmModel(BaseModel):
@@ -180,3 +180,14 @@ class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
 
 
 class UpdateInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass
+
+
+class DeleteInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
+    page_id: int
+
+    @classmethod
+    @validator('page_id')
+    def page_must_exist(cls, v: int):
+        page = InstructionDocumentPageRepository().get(entity_id=v, ignore_not_found=True)
+        if not page: raise ValueError(f'InstructionDocumentPage[{v}] not exists')
+        return v

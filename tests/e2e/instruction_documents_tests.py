@@ -228,6 +228,7 @@ def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
         assert magaged_doc.page_count() == 1
 
     deletion_data = {
+        "uid": str(uuid.uuid4()),
         "page_id": page_id
     }
 
@@ -236,6 +237,7 @@ def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
         deletion_data,
         headers=get_headers('admin')
     )
+    assert response.json['uid'] == deletion_data['uid']
     assert response.json['status'] == 'OK'
     assert response.json['data'] is None
 

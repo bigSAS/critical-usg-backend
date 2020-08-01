@@ -8,7 +8,7 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
     UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
     AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
-    UpdateInstructionDocumentPageEventResponseDataModel
+    UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -88,30 +88,19 @@ class UpdateInstructionDocumentPageEventHandler(EventHandler):
 
 
 class DeleteInstructionDocumentPageEventHandler(EventHandler):
+    request_model_class = DeleteInstructionDocumentPageEventRequestModel
 
     def get_response(self) -> JsonResponse:
+        rmodel: DeleteInstructionDocumentPageEventRequestModel = self.request_model
         user_id = get_jwt_identity()['id']
-        page_id = self.request.json['page_id']
         repo = InstructionDocumentPageRepository()
-
-        page: InstructionDocumentPage = repo.get(page_id)
+        page: InstructionDocumentPage = repo.get(rmodel.page_id)
         managed_doc = InstructionDocumentManager(document_id=page.document_id)
         managed_doc.delete_page(user_id, page_num=page.page_num)
         return ok_response()
 
 
-class ListInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page', value=request.json.get('page', None)),
-            IsRequired(field_name='limit', value=request.json.get('limit', None)),
-            # todo: min page, max limit validation
-        ])
-
-
 class ListInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, ListInstructionDocumentEventValidator(request))
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
