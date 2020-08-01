@@ -71,7 +71,7 @@ class InstructionDocumentSerializer(Serializer):
 
 
 class InstructionDocumentPageSerializer(Serializer):
-    fields = ('id', 'document_id', 'page_num', 'json')
+    fields = ('id', 'document_id', 'page_num', 'json_data')
 
 
 class ListInstructionDocumentSerializer(Serializer):
