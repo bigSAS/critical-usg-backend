@@ -1,6 +1,5 @@
 env:
-  - DB_NAME=cusg_db_testing
-  - LOG_LEVEL=ERROR
+  - DB_NAME=cusg_db_testing LOG_LEVEL=ERROR
 services:
   - postgresql
 language: python
