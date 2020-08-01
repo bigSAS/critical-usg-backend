@@ -136,7 +136,7 @@ class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequ
 
     @classmethod
     @validator('document_id')
-    def doc_must_exist(cls, v: int):
+    def doc_must_exist(cls, v: int):  # todo: DRY
         doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
         if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
         return v
