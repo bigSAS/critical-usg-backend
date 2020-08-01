@@ -9,24 +9,9 @@ from db.models import ApiErrorModel, ResponseStatus, ResponseModel
 
 
 class ApiError(Exception):
-    # todo: refactor list of errors ? or first err 4eva ?
     def __init__(self, name: str, data: Union[List, str]):
         self.name = name
         self.data = data
-
-    @property
-    def errros(self) -> List[dict]:
-        if isinstance(self.data, list):
-            return [
-                {
-                    'name': self.name,
-                    'message': message
-                } for message in self.data
-            ]
-        return [{
-            'name': self.name,
-            'message': self.data
-        }]
 
     def to_api_error_model(self):
         return ApiErrorModel(
