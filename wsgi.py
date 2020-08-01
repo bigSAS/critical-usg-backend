@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, request
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -6,6 +7,12 @@ from blueprints.instruction_document import instruction_document_blueprint
 from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
+
+logging.basicConfig(
+    filename='logs/app.log',
+    level=logging.DEBUG,
+    format='[%(asctime)s] | [%(levelname)s] | [%(name)s] | %(message)s)'
+)
 
 
 def create_app():
@@ -22,13 +29,13 @@ def create_app():
     application.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     return application
 
-
-# todo: logging decorator ??? read flask docs -> docker log into file[wanted] vs log into db table ?
 app = create_app()
 
 
 @app.before_request
 def check_json_content_type():
+    logging.info('before request :)')
+    app.logger.info('before from app ;)')
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
 

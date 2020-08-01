@@ -1,43 +1,14 @@
+import os
 from os import environ
 
-DEBUG_LOCAL = False
-# noinspection PyBroadException
-try:
-    from config_local import DEBUG as LOCAL_DEBUG
-    DEBUG_LOCAL = LOCAL_DEBUG
-    print('#' * 50)
-    print('LOCAL DEBUG:', DEBUG_LOCAL)
-    HAS_LOCAL_CONFIG = True
-except:
-    HAS_LOCAL_CONFIG = False
-
-print('#' * 50)
-print('Configuration')
-print('#' * 50)
-DEBUG = DEBUG_LOCAL if HAS_LOCAL_CONFIG else environ.get('CUSG_DEBUG', 'NO') == 'YES'
-
-
-# todo: !!! simplify config to minimum !!!
-
-TESTING = environ.get('CUSG_TESTING', 'NO') == 'YES'
-LOCAL_SECRET = 'top-secret-local-debug'
-SECRET = LOCAL_SECRET if DEBUG else environ.get('CUSG_SECRET', None)
-if not SECRET: raise EnvironmentError('CUSG_SECRET not set!')
-DB_CONNETION_STRING = environ['CUSG_DB_CONNETION_STRING'] \
-    if environ.get('CUSG_DB_CONNETION_STRING', None) \
-    else 'postgresql://postgres:postgres@localhost:5432/cusg_development_db'
-PGPASSWORD = 'postgres' if HAS_LOCAL_CONFIG else ''
-if TESTING: DB_CONNETION_STRING = f'postgresql://postgres:{PGPASSWORD}@localhost:5432/cusg_test_db'
-print('DEBUG:', 'yes' if DEBUG else 'no')
-print('TESTING:', 'yes' if TESTING else 'no')
-print('DB CONNECTION STRING:', DB_CONNETION_STRING)
-print('#' * 50)
+DB_CONNETION_STRING = os.environ['CUSG_DB_CONNETION_STRING']
+print('DB_CONNETION_STRING', DB_CONNETION_STRING)
 
 
 class Config:
-    SECRET_KEY = SECRET
+    SECRET_KEY = os.environ['CUSG_SECRET']
     FLASK_APP = 'wsgi'
-    FLASK_DEBUG = DEBUG
+    FLASK_DEBUG = environ.get('CUSG_DEBUG', 'NO') == 'YES'
 
     # Database
     SQLALCHEMY_DATABASE_URI = DB_CONNETION_STRING

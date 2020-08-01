@@ -9,7 +9,10 @@ install:
   - python -m pip install pipenv
   - pipenv sync
 script:
-  - psql -c 'create database cusg_test_db;' -U postgres
+  - psql -c 'CREATE DATABASE cusg_db_testing' -U postgres
+  - echo "CUSG_SECRET=oh-so-secret" > .env
+  - echo "CUSG_DEBUG=YES" >> .env
+  - echo "CUSG_DB_CONNETION_STRING=postgresql://postgres:postgres@localhost:5432/cusg_db_testing" >> .env
   - pipenv run flask db upgrade
   - pipenv run python setup_defaults.py
-  - pipenv run python -m pytest -v --log-cli-level=DEBUG
+  - pipenv run python -m pytest -v --log-cli-level=ERROR
