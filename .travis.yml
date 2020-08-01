@@ -1,5 +1,6 @@
 env:
-  - CUSG_TESTING=YES CUSG_DEBUG=YES
+  - DB_NAME=cusg_db_testing
+  - LOG_LEVEL=ERROR
 services:
   - postgresql
 language: python
@@ -9,10 +10,10 @@ install:
   - python -m pip install pipenv
   - pipenv sync
 script:
-  - psql -c 'CREATE DATABASE cusg_db_testing' -U postgres
+  - psql -c 'CREATE DATABASE $DB_NAME' -U postgres
   - echo "CUSG_SECRET=oh-so-secret" > .env
   - echo "CUSG_DEBUG=YES" >> .env
-  - echo "CUSG_DB_CONNETION_STRING=postgresql://postgres:postgres@localhost:5432/cusg_db_testing" >> .env
+  - echo "CUSG_DB_CONNETION_STRING=postgresql://postgres:postgres@localhost:5432/$DB_NAME" >> .env
   - pipenv run flask db upgrade
   - pipenv run python setup_defaults.py
-  - pipenv run python -m pytest -v --log-cli-level=ERROR
+  - pipenv run python -m pytest -v --log-cli-level=$LOG_LEVEL
