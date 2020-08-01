@@ -204,3 +204,10 @@ class ListInstructionDocumentEventResponseDataModel(BaseModel):
     prev_num: Union[int, None]
     next_num: Union[int, None]
     results: List[InstructionDocumentEntityModel]
+
+
+class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventResponseDataModel):
+    search: constr(min_length=3, max_length=100)
+
+
+class SearchInstructionDocumentEventResponseDataModel(ListInstructionDocumentEventResponseDataModel): pass

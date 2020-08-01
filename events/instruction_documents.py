@@ -9,7 +9,8 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
     AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
     UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel, \
-    ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel
+    ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel, \
+    SearchInstructionDocumentEventResponseDataModel, SearchInstructionDocumentEventRequestModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -130,8 +131,7 @@ class SearchInstructionDocumentEventValidator(EventValidator):
 
 
 class SearchInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, SearchInstructionDocumentEventValidator(request))
+    request_model_class = SearchInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         page = self.request.json['page']
@@ -142,8 +142,14 @@ class SearchInstructionDocumentEventHandler(EventHandler):
                                     InstructionDocument.description.ilike(f'%{search}%')),
                               page=page,
                               limit=limit)
-        serializer = ListInstructionDocumentSerializer(docs_paginated)
-        return ok_response(serializer.data)
+        rdata = SearchInstructionDocumentEventResponseDataModel(
+            total=docs_paginated.total,
+            page=docs_paginated.page,
+            next_num=docs_paginated.next_num,
+            prev_num=docs_paginated.prev_num,
+            results=docs_paginated.items
+        )
+        return ok_response(rdata)
 
 
 class GetInstructionDocumentEventValidator(EventValidator):
