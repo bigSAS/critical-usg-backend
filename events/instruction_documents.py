@@ -120,17 +120,6 @@ class ListInstructionDocumentEventHandler(EventHandler):
         return ok_response(rdata)
 
 
-class SearchInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            MinLen(field_name='search', min_len=3, value=request.json.get('search', None)),
-            MaxLen(field_name='search', max_len=100, value=request.json.get('search', None)),
-            IsRequired(field_name='page', value=request.json.get('page', None)),
-            IsRequired(field_name='limit', value=request.json.get('limit', None)),
-            # todo: min page, max limit validation
-        ])
-
-
 class SearchInstructionDocumentEventHandler(EventHandler):
     request_model_class = SearchInstructionDocumentEventRequestModel
 
