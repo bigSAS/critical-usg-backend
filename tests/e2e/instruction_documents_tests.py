@@ -51,10 +51,14 @@ def test_deletes_doc(client: TApp, admin, user, get_headers):
 
     assert created_doc_id is not None
     delete_doc_data = {
+        'uid': str(uuid.uuid4()),
         'document_id': created_doc_id
     }
     # admin can delete
-    client.post_json('/api/instruction-documents/delete-doc', delete_doc_data, headers=get_headers('admin'))
+    res = client.post_json('/api/instruction-documents/delete-doc', delete_doc_data, headers=get_headers('admin'))
+    assert res.json['status'] == 'OK'
+    assert res.json['uid'] == delete_doc_data['uid']
+    assert res.json['data'] is None
     # user cannnot delete
     client.post_json('/api/instruction-documents/delete-doc', delete_doc_data, headers=get_headers('user'), status=403)
 
