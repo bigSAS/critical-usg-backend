@@ -10,7 +10,9 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
     UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel, \
     ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel, \
-    SearchInstructionDocumentEventResponseDataModel, SearchInstructionDocumentEventRequestModel
+    SearchInstructionDocumentEventResponseDataModel, SearchInstructionDocumentEventRequestModel, \
+    GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
+    InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -152,22 +154,16 @@ class SearchInstructionDocumentEventHandler(EventHandler):
         return ok_response(rdata)
 
 
-class GetInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id', repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            )
-        ])
-
-
 class GetInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, GetInstructionDocumentEventValidator(request))
+    request_model_class = GetInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        doc = InstructionDocumentRepository().get(self.request.json['document_id'])
-        serializer = GetInstructionDocumentSerializer(doc)
-        return ok_response(serializer.data)
+        rmodel: GetInstructionDocumentEventRequestModel = self.request_model
+        doc = InstructionDocumentRepository().get(rmodel.document_id)
+        doc_entity = InstructionDocumentEntityModel.from_orm(doc)
+        pages = InstructionDocumentPageRepository().filter(InstructionDocumentPage.document_id == doc.id)
+        pages_entities = [InstructionDocumentPageEntityModel.from_orm(p) for p in pages]
+        data_dict = doc_entity.dict()
+        data_dict['pages'] = pages_entities
+        rdata = GetInstructionDocumentEventResponsedataModel(**data_dict)
+        return ok_response(rdata)

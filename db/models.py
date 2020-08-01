@@ -211,3 +211,18 @@ class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventReq
 
 
 class SearchInstructionDocumentEventResponseDataModel(ListInstructionDocumentEventResponseDataModel): pass
+
+
+class GetInstructionDocumentEventRequestModel(BaseEventRequestModel):
+    document_id: int
+
+    @classmethod
+    @validator('document_id')
+    def doc_must_exist(cls, v: int):  # todo: DRY
+        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
+        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        return v
+
+
+class GetInstructionDocumentEventResponsedataModel(InstructionDocumentEntityModel):
+    pages: List[InstructionDocumentPageEntityModel]

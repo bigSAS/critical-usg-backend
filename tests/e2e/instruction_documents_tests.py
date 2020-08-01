@@ -342,6 +342,7 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         doc_id = doc.id
 
     get_doc_data = {
+        "uid": str(uuid.uuid4()),
         "document_id": doc_id
     }
     response = client.post_json(
@@ -350,6 +351,7 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         headers=get_headers('nouser'))
 
     assert response.json['status'] == 'OK'
+    assert response.json['uid'] == get_doc_data['uid']
     assert len(response.json['data']['pages']) == 1
     assert response.json['data']['pages'][0]['page_num'] == 1
     assert response.json['data']['pages'][0]['document_id'] == doc_id
