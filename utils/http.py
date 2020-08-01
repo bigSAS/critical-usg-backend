@@ -21,7 +21,7 @@ class ApiError(Exception):
 
 
 class ValidationError(ApiError):
-    def __init__(self, message: str, field_name: str = 'NON_FIELD', ):
+    def __init__(self, message: str, field_name: str = 'NON_FIELD'):
         super().__init__(field_name, message)
 
 
@@ -62,11 +62,10 @@ def ok_response(data: Union[dict, BaseModel] = None):
     if isinstance(data, BaseModel):
         data_obj = data.dict()
 
-    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=200,
         response=ResponseModel(
-            uid=uid,
+            uid=g.get('uid', uuid.uuid4()),
             status=ResponseStatus.OK,
             data=data_obj
         ).json()
@@ -74,9 +73,6 @@ def ok_response(data: Union[dict, BaseModel] = None):
 
 
 def error_response(error: Exception = None):
-    """ error handler for App """
-    print("ERROR:")
-    print(repr(error))
     http_status, response_status = ERROR_STATUS_MAP.get(type(error).__name__, (500, ResponseStatus.SERVER_ERROR))
     if not isinstance(error, ApiError):
         if Config.FLASK_DEBUG: raise error
@@ -84,11 +80,10 @@ def error_response(error: Exception = None):
     else:
         api_error = error
 
-    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
-            uid=uid,
+            uid=g.get('uid', uuid.uuid4()),
             status=response_status,
             errors=[api_error.to_api_error_model()]
         ).json()
