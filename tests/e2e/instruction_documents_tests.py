@@ -328,7 +328,7 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         repo.save(doc)
         page = InstructionDocumentPage(
             document_id=doc.id,
-            json=page_json
+            json_data=page_json
         )
         managed_doc.add_page(page, admin.id)
         doc_id = doc.id
