@@ -355,4 +355,4 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
     assert len(response.json['data']['pages']) == 1
     assert response.json['data']['pages'][0]['page_num'] == 1
     assert response.json['data']['pages'][0]['document_id'] == doc_id
-    assert response.json['data']['pages'][0]['json'] == page_json
+    assert response.json['data']['pages'][0]['json_data'] == page_json
