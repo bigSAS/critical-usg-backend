@@ -12,10 +12,7 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
     InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
-from db.serializers import InstructionDocumentPageSerializer, \
-    ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
 from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
 from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
