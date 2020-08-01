@@ -154,7 +154,7 @@ class UpdateInstructionDocumentEventResponseDataModel(InstructionDocumentEntityM
 
 class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     document_id: int
-    json_data: Optional[str] = None
+    json_data: Optional[dict] = None
 
     @classmethod
     @validator('document_id')

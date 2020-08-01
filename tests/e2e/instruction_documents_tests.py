@@ -122,9 +122,9 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     doc_pages_data = {
         "uid": str(uuid.uuid4()),
         "document_id": created_doc_id,
-        "json_data": dumps({
+        "json_data": {
             "bar": "baz"
-        })
+        }
     }
 
     response = client.post_json(
