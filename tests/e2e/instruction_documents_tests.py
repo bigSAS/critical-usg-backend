@@ -303,6 +303,7 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
             added_count += 1
 
     search_docs_data = {
+        "uid": str(uuid.uuid4()),
         "search": "SearChed dOc",
         "page": 1,
         "limit": 100
@@ -313,6 +314,7 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
         headers=get_headers('nouser'))
 
     assert response.json['status'] == 'OK'
+    assert response.json['uid'] == search_docs_data['uid']
     assert response.json['data']['page'] == 1
     assert len(response.json['data']['results']) == added_count
     pass
