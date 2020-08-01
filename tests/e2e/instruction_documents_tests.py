@@ -172,6 +172,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
         headers=get_headers('admin')
     ).json['data']['id']
     update_page_data = {
+        "uid": str(uuid.uuid4()),
         "page_id": page_id,
         "json_data": {
             "cool": "update"
@@ -184,6 +185,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
         headers=get_headers('admin')
     )
 
+    assert response.json['uid'] == update_page_data['uid']
     assert response.json['status'] == 'OK'
     assert response.json['data']['json_data'] == update_page_data['json_data']
     with app.app_context():
