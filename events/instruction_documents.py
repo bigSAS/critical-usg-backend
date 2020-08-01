@@ -2,8 +2,17 @@ from flask import Request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
-from db.model import User, InstructionDocument, InstructionDocumentPage
-from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer, \
+from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseDataModel, \
+    DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
+    UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
+    AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
+    UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel, \
+    ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel, \
+    SearchInstructionDocumentEventResponseDataModel, SearchInstructionDocumentEventRequestModel, \
+    GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
+    InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
+from db.schema import User, InstructionDocument, InstructionDocumentPage
+from db.serializers import InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
 from events.core import EventHandler, EventValidator
 from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
@@ -12,19 +21,9 @@ from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
 
 
-class AddInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
-            MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
-            MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
-            MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
-        ])
-
-
+# todo: review 3x ;)
 class AddInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, AddInstructionDocumentEventValidator(request))
+    request_model_class = AddInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         user: User = UserRepository().get(get_jwt_identity()['id'])
@@ -34,171 +33,91 @@ class AddInstructionDocumentEventHandler(EventHandler):
             description=self.request.json.get('description', None)
         )
         InstructionDocumentRepository().save(doc)
-
-        serializer = InstructionDocumentSerializer(doc)
-        return ok_response(serializer.data)
-
-
-class DeleteInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id',
-                repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            )
-        ])
+        return ok_response(AddInstructionDocumentEventResponseDataModel.from_orm(doc))
 
 
 class DeleteInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, DeleteInstructionDocumentEventValidator(request))
+    request_model_class = DeleteInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         InstructionDocumentRepository().delete(self.request.json['document_id'])
         return ok_response()
 
 
-class UpdateInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id',
-                repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            ),
-            MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
-            MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
-            MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
-            MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
-        ])
-
-
 class UpdateInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentEventValidator(request))
+    request_model_class = UpdateInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        user_id = get_jwt_identity()['id']
-        doc_repo = InstructionDocumentRepository()
-        doc: InstructionDocument = doc_repo.get(self.request.json['document_id'])
-        managed_doc = InstructionDocumentManager(document=doc)
+        rdoc: UpdateInstructionDocumentEventRequestModel = self.request_model
+        managed_doc = InstructionDocumentManager(document_id=rdoc.document_id)
         managed_doc.update(
-            user_id,
-            name=self.request.json['name'],
-            description=self.request.json.get('description', None)
+            get_jwt_identity()['id'],
+            name=rdoc.name,
+            description=rdoc.description
         )
-        serializer = InstructionDocumentSerializer(doc)
-        return ok_response(serializer.data)
-
-
-class AddInstructionDocumentPageEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id',
-                repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            ),
-        ])
+        return ok_response(UpdateInstructionDocumentEventResponseDataModel.from_orm(managed_doc.document))
 
 
 class AddInstructionDocumentPageEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, AddInstructionDocumentPageEventValidator(request))
+    request_model_class = AddInstructionDocumentPageEventRequestModel
 
     def get_response(self) -> JsonResponse:
+        rmodel: AddInstructionDocumentPageEventRequestModel = self.request_model
         user_id = get_jwt_identity()['id']
-        doc_id = self.request.json['document_id']
         page = InstructionDocumentPage(
-            document_id=doc_id,
-            json=self.request.json.get('json', None)
+            document_id=rmodel.document_id,
+            json_data=rmodel.json_data
         )
-        managed_doc = InstructionDocumentManager(document_id=doc_id)
+        managed_doc = InstructionDocumentManager(document_id=rmodel.document_id)
         page = managed_doc.add_page(page, user_id)
-        serializer = InstructionDocumentPageSerializer(page)
-        return ok_response(serializer.data)
-
-
-class UpdateInstructionDocumentPageEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
-            ObjectExist(
-                field_name='page_id',
-                repository_class=InstructionDocumentPageRepository,
-                object_id=request.json.get('page_id', None)
-            ),
-        ])
+        return ok_response(AddInstructionDocumentPageEventResponseDataModel.from_orm(page))
 
 
 class UpdateInstructionDocumentPageEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
+    request_model_class = UpdateInstructionDocumentPageEventRequestModel
 
     def get_response(self) -> JsonResponse:
         user_id = get_jwt_identity()['id']
-        page_id = self.request.json['page_id']
-        repo = InstructionDocumentPageRepository()
+        rmodel: UpdateInstructionDocumentPageEventRequestModel = self.request_model
 
-        page: InstructionDocumentPage = repo.get(page_id)
-        page.json = self.request.json.get('json', None)
+        repo = InstructionDocumentPageRepository()
+        page: InstructionDocumentPage = repo.get(rmodel.page_id)
+        page.json_data = rmodel.json_data
         repo.save(page)
 
         managed_doc = InstructionDocumentManager(document_id=page.document_id)
         managed_doc.update(user_id)
-        serializer = InstructionDocumentPageSerializer(page)
-        return ok_response(serializer.data)
-
-
-class DeleteInstructionDocumentPageEventValidator(EventValidator):  # todo: duplicate ?
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page_id', value=request.json.get('page_id', None)),
-            ObjectExist(
-                field_name='page_id',
-                repository_class=InstructionDocumentPageRepository,
-                object_id=request.json.get('page_id', None)
-            ),
-        ])
+        return ok_response(UpdateInstructionDocumentPageEventResponseDataModel.from_orm(page))
 
 
 class DeleteInstructionDocumentPageEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentPageEventValidator(request))
+    request_model_class = DeleteInstructionDocumentPageEventRequestModel
 
     def get_response(self) -> JsonResponse:
+        rmodel: DeleteInstructionDocumentPageEventRequestModel = self.request_model
         user_id = get_jwt_identity()['id']
-        page_id = self.request.json['page_id']
         repo = InstructionDocumentPageRepository()
-
-        page: InstructionDocumentPage = repo.get(page_id)
+        page: InstructionDocumentPage = repo.get(rmodel.page_id)
         managed_doc = InstructionDocumentManager(document_id=page.document_id)
         managed_doc.delete_page(user_id, page_num=page.page_num)
         return ok_response()
 
 
-class ListInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='page', value=request.json.get('page', None)),
-            IsRequired(field_name='limit', value=request.json.get('limit', None)),
-            # todo: min page, max limit validation
-        ])
-
-
 class ListInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, ListInstructionDocumentEventValidator(request))
+    request_model_class = ListInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
             .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'])
-        serializer = ListInstructionDocumentSerializer(docs_paginated)
-        return ok_response(serializer.data)
+        rdata = ListInstructionDocumentEventResponseDataModel(
+            total=docs_paginated.total,
+            page=docs_paginated.page,
+            next_num=docs_paginated.next_num,
+            prev_num=docs_paginated.prev_num,
+            results=docs_paginated.items
+        )
+        # serializer = ListInstructionDocumentSerializer(docs_paginated)
+        return ok_response(rdata)
 
 
 class SearchInstructionDocumentEventValidator(EventValidator):
@@ -213,8 +132,7 @@ class SearchInstructionDocumentEventValidator(EventValidator):
 
 
 class SearchInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, SearchInstructionDocumentEventValidator(request))
+    request_model_class = SearchInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
         page = self.request.json['page']
@@ -225,26 +143,26 @@ class SearchInstructionDocumentEventHandler(EventHandler):
                                     InstructionDocument.description.ilike(f'%{search}%')),
                               page=page,
                               limit=limit)
-        serializer = ListInstructionDocumentSerializer(docs_paginated)
-        return ok_response(serializer.data)
-
-
-class GetInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id', repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            )
-        ])
+        rdata = SearchInstructionDocumentEventResponseDataModel(
+            total=docs_paginated.total,
+            page=docs_paginated.page,
+            next_num=docs_paginated.next_num,
+            prev_num=docs_paginated.prev_num,
+            results=docs_paginated.items
+        )
+        return ok_response(rdata)
 
 
 class GetInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, GetInstructionDocumentEventValidator(request))
+    request_model_class = GetInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        doc = InstructionDocumentRepository().get(self.request.json['document_id'])
-        serializer = GetInstructionDocumentSerializer(doc)
-        return ok_response(serializer.data)
+        rmodel: GetInstructionDocumentEventRequestModel = self.request_model
+        doc = InstructionDocumentRepository().get(rmodel.document_id)
+        doc_entity = InstructionDocumentEntityModel.from_orm(doc)
+        pages = InstructionDocumentPageRepository().filter(InstructionDocumentPage.document_id == doc.id)
+        pages_entities = [InstructionDocumentPageEntityModel.from_orm(p) for p in pages]
+        data_dict = doc_entity.dict()
+        data_dict['pages'] = pages_entities
+        rdata = GetInstructionDocumentEventResponsedataModel(**data_dict)
+        return ok_response(rdata)

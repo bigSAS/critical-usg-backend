@@ -10,6 +10,7 @@ auth_blueprint = Blueprint('auth', __name__)
 jwt = JWTManager()  # https://flask-jwt-extended.readthedocs.io/en/stable/api/
 
 
+# todo: zbadac errory dla invalid tokenow bo chyba cos nie do konca to dziala
 @auth_blueprint.errorhandler(Exception)
 def handle_error(error: Exception):
     if isinstance(error, DecodeError):

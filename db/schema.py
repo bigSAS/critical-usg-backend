@@ -1,9 +1,6 @@
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from pydantic.main import BaseModel
-from pydantic.networks import EmailStr
-from pydantic.types import constr
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
@@ -11,11 +8,6 @@ from sqlalchemy.types import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-
-
-class OrmModel(BaseModel):
-    class Config:
-        orm_mode = True
 
 
 class User(db.Model):
@@ -98,11 +90,11 @@ class InstructionDocumentPage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id', ondelete='CASCADE'), nullable=False)
     page_num = db.Column(db.Integer, default=0)
-    json = db.Column(JSON, nullable=True)
+    json_data = db.Column(JSON, nullable=True)
 
-    def __init__(self, document_id: int, json: dict, page_num: int = None):
+    def __init__(self, document_id: int, json_data: dict, page_num: int = None):
         self.document_id = document_id
-        self.json = json
+        self.json_data = json_data
         if page_num: self.page_num = page_num
 
     @hybrid_method

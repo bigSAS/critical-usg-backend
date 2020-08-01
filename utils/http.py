@@ -1,12 +1,11 @@
 import uuid
-from enum import Enum
-from typing import List, Union, Optional
+from typing import List, Union
 
-from pydantic import BaseModel, UUID4
-
-from flask import Response
+from pydantic import BaseModel
+from flask import Response, g
 
 from config import Config
+from db.models import ApiErrorModel, ResponseStatus, ResponseModel
 
 
 class ApiError(Exception):
@@ -56,44 +55,6 @@ class ForbiddenError(ApiError):
         super().__init__('PERMISSION', description)
 
 
-class ResponseStatus(str, Enum):
-    OK = 'OK'
-    NOT_FOUND = 'NOT_FOUND'
-    AUTH_ERROR = "AUTH_ERROR"
-    FORBIDDEN = "FORBIDDEN"
-    VALIDATION_ERROR = "VALIDATION_ERROR"
-    SERVER_ERROR = 'SERVER_ERROR'
-
-
-class ApiErrorModel(BaseModel):
-    name: str
-    message: str
-
-
-class ResponseModel(BaseModel):
-    status: ResponseStatus
-    data: Optional[dict]
-    errors: List[ApiErrorModel] = []
-    uid: UUID4 = uuid.uuid4()
-
-# todo: rm ???
-# class ResponseBody:  # todo: pydantic with generic data [T]
-#     def __init__(self, status: ResponseStatus, api_error: ApiError = None, data: dict = None,
-#                  data_model: OrmModel = None):  # todo: data always from PydanticModel().dict() -> typi
-#         # todo: validate -> only data or data_model can be passed ! ! !
-#         self.status = status.value
-#         self.api_error = api_error
-#         self.data = data
-#
-#     @property
-#     def body(self):  # todo: return ResponseBodyModel(self.status, self.api_error, self.data).data()
-#         return {
-#             'status': self.status,
-#             'errors': self.api_error.errros if self.api_error else [],
-#             'data': self.data
-#         }
-
-
 class JsonResponse(Response):
     """ Json Response for api views """
     default_mimetype = 'application/json'
@@ -116,9 +77,11 @@ def ok_response(data: Union[dict, BaseModel] = None):
     if isinstance(data, BaseModel):
         data_obj = data.dict()
 
+    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=200,
         response=ResponseModel(
+            uid=uid,
             status=ResponseStatus.OK,
             data=data_obj
         ).json()
@@ -135,10 +98,13 @@ def error_response(error: Exception = None):
         api_error = ApiError(name='SERVER', data=repr(error))
     else:
         api_error = error
+
+    uid = g.get('uid', uuid.uuid4())
     return JsonResponse(
         status=http_status,
         response=ResponseModel(
+            uid=uid,
             status=response_status,
-            errors=[error.to_api_error_model()]
+            errors=[api_error.to_api_error_model()]
         ).json()
     )

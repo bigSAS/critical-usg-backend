@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
-from db.model import db, bcrypt
+from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
 
@@ -23,6 +23,8 @@ def create_app():
     return application
 
 
+# todo: logging decorator ??? read flask docs -> docker log into file[wanted] vs log into db table ?
+# todo: clean not needed root repo scripts ???
 app = create_app()
 
 
@@ -32,6 +34,7 @@ def check_json_content_type():
         raise ValidationError('Content-Type - application/json only')
 
 
+# todo: read flask docs jak zachowuja sie errorhandlery app vs blueprint
 @app.errorhandler
 def handle_error(error: Exception):
     return error_response(error)

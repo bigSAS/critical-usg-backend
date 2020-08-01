@@ -1,10 +1,10 @@
 from typing import List
 from datetime import datetime
 
-from db.model import User, UserGroup, InstructionDocument, InstructionDocumentPage
+from db.schema import User, UserGroup, InstructionDocument, InstructionDocumentPage, GroupUser
 from repository.base import ObjectNotFoundError
 from repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
-    InstructionDocumentRepository
+    InstructionDocumentRepository, UserGroupRepository
 
 
 # todo: docs -> manager for existing objects
@@ -19,6 +19,11 @@ class UserManager:
     @property
     def user(self) -> User:
         return self.__user
+
+    def get_groups(self) -> List[UserGroup]:
+        user_groups = GroupUserRepository().filter(GroupUser.user_id == self.user.id)
+        group_ids = list(set([ug.group_id for ug in user_groups]))
+        return UserGroupRepository().filter(UserGroup.id.in_(group_ids))
 
     def belongs_to_group(self, group: UserGroup) -> bool:
         try:
@@ -38,6 +43,10 @@ class InstructionDocumentManager:
         self.__doc_repo = InstructionDocumentRepository()
         self.__document = self.__doc_repo.get(document_id) if document_id else document
         if not self.__document: raise ValueError('Document not provided!')
+
+    @property
+    def document(self):
+        return self.__document
 
     def update(self, user_id: int, **kwargs):
         valid_kwargs = ('name', 'description')

@@ -1,8 +1,8 @@
-from db.model import User, UserGroup, GroupUser, InstructionDocument
+from db.schema import User, UserGroup, GroupUser, InstructionDocument
 from repository.repos import GroupUserRepository, UserGroupRepository, UserRepository
 from utils.managers import InstructionDocumentManager
 
-
+# todo: RM ? find usages
 class SerializationError(Exception): pass
 
 
@@ -71,7 +71,7 @@ class InstructionDocumentSerializer(Serializer):
 
 
 class InstructionDocumentPageSerializer(Serializer):
-    fields = ('id', 'document_id', 'page_num', 'json')
+    fields = ('id', 'document_id', 'page_num', 'json_data')
 
 
 class ListInstructionDocumentSerializer(Serializer):

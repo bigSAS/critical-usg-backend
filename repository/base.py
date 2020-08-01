@@ -1,6 +1,6 @@
 from sqlalchemy import text
 
-from db.model import db
+from db.schema import db
 
 
 class ObjectNotFoundError(Exception): pass
