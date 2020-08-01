@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
@@ -49,6 +50,16 @@ class UserEntityModel(OrmModel):
     groups: List[UserGroupEntityModel]
 
 
+class InstructionDocumentEntityModel(OrmModel):
+    id: int
+    name: str
+    description: Optional[constr(min_length=1, max_length=500)]
+    created: datetime
+    created_by_user_id: int
+    updated: datetime
+    updated_by_user_id: int
+
+
 # @events
 class BaseEventRequestModel(BaseModel):
     uid: UUID4 = uuid.uuid4()
@@ -67,13 +78,13 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
-    username: Optional[str]  # todo contr regex
+    username: Optional[constr(max_length=50)]  # todo contr regex
 
-    @classmethod
-    @validator('username')
-    def username_max_len(cls, v: str):
-        if v and len(v) > 50: raise ValueError('Max 50 chars')
-        return v
+    # @classmethod
+    # @validator('username')
+    # def username_max_len(cls, v: str):
+    #     if v and len(v) > 50: raise ValueError('Max 50 chars')
+    #     return v
 
     @classmethod
     @validator('password_repeat')
@@ -105,3 +116,11 @@ class GetUserDataEventRequestModel(BaseEventRequestModel):
 
 
 class GetUserDataEventResponseDataModel(UserEntityModel): pass
+
+
+class AddInstructionDocumentEventRequestModel(BaseEventRequestModel):
+    name: constr(min_length=3, max_length=200)
+    description: Optional[constr(min_length=1, max_length=500)]
+
+
+class AddInstructionDocumentEventResponseModel(InstructionDocumentEntityModel): pass

@@ -4,7 +4,7 @@ from flask import Request, g
 from db.models import BaseEventRequestModel
 from utils.http import JsonResponse, ValidationError
 from abc import ABC
-from pydantic import ValidationError as VError, BaseModel
+from pydantic import ValidationError as VError
 
 
 class Validator(ABC):
