@@ -29,8 +29,8 @@ def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
     assert response.json['data']['created_by_user_id'] == admin.id
     assert response.json['data']['name'] == data['name']
     assert response.json['data']['description'] == data['description']
-    assert response.json['updated_by_user_id'] is None
-    assert response.json['updated'] is None
+    assert response.json['data']['updated_by_user_id'] is None
+    assert response.json['data']['updated'] is None
 
     # user cannot create
     client.post_json('/api/instruction-documents/add-doc', data, headers=get_headers('user'), status=403)

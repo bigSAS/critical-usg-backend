@@ -31,7 +31,7 @@ class ApiErrorModel(BaseModel):
 class ResponseModel(BaseModel):
     uid: Optional[UUID4]  # todo: mandatory when refactor done
     status: ResponseStatus
-    data: Optional[dict]
+    data: Optional[dict] = None
     errors: List[ApiErrorModel] = []
 
 
@@ -53,9 +53,9 @@ class UserEntityModel(OrmModel):
 class InstructionDocumentEntityModel(OrmModel):
     id: int
     name: str
-    description: Optional[constr(min_length=1, max_length=500)]
     created: datetime
     created_by_user_id: int
+    description: Optional[constr(min_length=1, max_length=500)] = None
     updated: Optional[datetime] = None
     updated_by_user_id: Optional[int] = None
 
@@ -79,12 +79,6 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
     username: Optional[constr(max_length=50)]  # todo contr regex
-
-    # @classmethod
-    # @validator('username')
-    # def username_max_len(cls, v: str):
-    #     if v and len(v) > 50: raise ValueError('Max 50 chars')
-    #     return v
 
     @classmethod
     @validator('password_repeat')
