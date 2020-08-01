@@ -105,8 +105,7 @@ class DeleteUserEventRequestModel(BaseEventRequestModel):
     @classmethod
     @validator('user_id')
     def user_must_exist(cls, v: int):
-        usr = UserRepository().get(entity_id=v, ignore_not_found=True)
-        if not usr: raise ValueError(f'User[{v}] not exists')
+        must_exist_by_pk(UserRepository(), v)
         return v
 
 

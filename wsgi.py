@@ -10,7 +10,7 @@ from config import Config
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
-    allow_origins = ['*']  # read from config in production
+    allow_origins = ['*']  # todo: read from container config on prd
     CORS(application, origins=allow_origins)
     application.config.from_object(Config)
     db.init_app(application)
@@ -24,7 +24,6 @@ def create_app():
 
 
 # todo: logging decorator ??? read flask docs -> docker log into file[wanted] vs log into db table ?
-# todo: clean not needed root repo scripts ???
 app = create_app()
 
 
@@ -34,7 +33,6 @@ def check_json_content_type():
         raise ValidationError('Content-Type - application/json only')
 
 
-# todo: read flask docs jak zachowuja sie errorhandlery app vs blueprint
 @app.errorhandler
 def handle_error(error: Exception):
     return error_response(error)
