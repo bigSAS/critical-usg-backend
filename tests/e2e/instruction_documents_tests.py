@@ -85,6 +85,7 @@ def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
 
     assert created_doc_id is not None
     update_doc_data = {
+        'uid': str(uuid.uuid4()),
         'document_id': created_doc_id,
         'name': 'new name',
         'description': description
@@ -95,10 +96,11 @@ def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
         update_doc_data,
         headers=get_headers(user_type))
     assert response.json['status'] == 'OK'
+    assert response.json['uid'] == update_doc_data['uid']
     assert response.json['data']['id'] == update_doc_data['document_id']
     assert response.json['data']['name'] == update_doc_data['name']
     assert response.json['data']['description'] == update_doc_data['description']
-    assert response.json['data']['updated_by']['id'] == admin.id
+    assert response.json['data']['updated_by_user_id'] == admin.id
     assert response.json['data']['updated'] is not None
 
 

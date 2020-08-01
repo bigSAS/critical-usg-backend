@@ -3,7 +3,8 @@ from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
 from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseModel, \
-    DeleteInstructionDocumentEventRequestModel
+    DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
+    UpdateInstructionDocumentEventResponseModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
 from db.serializers import InstructionDocumentSerializer, InstructionDocumentPageSerializer, \
     ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
@@ -36,38 +37,18 @@ class DeleteInstructionDocumentEventHandler(EventHandler):
         return ok_response()
 
 
-class UpdateInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            IsRequired(field_name='document_id', value=request.json.get('document_id', None)),
-            ObjectExist(
-                field_name='document_id',
-                repository_class=InstructionDocumentRepository,
-                object_id=request.json.get('document_id', None)
-            ),
-            MinLen(field_name='name', min_len=3, value=request.json.get('name', None)),
-            MaxLen(field_name='name', max_len=200, value=request.json.get('name', None)),
-            MinLen(field_name='description', min_len=1, value=request.json.get('description', None), optional=True),
-            MaxLen(field_name='description', max_len=500, value=request.json.get('description', None), optional=True)
-        ])
-
-
 class UpdateInstructionDocumentEventHandler(EventHandler):
-    def __init__(self, request: Request):
-        super().__init__(request, UpdateInstructionDocumentEventValidator(request))
+    request_model_class = UpdateInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        user_id = get_jwt_identity()['id']
-        doc_repo = InstructionDocumentRepository()
-        doc: InstructionDocument = doc_repo.get(self.request.json['document_id'])
-        managed_doc = InstructionDocumentManager(document=doc)
+        rdoc: UpdateInstructionDocumentEventRequestModel = self.request_model
+        managed_doc = InstructionDocumentManager(document_id=rdoc.document_id)
         managed_doc.update(
-            user_id,
-            name=self.request.json['name'],
-            description=self.request.json.get('description', None)
+            get_jwt_identity()['id'],
+            name=rdoc.name,
+            description=rdoc.description
         )
-        serializer = InstructionDocumentSerializer(doc)
-        return ok_response(serializer.data)
+        return ok_response(UpdateInstructionDocumentEventResponseModel.from_orm(managed_doc.document))
 
 
 class AddInstructionDocumentPageEventValidator(EventValidator):

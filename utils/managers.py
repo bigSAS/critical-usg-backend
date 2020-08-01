@@ -44,6 +44,10 @@ class InstructionDocumentManager:
         self.__document = self.__doc_repo.get(document_id) if document_id else document
         if not self.__document: raise ValueError('Document not provided!')
 
+    @property
+    def document(self):
+        return self.__document
+
     def update(self, user_id: int, **kwargs):
         valid_kwargs = ('name', 'description')
         for k, v in kwargs.items():

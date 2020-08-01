@@ -129,3 +129,17 @@ class DeleteInstructionDocumentEventRequestModel(BaseEventRequestModel):
         doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
         if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
         return v
+
+
+class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequestModel):
+    document_id: int
+
+    @classmethod
+    @validator('document_id')
+    def doc_must_exist(cls, v: int):
+        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
+        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        return v
+
+
+class UpdateInstructionDocumentEventResponseModel(InstructionDocumentEntityModel): pass
