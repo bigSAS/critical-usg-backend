@@ -133,3 +133,4 @@ app_test.db
 config_local.py
 wip.py
 .env.*
+logs/*.log
