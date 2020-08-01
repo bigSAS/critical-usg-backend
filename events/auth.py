@@ -9,15 +9,14 @@ from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataMode
     DeleteUserEventRequestModel, GetUserDataEventRequestModel, DeleteUserEventResponseDataModel, \
     GetUserDataEventResponseDataModel
 from db.schema import User, GroupUser
-from db.serializers import UserSerializer
-from events.core import EventHandler, EventValidator
-from events.validators import ObjectExist
+from events.core import EventHandler
 from repository.base import ObjectNotFoundError
 from repository.repos import UserRepository, UserGroupRepository
 from utils.http import JsonResponse, AuthError, ok_response
 from utils.managers import UserManager
 
 
+# todo: review 3x
 class TokenAuthEventHandler(EventHandler):
     request_model_class = TokenAuthEventRequestModel
 

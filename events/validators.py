@@ -2,7 +2,7 @@ from events.core import Validator
 from repository.base import ObjectNotFoundError
 from utils.http import ValidationError
 
-
+# todo: RM ??? find usages
 class IsRequired(Validator):
     """ No other limitations except required """
     def __init__(self, value: str, field_name: str = "NON_FIELD"):

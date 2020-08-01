@@ -2,7 +2,7 @@ from db.schema import User, UserGroup, GroupUser, InstructionDocument
 from repository.repos import GroupUserRepository, UserGroupRepository, UserRepository
 from utils.managers import InstructionDocumentManager
 
-
+# todo: RM ? find usages
 class SerializationError(Exception): pass
 
 

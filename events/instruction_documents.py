@@ -1,5 +1,3 @@
-from json import loads
-
 from flask import Request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
@@ -23,6 +21,7 @@ from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
 
 
+# todo: review 3x ;)
 class AddInstructionDocumentEventHandler(EventHandler):
     request_model_class = AddInstructionDocumentEventRequestModel
 

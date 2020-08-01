@@ -78,6 +78,7 @@ class EventHandler(ABC):
     def __get_request_model(self, request) -> BaseEventRequestModel:
         if not self.request_model_class:
             print('request_model_class not set')
+        # todo: enable ??? <- refactor done ? after review
         # todo: enable when refactor done
         # if not self.request_model_class: raise NotImplementedError('request_model_class not set')
         else:
