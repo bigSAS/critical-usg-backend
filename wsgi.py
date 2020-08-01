@@ -8,11 +8,14 @@ from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
 
+log_level = logging.DEBUG if Config.FLASK_DEBUG else logging.ERROR
+print('LOG LEVEL', log_level)
 logging.basicConfig(
     filename='logs/app.log',
     level=logging.DEBUG,
-    format='[%(asctime)s] | [%(levelname)s] | [%(name)s] | %(message)s)'
+    format='[%(asctime)s] | [%(levelname)s] | [%(name)s] | %(message)s'
 )
+logging.debug(f'Log level - {log_level}')
 
 
 def create_app():
@@ -34,8 +37,7 @@ app = create_app()
 
 @app.before_request
 def check_json_content_type():
-    logging.info('before request :)')
-    app.logger.info('before from app ;)')
+    logging.debug(f'before req: {repr(request)}')
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
 
