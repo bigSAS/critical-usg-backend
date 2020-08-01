@@ -173,7 +173,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     ).json['data']['id']
     update_page_data = {
         "page_id": page_id,
-        "json": {
+        "json_data": {
             "cool": "update"
         }
     }
@@ -185,7 +185,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     )
 
     assert response.json['status'] == 'OK'
-    assert response.json['data']['json'] == update_page_data['json']
+    assert response.json['data']['json_data'] == update_page_data['json_data']
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
