@@ -1,7 +1,9 @@
-import logging
+import logging, os
+
 from flask import Flask, request
 from flask_migrate import Migrate
 from flask_cors import CORS
+
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
 from db.schema import db, bcrypt
@@ -17,11 +19,16 @@ logging.basicConfig(
 )
 logging.debug(f'Log level - {log_level}')
 
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*')
+if ALLOWED_HOSTS == '*': logging.warning(f'ALLOWED_HOSTS not set')
+logging.info(f'ALLOWED_HOSTS: {ALLOWED_HOSTS}')
+logging.getLogger('flask_cors').level = logging.DEBUG
+
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
-    allow_origins = ['*']  # todo: read from container config on prd
-    CORS(application, origins=allow_origins)
+    allow_origins = ALLOWED_HOSTS
+    CORS(application, resources={r"/api/*": {"origins": ALLOWED_HOSTS}})
     application.config.from_object(Config)
     db.init_app(application)
     mirgate = Migrate()
