@@ -1,18 +1,14 @@
 env:
-  - DB_NAME=cusg_db_testing LOG_LEVEL=ERROR
+  - DB_NAME=cusg_db_testing LOG_LEVEL=ERROR CUSG_SECRET=oh-so-secret CUSG_DEBUG=YES CUSG_DB_CONNETION_STRING=postgresql://postgres:postgres@localhost:5432/${DB_NAME}
 services:
   - postgresql
 language: python
 python:
   - "3.8"
 install:
-  - python -m pip install pipenv
-  - pipenv sync
+  - pip install -r req-dev.txt
 script:
   - psql -c "CREATE DATABASE ${DB_NAME}" -U postgres
-  - echo "CUSG_SECRET=oh-so-secret" > .env
-  - echo "CUSG_DEBUG=YES" >> .env
-  - echo "CUSG_DB_CONNETION_STRING=postgresql://postgres:postgres@localhost:5432/${DB_NAME}" >> .env
-  - pipenv run flask db upgrade
-  - pipenv run python setup_defaults.py
-  - pipenv run python -m pytest -v --log-cli-level=${LOG_LEVEL}
+  - flask db upgrade
+  - python setup_defaults.py
+  - python -m pytest -v --log-cli-level=${LOG_LEVEL}
