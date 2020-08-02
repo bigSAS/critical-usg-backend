@@ -17,7 +17,7 @@ COPY . /opt/app/
 RUN chown -R www-data:www-data /opt/app
 
 WORKDIR /opt/app
-RUN pip install -r req.txt
+RUN pip install -r req-prd.txt
 RUN chmod +x start-server.sh
 
 EXPOSE 80
