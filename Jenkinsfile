@@ -25,12 +25,12 @@ pipeline {
 
     stage('Run app') {
       steps {
-        sh '''docker run -d --name $container_name \\
--p $expose_on_port:80 \\
--e GUNICORN_WORKERS=$gunicorn_workers \\
--e CUSG_SECRET=$secret \\
--e ALLOWED_HOSTS=$allowed_hosts
--e CUSG_DB_CONNETION_STRING=$db_connection_string \\
+        sh '''docker run -d --name ${container_name} \\
+-p ${expose_on_port}:80 \\
+-e GUNICORN_WORKERS=${gunicorn_workers} \\
+-e CUSG_SECRET=${secret} \\
+-e ALLOWED_HOSTS="${allowed_hosts}" \\
+-e CUSG_DB_CONNETION_STRING=${db_connection_string} \\
 $image_name'''
       }
     }
