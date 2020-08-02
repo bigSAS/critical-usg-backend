@@ -27,8 +27,7 @@ logging.getLogger('flask_cors').level = logging.DEBUG
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
-    allow_origins = ALLOWED_HOSTS
-    CORS(application, resources={r"/api/*": {"origins": ALLOWED_HOSTS}})
+    CORS(application, resources={r"/api/*": {"origins": ALLOWED_HOSTS.split(' ')}})
     application.config.from_object(Config)
     db.init_app(application)
     mirgate = Migrate()

@@ -43,6 +43,6 @@ $image_name'''
     container_name = 'cusg-backend-dev'
     secret = 'tosecret'
     db_connection_string = 'postgresql://postgres:postgres@172.17.0.2:5432/cusg_dev'
-    allowed_hosts = '77.55.215.44, localhost, 127.0.0.1'
+    allowed_hosts = '77.55.215.44 localhost 127.0.0.1'
   }
 }
