@@ -1,3 +1,6 @@
+import logging
+from json import dumps
+
 from flask import Request
 
 from events.auth import TokenAuthEventHandler, RegisterUserEventHandler, DeleteUserEventHandler, GetUserDataEventHandler
@@ -29,6 +32,8 @@ ENDPOINT_MAPPING = {
 def event_handler_for(request: Request) -> EventHandler:
     """ factory function - get EventHanlder based on request.endpoint """
     # todo: magic from endpoint name to instantiate handler class (keep note snippet)
+    logging.debug(f'@{request.endpoint}')
+    logging.debug(f'request -> {dumps(request.json)}')
     handler = ENDPOINT_MAPPING.get(request.endpoint, None)
     if not handler: raise NotImplementedError(f'endpoint: {request.endpoint} handler not implemented')
     return handler(request)

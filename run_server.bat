@@ -1,6 +1,3 @@
-SET CUSG_TESTING=NO
-SET CUSG_DEBUG=NO
-:: WIP => prd read CUSG_SECRET & CUSG_DB_CONNETION_STRING from env
-SET CUSG_SECRET=TOP-NOTCH-SECRET
-SET CUSG_DB_CONNETION_STRING=sqlite:///app.db
-.env\Scripts\activate && flask db upgrade && python setup_defaults.py && waitress-serve --call "wsgi:create_app"
+set PIPENV_DOTENV_LOCATION=.env.development
+
+pipenv run flask db upgrade && pipenv run python setup_defaults.py && pipenv run waitress-serve --call "wsgi:create_app"

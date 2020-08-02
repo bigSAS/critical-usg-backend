@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
+from repository.helpers import must_exist_by_pk
 from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 
 
@@ -29,7 +30,7 @@ class ApiErrorModel(BaseModel):
 
 
 class ResponseModel(BaseModel):
-    uid: Optional[UUID4]  # todo: mandatory when refactor done
+    uid: Optional[UUID4]
     status: ResponseStatus
     data: Optional[dict] = None
     errors: List[ApiErrorModel] = []
@@ -85,7 +86,7 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
     email: EmailStr
     password: constr(min_length=8, max_length=50)  # todo: add regex check
     password_repeat: constr(min_length=8, max_length=50)  # todo: add regex check
-    username: Optional[constr(max_length=50)]  # todo contr regex
+    username: Optional[constr(max_length=50)]  # todo contsr regex
 
     @classmethod
     @validator('password_repeat')
@@ -104,8 +105,7 @@ class DeleteUserEventRequestModel(BaseEventRequestModel):
     @classmethod
     @validator('user_id')
     def user_must_exist(cls, v: int):
-        usr = UserRepository().get(entity_id=v, ignore_not_found=True)
-        if not usr: raise ValueError(f'User[{v}] not exists')
+        must_exist_by_pk(UserRepository(), v)
         return v
 
 
@@ -133,8 +133,7 @@ class DeleteInstructionDocumentEventRequestModel(BaseEventRequestModel):
     @classmethod
     @validator('document_id')
     def doc_must_exist(cls, v: int):
-        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
-        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+        must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
 
 
@@ -143,9 +142,8 @@ class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequ
 
     @classmethod
     @validator('document_id')
-    def doc_must_exist(cls, v: int):  # todo: DRY
-        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
-        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+    def doc_must_exist(cls, v: int):
+        must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
 
 
@@ -158,9 +156,8 @@ class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
 
     @classmethod
     @validator('document_id')
-    def doc_must_exist(cls, v: int):  # todo: DRY
-        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
-        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+    def doc_must_exist(cls, v: int):
+        must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
 
 
@@ -173,9 +170,8 @@ class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
 
     @classmethod
     @validator('document_id')
-    def doc_must_exist(cls, v: int):  # todo: DRY
-        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
-        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+    def doc_must_exist(cls, v: int):
+        must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
 
 
@@ -188,8 +184,7 @@ class DeleteInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     @classmethod
     @validator('page_id')
     def page_must_exist(cls, v: int):
-        page = InstructionDocumentPageRepository().get(entity_id=v, ignore_not_found=True)
-        if not page: raise ValueError(f'InstructionDocumentPage[{v}] not exists')
+        must_exist_by_pk(InstructionDocumentPageRepository(), v)
         return v
 
 
@@ -218,9 +213,8 @@ class GetInstructionDocumentEventRequestModel(BaseEventRequestModel):
 
     @classmethod
     @validator('document_id')
-    def doc_must_exist(cls, v: int):  # todo: DRY
-        doc = InstructionDocumentRepository().get(entity_id=v, ignore_not_found=True)
-        if not doc: raise ValueError(f'InstructionDocument[{v}] not exists')
+    def doc_must_exist(cls, v: int):
+        must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
 
 

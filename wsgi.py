@@ -1,17 +1,34 @@
+import logging, os
+
 from flask import Flask, request
 from flask_migrate import Migrate
 from flask_cors import CORS
+
 from blueprints.auth import auth_blueprint, jwt
 from blueprints.instruction_document import instruction_document_blueprint
 from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
 
+log_level = logging.DEBUG if Config.FLASK_DEBUG else logging.ERROR
+print('LOG LEVEL', log_level)
+logging.basicConfig(
+    filename='logs/app.log',
+    level=logging.DEBUG,
+    format='[%(asctime)s] | [%(levelname)s] | [%(name)s] | %(message)s'
+)
+logging.debug(f'Log level - {log_level}')
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*')
+if ALLOWED_HOSTS == '*': logging.warning(f'ALLOWED_HOSTS not set')
+logging.info(f'ALLOWED_HOSTS: {ALLOWED_HOSTS}')
+logging.getLogger('flask_cors').level = logging.DEBUG
+
 
 def create_app():
     application = Flask(__name__, instance_relative_config=False)
-    allow_origins = ['*']  # read from config in production
-    CORS(application, origins=allow_origins)
+    allow_origins = ALLOWED_HOSTS
+    CORS(application, resources={r"/api/*": {"origins": ALLOWED_HOSTS}})
     application.config.from_object(Config)
     db.init_app(application)
     mirgate = Migrate()
@@ -22,19 +39,16 @@ def create_app():
     application.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     return application
 
-
-# todo: logging decorator ??? read flask docs -> docker log into file[wanted] vs log into db table ?
-# todo: clean not needed root repo scripts ???
 app = create_app()
 
 
 @app.before_request
 def check_json_content_type():
+    logging.debug(f'before req: {repr(request)}')
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
 
 
-# todo: read flask docs jak zachowuja sie errorhandlery app vs blueprint
 @app.errorhandler
 def handle_error(error: Exception):
     return error_response(error)

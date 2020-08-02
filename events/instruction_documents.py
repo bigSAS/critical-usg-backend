@@ -12,10 +12,7 @@ from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDoc
     GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
     InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
-from db.serializers import InstructionDocumentPageSerializer, \
-    ListInstructionDocumentSerializer, GetInstructionDocumentSerializer
-from events.core import EventHandler, EventValidator
-from events.validators import MaxLen, MinLen, IsRequired, ObjectExist
+from events.core import EventHandler
 from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
@@ -118,17 +115,6 @@ class ListInstructionDocumentEventHandler(EventHandler):
         )
         # serializer = ListInstructionDocumentSerializer(docs_paginated)
         return ok_response(rdata)
-
-
-class SearchInstructionDocumentEventValidator(EventValidator):
-    def __init__(self, request: Request):
-        super().__init__([
-            MinLen(field_name='search', min_len=3, value=request.json.get('search', None)),
-            MaxLen(field_name='search', max_len=100, value=request.json.get('search', None)),
-            IsRequired(field_name='page', value=request.json.get('page', None)),
-            IsRequired(field_name='limit', value=request.json.get('limit', None)),
-            # todo: min page, max limit validation
-        ])
 
 
 class SearchInstructionDocumentEventHandler(EventHandler):

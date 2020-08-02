@@ -7,9 +7,6 @@ from repository.repos import GroupUserRepository, InstructionDocumentPageReposit
     InstructionDocumentRepository, UserGroupRepository
 
 
-# todo: docs -> manager for existing objects
-
-
 class UserManager:
     def __init__(self, user_id: int = None, user: User = None):
         self.__user_repo = UserRepository()
