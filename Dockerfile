@@ -11,15 +11,13 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
-RUN pip install pipenv
 
 RUN mkdir /opt/app
 COPY . /opt/app/
 RUN chown -R www-data:www-data /opt/app
 
 WORKDIR /opt/app
-RUN pipenv install
-RUN pipenv install gunicorn
+RUN pip install -r req.txt
 RUN chmod +x start-server.sh
 
 EXPOSE 80
