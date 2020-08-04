@@ -41,8 +41,8 @@ $image_name'''
     gunicorn_workers = '3'
     expose_on_port = '8088'
     container_name = 'cusg-backend-dev'
-    secret = 'tosecret'
-    db_connection_string = 'postgresql://postgres:postgres@172.17.0.2:5432/cusg_dev'
-    allowed_hosts = '77.55.215.44 localhost 127.0.0.1'
+    secret = credentials('cusg-secret')
+    db_connection_string = credentials('cusg-db-connection-string')
+    allowed_hosts = credentials('cusg-allowed-hosts')
   }
 }
