@@ -96,9 +96,6 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
         return v
 
 
-class RegisterUserEventResponseDataModel(UserEntityModel): pass
-
-
 class DeleteUserEventRequestModel(BaseEventRequestModel):
     user_id: int
 
@@ -107,9 +104,6 @@ class DeleteUserEventRequestModel(BaseEventRequestModel):
     def user_must_exist(cls, v: int):
         must_exist_by_pk(UserRepository(), v)
         return v
-
-
-class DeleteUserEventResponseDataModel(UserEntityModel): pass
 
 
 class GetUserDataEventRequestModel(BaseEventRequestModel):
