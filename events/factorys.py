@@ -29,7 +29,6 @@ ENDPOINT_MAPPING = {
 
 def event_handler_for(request: Request) -> EventHandler:
     """ factory function - get EventHanlder based on request.endpoint """
-    # todo: magic from endpoint name to instantiate handler class (keep note snippet)
     logging.debug(f'@{request.endpoint}')
     logging.debug(f'request -> {dumps(request.json)}')
     handler = ENDPOINT_MAPPING.get(request.endpoint, None)
