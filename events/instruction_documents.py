@@ -1,14 +1,13 @@
-from flask import Request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
-from db.models import AddInstructionDocumentEventRequestModel, AddInstructionDocumentEventResponseDataModel, \
+from db.models import AddInstructionDocumentEventRequestModel, \
     DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
-    UpdateInstructionDocumentEventResponseDataModel, AddInstructionDocumentPageEventRequestModel, \
-    AddInstructionDocumentPageEventResponseDataModel, UpdateInstructionDocumentPageEventRequestModel, \
-    UpdateInstructionDocumentPageEventResponseDataModel, DeleteInstructionDocumentPageEventRequestModel, \
+    AddInstructionDocumentPageEventRequestModel, \
+    UpdateInstructionDocumentPageEventRequestModel, \
+    DeleteInstructionDocumentPageEventRequestModel, \
     ListInstructionDocumentEventRequestModel, ListInstructionDocumentEventResponseDataModel, \
-    SearchInstructionDocumentEventResponseDataModel, SearchInstructionDocumentEventRequestModel, \
+    SearchInstructionDocumentEventRequestModel, \
     GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
     InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
 from db.schema import User, InstructionDocument, InstructionDocumentPage
@@ -18,7 +17,6 @@ from utils.http import JsonResponse, ok_response
 from utils.managers import InstructionDocumentManager
 
 
-# todo: review 3x ;)
 class AddInstructionDocumentEventHandler(EventHandler):
     request_model_class = AddInstructionDocumentEventRequestModel
 
@@ -30,7 +28,7 @@ class AddInstructionDocumentEventHandler(EventHandler):
             description=self.request.json.get('description', None)
         )
         InstructionDocumentRepository().save(doc)
-        return ok_response(AddInstructionDocumentEventResponseDataModel.from_orm(doc))
+        return ok_response(InstructionDocumentEntityModel.from_orm(doc))
 
 
 class DeleteInstructionDocumentEventHandler(EventHandler):
@@ -52,7 +50,7 @@ class UpdateInstructionDocumentEventHandler(EventHandler):
             name=rdoc.name,
             description=rdoc.description
         )
-        return ok_response(UpdateInstructionDocumentEventResponseDataModel.from_orm(managed_doc.document))
+        return ok_response(InstructionDocumentEntityModel.from_orm(managed_doc.document))
 
 
 class AddInstructionDocumentPageEventHandler(EventHandler):
@@ -67,7 +65,7 @@ class AddInstructionDocumentPageEventHandler(EventHandler):
         )
         managed_doc = InstructionDocumentManager(document_id=rmodel.document_id)
         page = managed_doc.add_page(page, user_id)
-        return ok_response(AddInstructionDocumentPageEventResponseDataModel.from_orm(page))
+        return ok_response(InstructionDocumentPageEntityModel.from_orm(page))
 
 
 class UpdateInstructionDocumentPageEventHandler(EventHandler):
@@ -84,7 +82,7 @@ class UpdateInstructionDocumentPageEventHandler(EventHandler):
 
         managed_doc = InstructionDocumentManager(document_id=page.document_id)
         managed_doc.update(user_id)
-        return ok_response(UpdateInstructionDocumentPageEventResponseDataModel.from_orm(page))
+        return ok_response(InstructionDocumentPageEntityModel.from_orm(page))
 
 
 class DeleteInstructionDocumentPageEventHandler(EventHandler):
@@ -113,7 +111,6 @@ class ListInstructionDocumentEventHandler(EventHandler):
             prev_num=docs_paginated.prev_num,
             results=docs_paginated.items
         )
-        # serializer = ListInstructionDocumentSerializer(docs_paginated)
         return ok_response(rdata)
 
 
@@ -121,15 +118,14 @@ class SearchInstructionDocumentEventHandler(EventHandler):
     request_model_class = SearchInstructionDocumentEventRequestModel
 
     def get_response(self) -> JsonResponse:
-        page = self.request.json['page']
-        limit = self.request.json['limit']
-        search = self.request.json['search'].lower()
+        rmodel: SearchInstructionDocumentEventRequestModel = self.request_model
+        search = rmodel.search.lower().strip()
         docs_paginated = InstructionDocumentRepository() \
             .filter_paginated(f=or_(InstructionDocument.name.ilike(f'%{search}%'),
                                     InstructionDocument.description.ilike(f'%{search}%')),
-                              page=page,
-                              limit=limit)
-        rdata = SearchInstructionDocumentEventResponseDataModel(
+                              page=rmodel.page,
+                              limit=rmodel.limit)
+        rdata = ListInstructionDocumentEventResponseDataModel(
             total=docs_paginated.total,
             page=docs_paginated.page,
             next_num=docs_paginated.next_num,
