@@ -1,13 +1,9 @@
 from typing import Optional
 
-from flask import Request
 from flask_jwt_extended import create_access_token, get_jwt_identity
-from pydantic.main import BaseModel
 
-from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, UserEntityModel, \
-    UserGroupEntityModel, RegisterUserEventRequestModel, RegisterUserEventResponseDataModel, \
-    DeleteUserEventRequestModel, GetUserDataEventRequestModel, DeleteUserEventResponseDataModel, \
-    GetUserDataEventResponseDataModel
+from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, \
+    RegisterUserEventRequestModel, DeleteUserEventRequestModel, GetUserDataEventRequestModel
 from db.schema import User, GroupUser
 from events.core import EventHandler
 from repository.base import ObjectNotFoundError
@@ -16,7 +12,6 @@ from utils.http import JsonResponse, AuthError, ok_response
 from utils.managers import UserManager
 
 
-# todo: review 3x
 class TokenAuthEventHandler(EventHandler):
     request_model_class = TokenAuthEventRequestModel
 
@@ -24,17 +19,8 @@ class TokenAuthEventHandler(EventHandler):
         user = self.__auth_user()
         if not user: raise AuthError('Invalid credentials')
 
-        managed_user = UserManager(user=user)
-        user_model = UserEntityModel.construct(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            is_superuser=user.is_superuser,
-            is_deleted=user.is_deleted,
-            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
-        )
         rdata_model = TokenAuthEventResponseDataModel.construct(
-            token=create_access_token(identity=user_model.dict())
+            token=create_access_token(identity=UserManager(user=user).user_model.dict())
         )
         return ok_response(data=rdata_model)
 
@@ -63,17 +49,7 @@ class RegisterUserEventHandler(EventHandler):
         )
         UserRepository().save(user)
         self.__add_user_to_default_groups(user)
-
-        managed_user = UserManager(user=user)
-        rdata_model = RegisterUserEventResponseDataModel.construct(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            is_superuser=user.is_superuser,
-            is_deleted=user.is_deleted,
-            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
-        )
-        return ok_response(data=rdata_model)
+        return ok_response(data=UserManager(user=user).user_model)
 
     @staticmethod
     def __add_user_to_default_groups(user: User):
@@ -95,16 +71,7 @@ class DeleteUserEventHandler(EventHandler):
         rmodel: DeleteUserEventRequestModel = self.request_model
         managed_user = UserManager(user_id=rmodel.user_id)
         managed_user.delete()
-        user = managed_user.user
-        rdata_model = DeleteUserEventResponseDataModel.construct(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            is_superuser=user.is_superuser,
-            is_deleted=user.is_deleted,
-            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
-        )
-        return ok_response(data=rdata_model)
+        return ok_response(data=managed_user.user_model)
 
 
 class GetUserDataEventHandler(EventHandler):
@@ -113,13 +80,4 @@ class GetUserDataEventHandler(EventHandler):
     def get_response(self) -> JsonResponse:
         rmodel: GetUserDataEventRequestModel = self.request_model
         user_id = rmodel.user_id if rmodel.user_id else get_jwt_identity()['id']
-        managed_user = UserManager(user_id=user_id)
-        rdata_model = GetUserDataEventResponseDataModel.construct(
-            id=managed_user.user.id,
-            username=managed_user.user.username,
-            email=managed_user.user.email,
-            is_superuser=managed_user.user.is_superuser,
-            is_deleted=managed_user.user.is_deleted,
-            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in managed_user.get_groups()]
-        )
-        return ok_response(data=rdata_model)
+        return ok_response(data=UserManager(user_id=user_id).user_model)

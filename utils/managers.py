@@ -1,6 +1,7 @@
 from typing import List
 from datetime import datetime
 
+from db.models import UserEntityModel, UserGroupEntityModel
 from db.schema import User, UserGroup, InstructionDocument, InstructionDocumentPage, GroupUser
 from repository.base import ObjectNotFoundError
 from repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
@@ -16,6 +17,17 @@ class UserManager:
     @property
     def user(self) -> User:
         return self.__user
+
+    @property
+    def user_model(self) -> UserEntityModel:
+        return UserEntityModel.construct(
+            id=self.user.id,
+            username=self.user.username,
+            email=self.user.email,
+            is_superuser=self.user.is_superuser,
+            is_deleted=self.user.is_deleted,
+            groups=[UserGroupEntityModel.construct(id=g.id, name=g.name) for g in self.get_groups()]
+        )
 
     def get_groups(self) -> List[UserGroup]:
         user_groups = GroupUserRepository().filter(GroupUser.user_id == self.user.id)

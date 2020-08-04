@@ -96,9 +96,6 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
         return v
 
 
-class RegisterUserEventResponseDataModel(UserEntityModel): pass
-
-
 class DeleteUserEventRequestModel(BaseEventRequestModel):
     user_id: int
 
@@ -109,22 +106,13 @@ class DeleteUserEventRequestModel(BaseEventRequestModel):
         return v
 
 
-class DeleteUserEventResponseDataModel(UserEntityModel): pass
-
-
 class GetUserDataEventRequestModel(BaseEventRequestModel):
     user_id: Optional[int]
-
-
-class GetUserDataEventResponseDataModel(UserEntityModel): pass
 
 
 class AddInstructionDocumentEventRequestModel(BaseEventRequestModel):
     name: constr(min_length=3, max_length=200)
     description: Optional[constr(min_length=1, max_length=500)]
-
-
-class AddInstructionDocumentEventResponseDataModel(InstructionDocumentEntityModel): pass
 
 
 class DeleteInstructionDocumentEventRequestModel(BaseEventRequestModel):
@@ -147,9 +135,6 @@ class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequ
         return v
 
 
-class UpdateInstructionDocumentEventResponseDataModel(InstructionDocumentEntityModel): pass
-
-
 class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     document_id: int
     json_data: Optional[dict] = None
@@ -161,9 +146,6 @@ class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
         return v
 
 
-class AddInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass
-
-
 class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     page_id: int
     json_data: Optional[dict] = None
@@ -173,9 +155,6 @@ class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     def doc_must_exist(cls, v: int):
         must_exist_by_pk(InstructionDocumentRepository(), v)
         return v
-
-
-class UpdateInstructionDocumentPageEventResponseDataModel(InstructionDocumentPageEntityModel): pass
 
 
 class DeleteInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
@@ -203,9 +182,6 @@ class ListInstructionDocumentEventResponseDataModel(BaseModel):
 
 class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventRequestModel):
     search: constr(min_length=3, max_length=100)
-
-
-class SearchInstructionDocumentEventResponseDataModel(ListInstructionDocumentEventResponseDataModel): pass
 
 
 class GetInstructionDocumentEventRequestModel(BaseEventRequestModel):
