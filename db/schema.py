@@ -90,12 +90,16 @@ class InstructionDocumentPage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     document_id = db.Column(db.Integer, db.ForeignKey('instruction_document.id', ondelete='CASCADE'), nullable=False)
     page_num = db.Column(db.Integer, default=0)
-    json_data = db.Column(JSON, nullable=True)
+    md = db.Column(db.Text)
 
-    def __init__(self, document_id: int, json_data: dict, page_num: int = None):
+    def __init__(self, document_id: int, md: str, page_num: int = None):
         self.document_id = document_id
-        self.json_data = json_data
+        self.md = md
         if page_num: self.page_num = page_num
+
+    @property
+    def html(self):  # todo: impl markdown -> html
+        raise NotImplementedError('. . .')
 
     @hybrid_method
     def doc(self, document_id: int):

@@ -122,9 +122,7 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     doc_pages_data = {
         "uid": str(uuid.uuid4()),
         "document_id": created_doc_id,
-        "json_data": {
-            "bar": "baz"
-        }
+        "md": "# page one ;)   \n* foo   \n* bar"
     }
 
     response = client.post_json(
@@ -136,7 +134,8 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     assert response.json['uid'] == doc_pages_data['uid']
     assert response.json['data']['id'] is not None
     assert response.json['data']['document_id'] == created_doc_id
-    assert response.json['data']['json_data'] == doc_pages_data['json_data']
+    assert response.json['data']['md'] == doc_pages_data['md']
+    # todo: assert html
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
@@ -161,9 +160,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     assert created_doc_id is not None
     doc_pages_data = {
         "document_id": created_doc_id,
-        "json": {
-            "bar": "baz"
-        }
+        "md": "# page one ;)   \n* foo   \n* bar"
     }
 
     page_id = client.post_json(
@@ -174,9 +171,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     update_page_data = {
         "uid": str(uuid.uuid4()),
         "page_id": page_id,
-        "json_data": {
-            "cool": "update"
-        }
+        "md": "# updated page one ;)   \n* baz   \n* gaz"
     }
 
     response = client.post_json(
@@ -187,7 +182,8 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
 
     assert response.json['uid'] == update_page_data['uid']
     assert response.json['status'] == 'OK'
-    assert response.json['data']['json_data'] == update_page_data['json_data']
+    assert response.json['data']['md'] == update_page_data['md']
+    # todo: assert html
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
@@ -210,9 +206,7 @@ def test_deletes_doc_page(app, client: TApp, admin, user, get_headers):
     assert created_doc_id is not None
     doc_pages_data = {
         "document_id": created_doc_id,
-        "json": {
-            "bar": "baz"
-        }
+        "md": "# page one ;)   \n* foo   \n* bar"
     }
 
     page_id = client.post_json(
@@ -324,7 +318,7 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
 @pytest.mark.docs
 def test_gets_doc(app, client: TApp, admin, user, get_headers):
     """ corret doc getting """
-    page_json = {"foo": "bar"}
+    md = "# GOO GOO"
     with app.app_context():
         repo = InstructionDocumentRepository()
         doc = InstructionDocument(
@@ -336,7 +330,7 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         repo.save(doc)
         page = InstructionDocumentPage(
             document_id=doc.id,
-            json_data=page_json
+            md=md
         )
         managed_doc.add_page(page, admin.id)
         doc_id = doc.id
@@ -355,4 +349,4 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
     assert len(response.json['data']['pages']) == 1
     assert response.json['data']['pages'][0]['page_num'] == 1
     assert response.json['data']['pages'][0]['document_id'] == doc_id
-    assert response.json['data']['pages'][0]['json_data'] == page_json
+    assert response.json['data']['pages'][0]['md'] == md
