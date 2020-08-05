@@ -61,7 +61,7 @@ class AddInstructionDocumentPageEventHandler(EventHandler):
         user_id = get_jwt_identity()['id']
         page = InstructionDocumentPage(
             document_id=rmodel.document_id,
-            json_data=rmodel.json_data
+            md=rmodel.md
         )
         managed_doc = InstructionDocumentManager(document_id=rmodel.document_id)
         page = managed_doc.add_page(page, user_id)
@@ -77,7 +77,7 @@ class UpdateInstructionDocumentPageEventHandler(EventHandler):
 
         repo = InstructionDocumentPageRepository()
         page: InstructionDocumentPage = repo.get(rmodel.page_id)
-        page.json_data = rmodel.json_data
+        page.md = rmodel.md
         repo.save(page)
 
         managed_doc = InstructionDocumentManager(document_id=page.document_id)

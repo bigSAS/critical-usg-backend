@@ -65,7 +65,8 @@ class InstructionDocumentPageEntityModel(OrmModel):
     id: int
     document_id: int
     page_num: int
-    json_data: Optional[dict] = None
+    md: str
+    # todo: html
 
 
 # @events
@@ -137,7 +138,7 @@ class UpdateInstructionDocumentEventRequestModel(AddInstructionDocumentEventRequ
 
 class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     document_id: int
-    json_data: Optional[dict] = None
+    md: str
 
     @classmethod
     @validator('document_id')
@@ -148,7 +149,7 @@ class AddInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
 
 class UpdateInstructionDocumentPageEventRequestModel(BaseEventRequestModel):
     page_id: int
-    json_data: Optional[dict] = None
+    md: str
 
     @classmethod
     @validator('document_id')
