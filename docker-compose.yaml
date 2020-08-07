@@ -17,10 +17,10 @@ services:
       context: .
     image: critical-usg-backend:${CUSG_VERSION:-latest}
     ports:
-      - "${CUSG_PORT-8088}:80"
+      - "${CUSG_PORT-9001}:80"
     environment:
       CUSG_GUNICORN_WORKERS: ${CUSG_GUNICORN_WORKERS:-2}
-      CUSG_SECRET: "${CUSG_SECRET:-DEV-SECRET}"
+      CUSG_SECRET: "${CUSG_SECRET}"
       CUSG_DEBUG: "${CUSG_DEBUG:-NO}"
     networks:
       - cusg_network
