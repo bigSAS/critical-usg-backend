@@ -32,7 +32,7 @@ pipeline {
   environment {
     CUSG_VERSION = '1.0.0'
     CUSG_DEBUG = 'NO'
-    CUSG_ENV = 'dev'
+    CUSG_ENV = 'prod'
     CUSG_PORT = '8088'
     CUSG_GUNICORN_WORKERS = '2'
     CUSG_SECRET = credentials('cusg-secret')

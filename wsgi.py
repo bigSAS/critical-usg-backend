@@ -10,7 +10,7 @@ from db.schema import db, bcrypt
 from utils.http import ValidationError, error_response
 from config import Config
 
-log_level = logging.DEBUG if Config.FLASK_DEBUG else logging.ERROR
+log_level = logging.DEBUG if Config.FLASK_DEBUG else logging.WARNING
 print('LOG LEVEL', log_level)
 logging.basicConfig(
     filename='logs/app.log',
