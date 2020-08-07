@@ -1,0 +1,31 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB="cusg_db_${CUSG_ENV:-prod}"
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - cusg_network
+  cusg:
+    depends_on:
+      - db
+    build:
+      context: .
+    image: critical-usg-backend:${CUSG_VERSION:-latest}
+    ports:
+      - "${CUSG_PORT-8088}:80"
+    environment:
+      CUSG_GUNICORN_WORKERS: ${CUSG_GUNICORN_WORKERS:-2}
+      CUSG_SECRET: "${CUSG_SECRET:-DEV-SECRET}"
+      CUSG_DEBUG: "${CUSG_DEBUG:-NO}"
+    networks:
+      - cusg_network
+
+volumes:
+  postgres-data:
+networks:
+  cusg_network:

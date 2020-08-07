@@ -12,37 +12,29 @@ pipeline {
   stages {
     stage('Build docker image') {
       steps {
-        sh 'docker build -t $image_name .'
+        sh 'docker-compose build cusg'
       }
     }
 
-    stage('Stop + delete container') {
+    stage('Stop services') {
       steps {
-        sh 'docker stop $container_name || true'
-        sh 'docker rm $container_name || true'
+        sh 'docker-compose stop'
       }
     }
 
-    stage('Run app') {
+    stage('Run services') {
       steps {
-        sh '''docker run -d --name ${container_name} \\
--p ${expose_on_port}:80 \\
--e GUNICORN_WORKERS=${gunicorn_workers} \\
--e CUSG_SECRET=${secret} \\
--e ALLOWED_HOSTS="${allowed_hosts}" \\
--e CUSG_DB_CONNETION_STRING=${db_connection_string} \\
-$image_name'''
+        sh 'docker-compose up -d'
       }
     }
 
   }
   environment {
-    image_name = 'cusg-backend-dev:latest'
-    gunicorn_workers = '3'
-    expose_on_port = '8088'
-    container_name = 'cusg-backend-dev'
-    secret = credentials('cusg-secret')
-    db_connection_string = credentials('cusg-db-connection-string')
-    allowed_hosts = credentials('cusg-allowed-hosts')
+    CUSG_VERSION = '1.0.0'
+    CUSG_DEBUG = 'NO'
+    CUSG_ENV = 'dev'
+    CUSG_PORT = '8088'
+    CUSG_GUNICORN_WORKERS = '2'
+    CUSG_SECRET = credentials('cusg-secret')
   }
 }
