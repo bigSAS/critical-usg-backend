@@ -3,6 +3,7 @@ from os import environ
 
 DEBUG = environ.get('CUSG_DEBUG', 'NO') == 'YES'
 print('DEBUG', DEBUG)
+ENV = environ.get('CUSG_ENV', 'prod')
 
 
 class Config:
@@ -11,6 +12,6 @@ class Config:
     FLASK_DEBUG = DEBUG
 
     # Database
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@db:5432/cusg_db"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}"
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
