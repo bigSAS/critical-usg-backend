@@ -32,13 +32,10 @@ pipeline {
                 CUSG_SECRET = 'testing-secret'
             }
             steps {
-                node('cusg-server-tests-slave') {
-                    steps {
-                        build (
-                            job: 'CUSG-TESTS',
-                            parameters: [$class: 'StringParameterValue', name: 'CUSG_BRANCH', value: 'release/dev'])
-                    }
-                }
+                build (
+                    job: 'CUSG-TESTS',
+                    parameters: [$class: 'StringParameterValue', name: 'CUSG_BRANCH', value: 'release/dev']
+                )
             }
         }
 
