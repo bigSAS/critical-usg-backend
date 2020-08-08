@@ -16,6 +16,12 @@ pipeline {
       }
     }
 
+    stage('Test') {
+      steps {
+        echo: "todo: run tests in another container ala travis"
+      }
+    }
+
     stage('Stop services') {
       steps {
         sh 'docker-compose stop'
