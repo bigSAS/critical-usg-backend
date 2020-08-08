@@ -6,7 +6,7 @@ pipeline {
     }
 
     triggers {
-        pollSCM('*/5 * * * *')
+        pollSCM('*/2 * * * *')
     }
 
     environment {
@@ -16,6 +16,12 @@ pipeline {
         CUSG_PORT = '8088'
         CUSG_GUNICORN_WORKERS = '2'
         CUSG_SECRET = credentials('cusg-secret')
+    }
+
+    stage('Stop services') {
+        steps {
+            sh 'docker-compose stop'
+        }
     }
 
     stages {
@@ -41,11 +47,6 @@ pipeline {
             }
         }
 
-        stage('Stop services') {
-            steps {
-                sh 'docker-compose stop'
-            }
-        }
 
         stage('Run services') {
             steps {
