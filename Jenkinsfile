@@ -21,15 +21,11 @@ pipeline {
         CUSG_DEBUG = 'YES'
         CUSG_ENV = 'test'
         CUSG_SECRET = 'testing-secret'
-        PSSWD_DB_COMMAND = "alter user postgres with password 'postgres'"
-        CREATE_DB_COMMAND = "CREATE DATABASE cusg_db_test"
       }
 
       steps {
         node('cusg-server-tests-slave') {
-            sh 'service postgresql start'
-            sh 'psql -U postgres -c "${PSSWD_DB_COMMAND}"'
-            sh 'PGPASSWORD=postgres psql -c ${CREATE_DB_COMMAND} -U postgres'
+            sh 'PGPASSWORD=postgres psql -U postgres -c "create database cusg_db_test;"'
             sh 'pip install -r req-dev.txt'
             sh 'python manage.py db upgrade'
             sh 'python -m pytest -v --log-cli-level=${LOG_LEVEL} tests/'
