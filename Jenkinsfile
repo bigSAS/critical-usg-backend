@@ -28,7 +28,6 @@ pipeline {
       steps {
         node('cusg-server-tests-slave') {
             sh 'service postgresql start'
-            sh 'psql -U postgres -c ${DB_COMMAND}'
             sh 'PGPASSWORD=postgres psql -c ${CREATE_DB_COMMAND} -U postgres'
             sh 'pip install -r req-dev.txt'
             sh 'python manage.py db upgrade'
