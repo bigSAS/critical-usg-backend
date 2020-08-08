@@ -18,7 +18,6 @@ pipeline {
         CUSG_SECRET = credentials('cusg-secret')
     }
 
-
     stages {
 
         stage('Stop services') {
@@ -48,7 +47,6 @@ pipeline {
                 )
             }
         }
-
 
         stage('Run services') {
             steps {
