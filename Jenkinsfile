@@ -18,13 +18,15 @@ pipeline {
         CUSG_SECRET = credentials('cusg-secret')
     }
 
-    stage('Stop services') {
-        steps {
-            sh 'docker-compose stop'
-        }
-    }
 
     stages {
+
+        stage('Stop services') {
+            steps {
+                sh 'docker-compose stop'
+            }
+        }
+
         stage('Build docker image') {
             steps {
                 sh 'docker-compose build cusg'
