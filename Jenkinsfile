@@ -17,13 +17,14 @@ pipeline {
     }
 
     stage('Test') {
+      environment {
+        CUSG_DEBUG = 'YES'
+        CUSG_ENV = 'test'
+        CUSG_SECRET = 'testing-secret'
+      }
       steps {
         node('cusg-server-tests-slave') {
-            environment {
-                CUSG_DEBUG = 'YES'
-                CUSG_ENV = 'test'
-                CUSG_SECRET = 'testing-secret'
-            }
+
             steps {
                 git(
                   url: 'https://github.com/bigSAS/critical-usg-backend.git',
