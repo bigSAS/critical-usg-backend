@@ -9,6 +9,7 @@ class Config:
     SECRET_KEY = os.environ['CUSG_SECRET']
     FLASK_APP = 'wsgi:cusg'
     FLASK_DEBUG = DEBUG
+    FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
 
     # Database
     SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}"
@@ -20,6 +21,7 @@ class TConfig:
     SECRET_KEY = "secret"
     FLASK_APP = 'wsgi:cusg'
     FLASK_DEBUG = True
+    FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
 
     # Database
     SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@localhost:5432/cusg_db_test"
