@@ -22,9 +22,7 @@ pipeline {
         CUSG_ENV = 'test'
         CUSG_SECRET = 'testing-secret'
       }
-      steps {
-        node('cusg-server-tests-slave') {
-
+      node('cusg-server-tests-slave') {
             steps {
                 git(
                   url: 'https://github.com/bigSAS/critical-usg-backend.git',
@@ -32,15 +30,14 @@ pipeline {
                   branch: 'release/dev'
                 )
                 sh '''
-                service postgresql start && \\
-	                python3 -m pip install -r req-dev.txt && \\
-                    python3 manage.py db upgrade && \\
-                    python3 -m pytest -v --log-cli-level=ERROR tests/
-                '''
-            }
-        }
+                    service postgresql start && \\
+                        python3 -m pip install -r req-dev.txt && \\
+                        python3 manage.py db upgrade && \\
+                        python3 -m pytest -v --log-cli-level=ERROR tests/
+                    '''
+                }
 
-        build 'CUSG-TESTS'
+            }
       }
     }
 
