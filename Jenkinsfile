@@ -21,12 +21,6 @@ pipeline {
 
     stages {
 
-        stage('Stop services') {
-            steps {
-                sh 'docker-compose stop'
-            }
-        }
-
         stage('Build docker image') {
             steps {
                 sh 'docker-compose build cusg'
@@ -49,6 +43,11 @@ pipeline {
             }
         }
 
+        stage('Stop services') {
+            steps {
+                sh 'docker-compose stop'
+            }
+        }
 
         stage('Run services') {
             steps {
