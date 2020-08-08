@@ -11,7 +11,6 @@ app = Flask(__name__)
 dburi = TConfig.SQLALCHEMY_DATABASE_URI if ENV == 'test' else Config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_DATABASE_URI'] = dburi
 
-# db = SQLAlchemy(app)
 db.init_app(app)
 migrate = Migrate(app, db)
 
