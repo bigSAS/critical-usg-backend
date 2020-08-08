@@ -25,7 +25,7 @@ pipeline {
 
       steps {
         node('cusg-server-tests-slave') {
-            sh 'pip install -r req-dev.txt'
+            sh 'python -m pip install -r req-dev.txt'
             sh 'python manage.py db upgrade'
             sh 'python -m pytest -v --log-cli-level=${LOG_LEVEL} tests/'
         }
