@@ -22,6 +22,8 @@ services:
       CUSG_GUNICORN_WORKERS: ${CUSG_GUNICORN_WORKERS:-2}
       CUSG_SECRET: "${CUSG_SECRET}"
       CUSG_DEBUG: "${CUSG_DEBUG:-NO}"
+      FLASK_APP: "cusg"
+      CUSG_ENV: "${CUSG_ENV:-prod}"
     networks:
       - cusg_network
 
