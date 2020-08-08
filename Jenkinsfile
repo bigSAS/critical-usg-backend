@@ -18,7 +18,6 @@ pipeline {
         CUSG_SECRET = credentials('cusg-secret')
     }
 
-
     stages {
 
         stage('Build docker image') {
