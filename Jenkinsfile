@@ -17,18 +17,8 @@ pipeline {
     }
 
     stage('Test') {
-      environment {
-        CUSG_DEBUG = 'YES'
-        CUSG_ENV = 'test'
-        CUSG_SECRET = 'testing-secret'
-      }
-
       steps {
-        node('cusg-server-tests-slave') {
-            sh 'python3 -m pip install -r req-dev.txt'
-            sh 'python3 manage.py db upgrade'
-            sh 'python3 -m pytest -v --log-cli-level=${LOG_LEVEL} tests/'
-        }
+        build 'CUSG-TESTS'
       }
     }
 
