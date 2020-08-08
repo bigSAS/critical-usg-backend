@@ -9,6 +9,5 @@ flask-sqlalchemy==2.4.4
 flask==1.1.2
 psycopg2-binary==2.8.5
 pydantic[dotenv,email,typing_extensions]==1.6.1
-
 webtest==2.0.35
 pytest==6.0.1
