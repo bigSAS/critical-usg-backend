@@ -10,4 +10,4 @@ install:
 script:
   - psql -c "CREATE DATABASE cusg_db_${CUSG_ENV}" -U postgres
   - python manage.py db upgrade
-  - python -m pytest -v --log-cli-level=${LOG_LEVEL}
+  - python -m pytest -v --log-cli-level=${LOG_LEVEL} tests/
