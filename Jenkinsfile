@@ -34,7 +34,7 @@ pipeline {
             steps {
                 build (
                     job: 'CUSG-TESTS',
-                    parameters: [[$class: 'WReadonlyStringParameterValue', name: 'CUSG_BRANCH', value: 'release/dev']]
+                    parameters: [[name: 'CUSG_BRANCH', value: 'release/dev']]
                 )
             }
         }
