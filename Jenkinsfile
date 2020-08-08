@@ -20,6 +20,7 @@ pipeline {
 
     stages {
         stage('Build docker image') {
+            when { branch "release/*" }
             steps {
                 sh 'docker-compose build cusg'
             }
@@ -42,12 +43,14 @@ pipeline {
         }
 
         stage('Stop services') {
+            when { branch "release/*" }
             steps {
                 sh 'docker-compose stop'
             }
         }
 
         stage('Run services') {
+            when { branch "release/*" }
             steps {
                 sh 'docker-compose up -d'
             }
