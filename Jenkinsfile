@@ -23,6 +23,7 @@ pipeline {
             sh 'CUSG_ENV=test'
             sh 'CUSG_SECRET=testing-secret'
             sh 'PGPASSWORD=postgres'
+            sh 'service postgresql start'
             sh '''psql -U postgres -c "alter user postgres with password '${PGPASSWORD}'"'''
             sh 'psql -c "CREATE DATABASE cusg_db_${CUSG_ENV}" -U postgres'
             sh 'pip install -r req-dev.txt'
