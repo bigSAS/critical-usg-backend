@@ -3,9 +3,8 @@ import logging
 from json import dumps
 from flask import Request
 
-import events.auth as auth
-import events.instruction_documents as instruct
-from events.core import EventHandler
+from cusg.events import auth, instruction_documents as instruct
+from cusg.events.core import EventHandler
 
 
 ENDPOINT_MAPPING = {

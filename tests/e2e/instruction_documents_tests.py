@@ -1,13 +1,12 @@
 import uuid
-from json import dumps
 
 import pytest
 from webtest import TestApp as TApp
 
-from db.schema import InstructionDocument, InstructionDocumentPage
-from repository.repos import InstructionDocumentRepository
-from utils.http import ResponseStatus
-from utils.managers import InstructionDocumentManager
+from cusg.db.schema import InstructionDocument, InstructionDocumentPage
+from cusg.repository.repos import InstructionDocumentRepository
+from cusg.utils.http import ResponseStatus
+from cusg.utils.managers import InstructionDocumentManager
 
 
 @pytest.mark.e2e

@@ -2,9 +2,9 @@ from flask import request, Blueprint
 from flask_jwt_extended import JWTManager
 from jwt import DecodeError
 
-from events.factorys import event_handler_for
-from utils.http import AuthError, error_response
-from utils.permissions import restricted, superuser_only
+from cusg.events.factorys import event_handler_for
+from cusg.utils.http import AuthError, error_response
+from cusg.utils.permissions import restricted, superuser_only
 
 auth_blueprint = Blueprint('auth', __name__)
 jwt = JWTManager()  # https://flask-jwt-extended.readthedocs.io/en/stable/api/

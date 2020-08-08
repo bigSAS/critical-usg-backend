@@ -1,5 +1,5 @@
-from db.schema import InstructionDocument, User, GroupUser, UserGroup, InstructionDocumentPage
-from repository.base import Repository
+from cusg.db.schema import InstructionDocument, User, GroupUser, UserGroup, InstructionDocumentPage
+from cusg.repository.base import Repository
 
 
 class UserRepository(Repository):

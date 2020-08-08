@@ -1,10 +1,10 @@
 from typing import List
 from datetime import datetime
 
-from db.models import UserEntityModel, UserGroupEntityModel
-from db.schema import User, UserGroup, InstructionDocument, InstructionDocumentPage, GroupUser
-from repository.base import ObjectNotFoundError
-from repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
+from cusg.db.models import UserEntityModel, UserGroupEntityModel
+from cusg.db.schema import User, UserGroup, InstructionDocument, InstructionDocumentPage, GroupUser
+from cusg.repository.base import ObjectNotFoundError
+from cusg.repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
     InstructionDocumentRepository, UserGroupRepository
 
 

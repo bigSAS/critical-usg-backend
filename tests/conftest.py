@@ -3,10 +3,12 @@ from typing import Callable, Dict
 import pytest
 from webtest import TestApp as TApp
 
-from repository.base import ObjectNotFoundError
-from repository.repos import UserRepository, GroupUserRepository, UserGroupRepository
-from wsgi import app as application
-from db.schema import db as database, User, GroupUser, UserGroup
+from cusg.repository.base import ObjectNotFoundError
+from cusg.repository.repos import UserRepository, GroupUserRepository, UserGroupRepository
+from cusg import create_app
+from cusg.config import TConfig
+from cusg.db.schema import db as database, User, GroupUser, UserGroup
+
 
 USER = {
     'email': 'jimmy@choo.io',
@@ -39,11 +41,9 @@ def dbsession(db):
 
 @pytest.fixture(scope='session')
 def app(db):
-    apk = application
-    db.init_app(apk)
+    apk = create_app(TConfig)
     db.init_app(apk)
     with apk.app_context():
-
         return apk
 
 

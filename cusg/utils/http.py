@@ -5,8 +5,8 @@ from typing import List, Union
 from pydantic import BaseModel
 from flask import Response, g, request
 
-from config import Config
-from db.models import ApiErrorModel, ResponseStatus, ResponseModel
+from cusg.config import Config
+from cusg.db.models import ApiErrorModel, ResponseStatus, ResponseModel
 
 
 class ApiError(Exception):

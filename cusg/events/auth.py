@@ -2,14 +2,14 @@ from typing import Optional
 
 from flask_jwt_extended import create_access_token, get_jwt_identity
 
-from db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, \
+from cusg.db.models import TokenAuthEventRequestModel, TokenAuthEventResponseDataModel, \
     RegisterUserEventRequestModel, DeleteUserEventRequestModel, GetUserDataEventRequestModel
-from db.schema import User, GroupUser
-from events.core import EventHandler
-from repository.base import ObjectNotFoundError
-from repository.repos import UserRepository, UserGroupRepository
-from utils.http import JsonResponse, AuthError, ok_response
-from utils.managers import UserManager
+from cusg.db.schema import User, GroupUser
+from cusg.events.core import EventHandler
+from cusg.repository.base import ObjectNotFoundError
+from cusg.repository.repos import UserRepository, UserGroupRepository
+from cusg.utils.http import JsonResponse, AuthError, ok_response
+from cusg.utils.managers import UserManager
 
 
 class TokenAuthEventHandler(EventHandler):

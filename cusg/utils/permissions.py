@@ -3,10 +3,10 @@ from typing import List
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from db.schema import User
-from utils.managers import UserManager
-from repository.repos import UserRepository, UserGroupRepository
-from utils.http import ForbiddenError
+from cusg.db.schema import User
+from cusg.utils.http import ForbiddenError
+from cusg.utils.managers import UserManager
+from cusg.repository.repos import UserRepository, UserGroupRepository
 
 
 def superuser_only(func):

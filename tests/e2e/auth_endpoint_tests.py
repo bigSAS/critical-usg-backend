@@ -3,9 +3,9 @@ import uuid
 import pytest
 from webtest import TestApp as TApp
 
-from db.schema import User
-from repository.repos import UserRepository
-from utils.http import ResponseStatus
+from cusg.db.schema import User
+from cusg.repository.repos import UserRepository
+from cusg.utils.http import ResponseStatus
 
 
 def get_token_response(client: TApp, uid, email: str, password: str = '12341234', status: int = 200):

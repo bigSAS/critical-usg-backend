@@ -1,7 +1,7 @@
 import pytest
 from webtest import TestApp as TApp
 
-from utils.http import ResponseStatus
+from cusg.utils.http import ResponseStatus
 
 
 @pytest.mark.e2e

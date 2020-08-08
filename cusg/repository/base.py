@@ -1,6 +1,6 @@
 from sqlalchemy import text
 
-from db.schema import db
+from cusg.db.schema import db
 
 
 class ObjectNotFoundError(Exception): pass

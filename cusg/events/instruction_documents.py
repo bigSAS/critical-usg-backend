@@ -1,7 +1,7 @@
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import or_
 
-from db.models import AddInstructionDocumentEventRequestModel, \
+from cusg.db.models import AddInstructionDocumentEventRequestModel, \
     DeleteInstructionDocumentEventRequestModel, UpdateInstructionDocumentEventRequestModel, \
     AddInstructionDocumentPageEventRequestModel, \
     UpdateInstructionDocumentPageEventRequestModel, \
@@ -10,11 +10,11 @@ from db.models import AddInstructionDocumentEventRequestModel, \
     SearchInstructionDocumentEventRequestModel, \
     GetInstructionDocumentEventRequestModel, GetInstructionDocumentEventResponsedataModel, \
     InstructionDocumentEntityModel, InstructionDocumentPageEntityModel
-from db.schema import User, InstructionDocument, InstructionDocumentPage
-from events.core import EventHandler
-from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
-from utils.http import JsonResponse, ok_response
-from utils.managers import InstructionDocumentManager
+from cusg.db.schema import User, InstructionDocument, InstructionDocumentPage
+from cusg.events.core import EventHandler
+from cusg.repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
+from cusg.utils.http import JsonResponse, ok_response
+from cusg.utils.managers import InstructionDocumentManager
 
 
 class AddInstructionDocumentEventHandler(EventHandler):

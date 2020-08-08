@@ -5,8 +5,8 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, UUID4, EmailStr, constr, validator
 
-from repository.helpers import must_exist_by_pk
-from repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
+from cusg.repository.helpers import must_exist_by_pk
+from cusg.repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 
 
 class OrmModel(BaseModel):

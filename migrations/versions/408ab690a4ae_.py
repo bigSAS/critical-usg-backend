@@ -1,8 +1,8 @@
-"""model
+"""empty message
 
-Revision ID: 45eb056265bf
+Revision ID: 408ab690a4ae
 Revises: 
-Create Date: 2020-06-21 11:54:16.560051
+Create Date: 2020-08-08 03:03:23.115602
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '45eb056265bf'
+revision = '408ab690a4ae'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -59,8 +59,8 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('document_id', sa.Integer(), nullable=False),
     sa.Column('page_num', sa.Integer(), nullable=True),
-    sa.Column('json', sa.JSON(), nullable=True),
-    sa.ForeignKeyConstraint(['document_id'], ['instruction_document.id'], ),
+    sa.Column('md', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['document_id'], ['instruction_document.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

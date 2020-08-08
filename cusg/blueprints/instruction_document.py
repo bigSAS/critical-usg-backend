@@ -1,8 +1,8 @@
 from flask import request, Blueprint
 
-from events.factorys import event_handler_for
-from utils.http import error_response
-from utils.permissions import restricted
+from cusg.utils.http import error_response
+from cusg.events.factorys import event_handler_for
+from cusg.utils.permissions import restricted
 
 instruction_document_blueprint = Blueprint('instruction_document', __name__)
 
