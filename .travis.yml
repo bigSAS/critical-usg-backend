@@ -8,6 +8,6 @@ python:
 install:
   - pip install -r req-dev.txt
 script:
-  - psql -c "CREATE DATABASE ${DB_NAME}" -U postgres
+  - psql -c "CREATE DATABASE ${CUSG_ENV}" -U postgres
   - python manage.py db upgrade
   - python -m pytest -v --log-cli-level=${LOG_LEVEL}
