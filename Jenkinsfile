@@ -9,15 +9,6 @@ pipeline {
         pollSCM('*/2 * * * *')
     }
 
-    environment {
-        CUSG_VERSION = '1.0.0'
-        CUSG_DEBUG = 'YES'
-        CUSG_ENV = 'dev'
-        CUSG_PORT = '8088'
-        CUSG_GUNICORN_WORKERS = '2'
-        CUSG_SECRET = credentials('cusg-secret')
-    }
-
     stages {
 
         stage('Build docker image') {
@@ -54,6 +45,7 @@ pipeline {
             }
         }
     }
+
     environment {
         CUSG_VERSION = getVersion(env.BRANCH_NAME)
         CUSG_DEBUG = getDebug(env.BRANCH_NAME)
