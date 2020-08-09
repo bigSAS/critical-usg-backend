@@ -10,7 +10,7 @@ pipeline {
     }
 
     environment {
-        CUSG_VERSION = '1.0.0'
+        CUSG_VERSION = '1.0.0-dev'
         CUSG_DEBUG = 'YES'
         CUSG_ENV = 'dev'
         CUSG_PORT = '8088'
