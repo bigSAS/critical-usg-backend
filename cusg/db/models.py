@@ -54,6 +54,7 @@ class UserEntityModel(OrmModel):
 class InstructionDocumentEntityModel(OrmModel):
     id: int
     name: str
+    slug: str
     created: datetime
     created_by_user_id: int
     description: Optional[constr(min_length=1, max_length=500)] = None

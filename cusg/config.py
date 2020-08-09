@@ -2,7 +2,7 @@ import os
 from os import environ
 
 DEBUG = environ.get('CUSG_DEBUG', 'NO') == 'YES'
-ENV = environ.get('CUSG_ENV', 'prod') # when testing set CUSG_ENV=test
+ENV = environ.get('CUSG_ENV', 'prod')  # when testing set CUSG_ENV=test
 
 
 class Config:
@@ -12,7 +12,7 @@ class Config:
     FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
 
     # Database
-    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@localhost:5432/cusg_db_{ENV}"
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -24,6 +24,6 @@ class TConfig:
     FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
 
     # Database
-    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@localhost:5432/cusg_db_test"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/cusg_db_test"
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False

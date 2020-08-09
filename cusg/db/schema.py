@@ -1,10 +1,10 @@
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
 
+from cusg.utils.string import get_slug
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -65,17 +65,19 @@ class GroupUser(db.Model):
 class InstructionDocument(db.Model):
     """ Istruction Document Entity """
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(200), nullable=False, unique=True)
+    slug = db.Column(db.String(400), nullable=False, index=True, unique=True)
     description = db.Column(db.String(500), nullable=True)
-    created = Column(DateTime)
+    created = db.Column(db.DateTime)
     created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    updated = Column(DateTime)
+    updated = db.Column(db.DateTime)
     updated_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     created_by = relationship("User", foreign_keys=[created_by_user_id])
     updated_by = relationship("User", foreign_keys=[updated_by_user_id])
 
     def __init__(self, name: str, description: str, created_by: User):
         self.name = name
+        self.slug = get_slug(name)
         self.description = description
         self.created_by_user_id = created_by.id
         self.created = datetime.utcnow()
