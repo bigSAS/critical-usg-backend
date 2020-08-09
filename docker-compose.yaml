@@ -29,6 +29,5 @@ services:
 
 volumes:
   postgres-data:
-    name: "postgres-data"
 networks:
   cusg_network:
