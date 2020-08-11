@@ -1,6 +1,6 @@
 import logging, os
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from flask_cors import CORS
 
@@ -8,8 +8,9 @@ from cusg.blueprints.auth import auth_blueprint, jwt
 from cusg.blueprints.instruction_document import instruction_document_blueprint
 
 from cusg.config import Config, ENV
-from cusg.db.schema import db, bcrypt, UserGroup
-from cusg.repository.repos import UserGroupRepository
+from cusg.db.models import InstructionDocumentEntityModel
+from cusg.db.schema import db, bcrypt, UserGroup, InstructionDocument
+from cusg.repository.repos import UserGroupRepository, InstructionDocumentRepository
 from cusg.utils.http import ValidationError, error_response
 
 
@@ -43,6 +44,9 @@ def create_app(test_config=None):
     application.before_request(check_json_content_type)
     application.errorhandler(handle_error)
     create_default_groups(application)
+
+    @application.route('/doc-admin', methods=('GET',))
+    def doc_admin(): return render_template('doc-admin.html')
     return application
 
 
