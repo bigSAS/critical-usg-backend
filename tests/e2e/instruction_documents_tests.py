@@ -124,7 +124,7 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     doc_pages_data = {
         "uid": str(uuid.uuid4()),
         "document_id": created_doc_id,
-        "md": "# page one ;)   \n* foo   \n* bar"
+        "md": "# page one ;)"
     }
 
     response = client.post_json(
@@ -137,7 +137,7 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     assert response.json['data']['id'] is not None
     assert response.json['data']['document_id'] == created_doc_id
     assert response.json['data']['md'] == doc_pages_data['md']
-    # todo: assert html
+    assert response.json['data']['html'] == '<h1>page one ;)</h1>'
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
@@ -173,7 +173,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     update_page_data = {
         "uid": str(uuid.uuid4()),
         "page_id": page_id,
-        "md": "# updated page one ;)   \n* baz   \n* gaz"
+        "md": "# updated page one ;)"
     }
 
     response = client.post_json(
@@ -185,7 +185,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     assert response.json['uid'] == update_page_data['uid']
     assert response.json['status'] == 'OK'
     assert response.json['data']['md'] == update_page_data['md']
-    # todo: assert html
+    assert response.json['data']['html'] == "<h1>updated page one ;)</h1>"
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id

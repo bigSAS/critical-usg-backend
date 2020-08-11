@@ -67,7 +67,7 @@ class InstructionDocumentPageEntityModel(OrmModel):
     document_id: int
     page_num: int
     md: str
-    # todo: html
+    html: str
 
 
 # @events

@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from markdown import markdown
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
 
@@ -100,8 +101,8 @@ class InstructionDocumentPage(db.Model):
         if page_num: self.page_num = page_num
 
     @property
-    def html(self):  # todo: impl markdown -> html
-        raise NotImplementedError('. . .')
+    def html(self):
+        return markdown(self.md)
 
     @hybrid_method
     def doc(self, document_id: int):
