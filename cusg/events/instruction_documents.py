@@ -140,7 +140,8 @@ class GetInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         rmodel: GetInstructionDocumentEventRequestModel = self.request_model
-        doc = InstructionDocumentRepository().get(rmodel.document_id)
+        by, val = ('slug', rmodel.document_slug) if rmodel.document_slug is not None else ('id', rmodel.document_id)
+        doc = InstructionDocumentRepository().get_by(**{by: val})
         doc_entity = InstructionDocumentEntityModel.from_orm(doc)
         pages = InstructionDocumentPageRepository().filter(InstructionDocumentPage.document_id == doc.id)
         pages_entities = [InstructionDocumentPageEntityModel.from_orm(p) for p in pages]

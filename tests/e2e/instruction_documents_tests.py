@@ -318,15 +318,17 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
 
 @pytest.mark.e2e
 @pytest.mark.docs
-def test_gets_doc(app, client: TApp, admin, user, get_headers):
+@pytest.mark.debugmocno
+@pytest.mark.parametrize("by", ['document_id', 'document_slug'])  # todo: test validation
+def test_gets_doc(app, client: TApp, admin, user, get_headers, by):
     """ corret doc getting """
     md = "# GOO GOO"
     with app.app_context():
         repo = InstructionDocumentRepository()
         doc = InstructionDocument(
-            f'coolish doc',
-            '. . .',
-            admin
+            name=f'coolish doc' + ' ' + by if by else 'None',
+            description='. . .',
+            created_by=admin
         )
         managed_doc = InstructionDocumentManager(document=doc)
         repo.save(doc)
@@ -336,11 +338,12 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         )
         managed_doc.add_page(page, admin.id)
         doc_id = doc.id
+        doc_slug = doc.slug
 
-    get_doc_data = {
-        "uid": str(uuid.uuid4()),
-        "document_id": doc_id
-    }
+    get_doc_data = {"uid": str(uuid.uuid4())}
+    if by:
+        get_doc_data[by] = int(doc_id) if by == 'document_id' else str(doc_slug)
+    print('get_doc_data', get_doc_data)
     response = client.post_json(
         '/api/instruction-documents/get-doc',
         get_doc_data,

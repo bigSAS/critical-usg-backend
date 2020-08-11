@@ -3,9 +3,9 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, UUID4, EmailStr, constr, validator
+from pydantic import BaseModel, UUID4, EmailStr, constr, validator, root_validator
 
-from cusg.repository.helpers import must_exist_by_pk
+from cusg.repository.helpers import must_exist_by_pk, must_exist_by
 from cusg.repository.repos import UserRepository, InstructionDocumentRepository, InstructionDocumentPageRepository
 
 
@@ -92,7 +92,7 @@ class RegisterUserEventRequestModel(BaseEventRequestModel):
 
     @classmethod
     @validator('password_repeat')
-    def passwords_match(cls, v, values):
+    def passwords_match(cls, v, values: dict):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
         return v
@@ -187,13 +187,26 @@ class SearchInstructionDocumentEventRequestModel(ListInstructionDocumentEventReq
 
 
 class GetInstructionDocumentEventRequestModel(BaseEventRequestModel):
-    document_id: int
+    # todo: pydantic validation not triggering ;( dunno why
+    document_id: int = None
+    document_slug: constr(min_length=2) = None
 
     @classmethod
-    @validator('document_id')
-    def doc_must_exist(cls, v: int):
-        must_exist_by_pk(InstructionDocumentRepository(), v)
-        return v
+    @root_validator(pre=True)
+    def check_input(cls, values: dict):
+        doc_slug = values.get('document_slug', None)
+        doc_id = values.get('document_id', None)
+        print('validation doc id', doc_id)
+        print('validation doc slug', doc_slug)
+        if doc_slug is None and doc_id is None:
+            raise ValueError('document_slug or document_id is required')
+        if doc_slug is not None and doc_id is not None:
+            raise ValueError('provide only document_slug or only document_id')
+        if doc_slug is not None:
+            must_exist_by(InstructionDocumentRepository(), by='slug', value=doc_slug)
+        if doc_id is not None:
+            must_exist_by_pk(InstructionDocumentRepository(), doc_id)
+        return values
 
 
 class GetInstructionDocumentEventResponsedataModel(InstructionDocumentEntityModel):
