@@ -5,7 +5,7 @@ from markdown import markdown
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
 
-from cusg.utils.string import get_slug
+from cusg.utils.string import get_slug, quasarify_html
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -102,6 +102,10 @@ class InstructionDocumentPage(db.Model):
 
     @property
     def html(self):
+        return quasarify_html(self.html_raw)
+
+    @property
+    def html_raw(self):
         return markdown(self.md)
 
     @hybrid_method

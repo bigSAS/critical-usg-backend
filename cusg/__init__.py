@@ -8,9 +8,8 @@ from cusg.blueprints.auth import auth_blueprint, jwt
 from cusg.blueprints.instruction_document import instruction_document_blueprint
 
 from cusg.config import Config, ENV
-from cusg.db.models import InstructionDocumentEntityModel
-from cusg.db.schema import db, bcrypt, UserGroup, InstructionDocument
-from cusg.repository.repos import UserGroupRepository, InstructionDocumentRepository
+from cusg.db.schema import db, bcrypt, UserGroup
+from cusg.repository.repos import UserGroupRepository
 from cusg.utils.http import ValidationError, error_response
 
 

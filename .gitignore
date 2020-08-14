@@ -134,3 +134,5 @@ config_local.py
 wip.py
 .env.*
 logs/*.log
+
+doc.example.md

@@ -103,7 +103,7 @@ class ListInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
-            .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'])
+            .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'], order='id desc')
         rdata = ListInstructionDocumentEventResponseDataModel(
             total=docs_paginated.total,
             page=docs_paginated.page,
@@ -124,7 +124,8 @@ class SearchInstructionDocumentEventHandler(EventHandler):
             .filter_paginated(f=or_(InstructionDocument.name.ilike(f'%{search}%'),
                                     InstructionDocument.description.ilike(f'%{search}%')),
                               page=rmodel.page,
-                              limit=rmodel.limit)
+                              limit=rmodel.limit,
+                              order='id desc')
         rdata = ListInstructionDocumentEventResponseDataModel(
             total=docs_paginated.total,
             page=docs_paginated.page,
