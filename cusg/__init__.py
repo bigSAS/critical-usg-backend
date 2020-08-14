@@ -1,6 +1,6 @@
 import logging, os
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from flask_cors import CORS
 
@@ -17,7 +17,7 @@ def create_app(test_config=None):
     print('ENV:', ENV)
     application = Flask(__name__, instance_relative_config=False)
     allowed_hosts = os.environ.get('CUSG_ALLOWED_HOSTS', '*')
-    if allowed_hosts == '*': logging.warning(f'CUSG_ALLOWED_HOSTS not set')
+    if allowed_hosts == '*': logging.warning('CUSG_ALLOWED_HOSTS not set')
     CORS(application, resources={r"/api/*": {"origins": allowed_hosts.split(' ')}})
     conf = test_config if test_config else Config
     if ENV != 'test':
@@ -43,6 +43,9 @@ def create_app(test_config=None):
     application.before_request(check_json_content_type)
     application.errorhandler(handle_error)
     create_default_groups(application)
+
+    @application.route('/doc-admin', methods=('GET',))
+    def doc_admin(): return render_template('doc-admin.html')
     return application
 
 

@@ -103,7 +103,7 @@ class ListInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         docs_paginated = InstructionDocumentRepository() \
-            .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'])
+            .all_paginated(page=self.request.json['page'], limit=self.request.json['limit'], order='id desc')
         rdata = ListInstructionDocumentEventResponseDataModel(
             total=docs_paginated.total,
             page=docs_paginated.page,
@@ -124,7 +124,8 @@ class SearchInstructionDocumentEventHandler(EventHandler):
             .filter_paginated(f=or_(InstructionDocument.name.ilike(f'%{search}%'),
                                     InstructionDocument.description.ilike(f'%{search}%')),
                               page=rmodel.page,
-                              limit=rmodel.limit)
+                              limit=rmodel.limit,
+                              order='id desc')
         rdata = ListInstructionDocumentEventResponseDataModel(
             total=docs_paginated.total,
             page=docs_paginated.page,
@@ -140,7 +141,8 @@ class GetInstructionDocumentEventHandler(EventHandler):
 
     def get_response(self) -> JsonResponse:
         rmodel: GetInstructionDocumentEventRequestModel = self.request_model
-        doc = InstructionDocumentRepository().get(rmodel.document_id)
+        by, val = ('slug', rmodel.document_slug) if rmodel.document_slug is not None else ('id', rmodel.document_id)
+        doc = InstructionDocumentRepository().get_by(**{by: val})
         doc_entity = InstructionDocumentEntityModel.from_orm(doc)
         pages = InstructionDocumentPageRepository().filter(InstructionDocumentPage.document_id == doc.id)
         pages_entities = [InstructionDocumentPageEntityModel.from_orm(p) for p in pages]

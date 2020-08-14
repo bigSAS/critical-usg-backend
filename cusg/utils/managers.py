@@ -6,6 +6,7 @@ from cusg.db.schema import User, UserGroup, InstructionDocument, InstructionDocu
 from cusg.repository.base import ObjectNotFoundError
 from cusg.repository.repos import GroupUserRepository, InstructionDocumentPageRepository, UserRepository, \
     InstructionDocumentRepository, UserGroupRepository
+from cusg.utils.string import get_slug
 
 
 class UserManager:
@@ -61,6 +62,7 @@ class InstructionDocumentManager:
         valid_kwargs = ('name', 'description')
         for k, v in kwargs.items():
             if k in valid_kwargs: setattr(self.__document, k, v)
+        self.__document.slug = get_slug(self.__document.name)
         self.__document.updated_by_user_id = user_id
         self.__document.updated = datetime.utcnow()
         self.__doc_repo.save(self.__document)
