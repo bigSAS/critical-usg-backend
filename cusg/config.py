@@ -4,9 +4,13 @@ from os import environ
 DEBUG = environ.get('CUSG_DEBUG', 'NO') == 'YES'
 ENV = environ.get('CUSG_ENV', 'prod')  # when testing set CUSG_ENV=test
 
+HOUR = (60 * 60)
+DAY = (HOUR * 24)
+
 
 class Config:
     SECRET_KEY = os.environ['CUSG_SECRET']
+    JWT_ACCESS_TOKEN_EXPIRES = (1 * HOUR) if not DEBUG else (360 * DAY)
     FLASK_APP = 'wsgi:cusg'
     FLASK_DEBUG = DEBUG
     FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
@@ -19,6 +23,7 @@ class Config:
 
 class TConfig:
     SECRET_KEY = "secret"
+    JWT_ACCESS_TOKEN_EXPIRES = False
     FLASK_APP = 'wsgi:cusg'
     FLASK_DEBUG = True
     FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
