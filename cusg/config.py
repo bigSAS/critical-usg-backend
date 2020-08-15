@@ -7,6 +7,8 @@ ENV = environ.get('CUSG_ENV', 'prod')  # when testing set CUSG_ENV=test
 HOUR = (60 * 60)
 DAY = (HOUR * 24)
 
+DB_URI = os.environ.get('CUSG_DB_CONNETION_STRING', f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}")
+
 
 class Config:
     SECRET_KEY = os.environ['CUSG_SECRET']
@@ -16,7 +18,7 @@ class Config:
     FLASK_ENVIRONMENT = 'development' if DEBUG else 'production'
 
     # Database
-    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}"
+    SQLALCHEMY_DATABASE_URI = DB_URI
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
