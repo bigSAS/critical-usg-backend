@@ -25,7 +25,7 @@ services:
       FLASK_APP: "cusg"
       CUSG_ENV: "${CUSG_ENV:-prod}"
     volumes:
-    - cusg-files:/opt/app/cusg/files
+    - cusg-files:/opt/app/cusg/files/api/filez
     networks:
       - cusg_network
 
