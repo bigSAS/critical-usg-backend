@@ -136,7 +136,7 @@ wip.py
 logs/*.log
 
 doc.example.md
-cusg/files/*.jpg
-cusg/files/*.jpeg
-cusg/files/*.png
+cusg/files/api/filez/*.jpg
+cusg/files/api/filez/*.jpeg
+cusg/files/api/filez/*.png
 

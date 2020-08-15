@@ -11,7 +11,7 @@ from cusg.utils.permissions import restricted
 files_blueprint = Blueprint('files', __name__)
 
 ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
-UPLOAD_FOLDER = str(pathlib.Path(__file__).parent.absolute()).replace('\\', '/') + '/../files'
+UPLOAD_FOLDER = str(pathlib.Path(__file__).parent.absolute()).replace('\\', '/') + '/../files/api/filez'
 print('FILES UPLOAD FOLDER', UPLOAD_FOLDER)
 
 
