@@ -32,4 +32,4 @@ def add_file():
 
 @files_blueprint.route('/get/<filename>', methods=('GET',))
 def get_file(filename: str):
-    return send_from_directory('files', filename)
+    return send_from_directory('files/api/filez', filename)
