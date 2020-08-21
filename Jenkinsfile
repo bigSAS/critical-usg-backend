@@ -17,6 +17,7 @@ pipeline {
             steps {
                 script {
                     g = load('jenkins.groovy')
+                    echo "env: ${g.CUSG_ENV}"
                 }
             }
         }
