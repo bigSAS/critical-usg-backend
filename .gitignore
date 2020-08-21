@@ -134,3 +134,9 @@ config_local.py
 wip.py
 .env.*
 logs/*.log
+
+doc.example.md
+cusg/files/api/filez/*.jpg
+cusg/files/api/filez/*.jpeg
+cusg/files/api/filez/*.png
+

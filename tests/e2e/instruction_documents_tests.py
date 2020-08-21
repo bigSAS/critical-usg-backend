@@ -7,16 +7,17 @@ from cusg.db.schema import InstructionDocument, InstructionDocumentPage
 from cusg.repository.repos import InstructionDocumentRepository
 from cusg.utils.http import ResponseStatus
 from cusg.utils.managers import InstructionDocumentManager
+from cusg.utils.string import get_slug
 
 
 @pytest.mark.e2e
 @pytest.mark.docs
-@pytest.mark.parametrize("description", [". . .", None])
-def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
+@pytest.mark.parametrize("description, uid", [[". . .", 1], [None, 2]])
+def test_creates_new_doc(client: TApp, user, admin, get_headers, description, uid):
     """ corret doc creation by admin user """
     data = {
         'uid': str(uuid.uuid4()),
-        'name': 'some cool new doc',
+        'name': 'some cool new doc' + str(uid),
         'description': description
     }
     # admin can create
@@ -28,6 +29,7 @@ def test_creates_new_doc(client: TApp, user, admin, get_headers, description):
     assert response.json['data']['created'] is not None
     assert response.json['data']['created_by_user_id'] == admin.id
     assert response.json['data']['name'] == data['name']
+    assert response.json['data']['slug'] == get_slug(data['name'])
     assert response.json['data']['description'] == data['description']
     assert response.json['data']['updated_by_user_id'] is None
     assert response.json['data']['updated'] is None
@@ -66,16 +68,16 @@ def test_deletes_doc(client: TApp, admin, user, get_headers):
 @pytest.mark.e2e
 @pytest.mark.docs
 @pytest.mark.parametrize(
-    "user_type, description",
+    "user_type, description, uid",
     [
-        ('admin', 'new desc'),
-        ('admin', None),
+        ('admin', 'new desc', 1),
+        ('admin', None, 2),
     ]
 )
-def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
+def test_updates_doc(client: TApp, admin, get_headers, user_type, description, uid):
     """ correct document object update """
     create_doc_data = {
-        'name': 'some cool new doc fo edition',
+        'name': 'some cool new doc fo edition' + str(uid),
         'description': '. . .'
     }
     created_doc_id = client.post_json(
@@ -87,7 +89,7 @@ def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
     update_doc_data = {
         'uid': str(uuid.uuid4()),
         'document_id': created_doc_id,
-        'name': 'new name',
+        'name': 'new name' + str(uid),
         'description': description
     }
     # admin can update
@@ -99,6 +101,7 @@ def test_updates_doc(client: TApp, admin, get_headers, user_type, description):
     assert response.json['uid'] == update_doc_data['uid']
     assert response.json['data']['id'] == update_doc_data['document_id']
     assert response.json['data']['name'] == update_doc_data['name']
+    assert response.json['data']['slug'] == get_slug(update_doc_data['name'])
     assert response.json['data']['description'] == update_doc_data['description']
     assert response.json['data']['updated_by_user_id'] == admin.id
     assert response.json['data']['updated'] is not None
@@ -121,7 +124,7 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     doc_pages_data = {
         "uid": str(uuid.uuid4()),
         "document_id": created_doc_id,
-        "md": "# page one ;)   \n* foo   \n* bar"
+        "md": "# page one ;)"
     }
 
     response = client.post_json(
@@ -134,7 +137,7 @@ def test_adds_doc_page(app, client: TApp, admin, user, get_headers):
     assert response.json['data']['id'] is not None
     assert response.json['data']['document_id'] == created_doc_id
     assert response.json['data']['md'] == doc_pages_data['md']
-    # todo: assert html
+    assert response.json['data']['html'] == '<div class="text-h1">page one ;)</div>'
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
@@ -170,7 +173,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     update_page_data = {
         "uid": str(uuid.uuid4()),
         "page_id": page_id,
-        "md": "# updated page one ;)   \n* baz   \n* gaz"
+        "md": "# updated page one ;)"
     }
 
     response = client.post_json(
@@ -182,7 +185,7 @@ def test_updates_doc_page(app, client: TApp, admin, get_headers):
     assert response.json['uid'] == update_page_data['uid']
     assert response.json['status'] == 'OK'
     assert response.json['data']['md'] == update_page_data['md']
-    # todo: assert html
+    assert response.json['data']['html'] == '<div class="text-h1">updated page one ;)</div>'
     with app.app_context():
         doc: InstructionDocument = InstructionDocumentRepository().get(created_doc_id)
         assert doc.updated_by_user_id == admin.id
@@ -315,15 +318,17 @@ def test_search_docs(app, client: TApp, admin, user, get_headers):
 
 @pytest.mark.e2e
 @pytest.mark.docs
-def test_gets_doc(app, client: TApp, admin, user, get_headers):
+@pytest.mark.debugmocno
+@pytest.mark.parametrize("by", ['document_id', 'document_slug'])  # todo: test validation
+def test_gets_doc(app, client: TApp, admin, user, get_headers, by):
     """ corret doc getting """
     md = "# GOO GOO"
     with app.app_context():
         repo = InstructionDocumentRepository()
         doc = InstructionDocument(
-            f'coolish doc',
-            '. . .',
-            admin
+            name=f'coolish doc' + ' ' + by if by else 'None',
+            description='. . .',
+            created_by=admin
         )
         managed_doc = InstructionDocumentManager(document=doc)
         repo.save(doc)
@@ -333,11 +338,12 @@ def test_gets_doc(app, client: TApp, admin, user, get_headers):
         )
         managed_doc.add_page(page, admin.id)
         doc_id = doc.id
+        doc_slug = doc.slug
 
-    get_doc_data = {
-        "uid": str(uuid.uuid4()),
-        "document_id": doc_id
-    }
+    get_doc_data = {"uid": str(uuid.uuid4())}
+    if by:
+        get_doc_data[by] = int(doc_id) if by == 'document_id' else str(doc_slug)
+    print('get_doc_data', get_doc_data)
     response = client.post_json(
         '/api/instruction-documents/get-doc',
         get_doc_data,

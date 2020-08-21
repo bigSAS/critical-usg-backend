@@ -11,3 +11,4 @@ psycopg2-binary==2.8.5
 pydantic[dotenv,email,typing_extensions]==1.6.1
 webtest==2.0.35
 pytest==6.0.1
+markdown==3.2.2

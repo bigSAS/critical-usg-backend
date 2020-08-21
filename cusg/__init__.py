@@ -1,10 +1,11 @@
 import logging, os
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from flask_cors import CORS
 
 from cusg.blueprints.auth import auth_blueprint, jwt
+from cusg.blueprints.files import files_blueprint
 from cusg.blueprints.instruction_document import instruction_document_blueprint
 
 from cusg.config import Config, ENV
@@ -17,7 +18,7 @@ def create_app(test_config=None):
     print('ENV:', ENV)
     application = Flask(__name__, instance_relative_config=False)
     allowed_hosts = os.environ.get('CUSG_ALLOWED_HOSTS', '*')
-    if allowed_hosts == '*': logging.warning(f'CUSG_ALLOWED_HOSTS not set')
+    if allowed_hosts == '*': logging.warning('CUSG_ALLOWED_HOSTS not set')
     CORS(application, resources={r"/api/*": {"origins": allowed_hosts.split(' ')}})
     conf = test_config if test_config else Config
     if ENV != 'test':
@@ -40,14 +41,19 @@ def create_app(test_config=None):
     jwt.init_app(application)
     application.register_blueprint(auth_blueprint, url_prefix='/api')
     application.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
+    application.register_blueprint(files_blueprint, url_prefix='/api/files')
     application.before_request(check_json_content_type)
     application.errorhandler(handle_error)
     create_default_groups(application)
+
+    @application.route('/doc-admin', methods=('GET',))
+    def doc_admin(): return render_template('doc-admin.html')
     return application
 
 
 def check_json_content_type():
     logging.debug(f'before req: {repr(request)}')
+    if request.path == '/api/files/add': return
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
 

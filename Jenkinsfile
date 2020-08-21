@@ -1,3 +1,5 @@
+def g
+
 pipeline {
     agent {
         node {
@@ -11,9 +13,23 @@ pipeline {
 
     stages {
 
+        stage('Init') {
+            steps {
+                script {
+                    g = load('jenkins.groovy')
+                    echo "${g}"
+                    echo "g:\n${g}"
+                }
+            }
+        }
+
         stage('Build docker image') {
             steps {
-                sh 'docker-compose build cusg'
+                script {
+                    withEnv(["CUSG_VERSION=${g['CUSG_VERSION']}"]) {
+                        sh 'docker-compose build cusg'
+                    }
+                }
             }
         }
 
@@ -27,7 +43,7 @@ pipeline {
                 build (
                     job: 'CUSG-TESTS',
                     parameters: [
-                        string(name: 'CUSG_BRANCH', value: 'release/dev')
+                        string(name: 'CUSG_BRANCH', value: env.BRANCH_NAME)
                     ]
                 )
             }
@@ -41,41 +57,19 @@ pipeline {
 
         stage('Run services') {
             steps {
-                sh 'docker-compose up -d'
+                script {
+                    withEnv([
+                        "CUSG_ENV=${g['CUSG_ENV']}",
+                        "CUSG_VERSION=${g['CUSG_VERSION']}",
+                        "CUSG_PORT=${g['CUSG_PORT']}",
+                        "CUSG_SECRET=${g['CUSG_SECRET']}",
+                        "CUSG_DEBUG=${g['CUSG_DEBUG']}",
+                        "CUSG_GUNICORN_WORKERS=2"
+                    ]) {
+                        sh 'docker-compose up -d'
+                    }
+                }
             }
         }
     }
-    environment {
-        CUSG_VERSION = getVersion(env.BRANCH_NAME)
-        CUSG_DEBUG = getDebug(env.BRANCH_NAME)
-        CUSG_ENV = getEnv(env.BRANCH_NAME)
-        CUSG_PORT = getPort(env.BRANCH_NAME)
-        CUSG_GUNICORN_WORKERS = '2'
-        CUSG_SECRET = getSecret(env.BRANCH_NAME)
-    }
-}
-
-def version() { '1.0.0' }
-def devPort() { '8088' }
-def prdPort() { '9001' }
-def secret() { credentials('cusg-secret') }
-
-def getEnv(branch) {
-    return branch == 'release/dev' ? 'dev' : 'prod'
-}
-
-def getDebug(branch) {
-    return branch == 'release/dev' ? 'YES' : 'NO'
-}
-
-def getVersion(branch) {
-    return branch == 'release/dev' ? version() + '-dev' : version()
-}
-
-def getPort(branch) {
-    return branch == 'release/dev' ? devPort() : prdPort()
-}
-
-def getSecret(branch) {
-    return branch == 'release/dev' ? 'not-so-seret' : secret()
 }
