@@ -17,8 +17,8 @@ pipeline {
             steps {
                 script {
                     g = load('jenkins.groovy')
-                    echo "${g.ToString()}"
-                    echo "env: ${g.CUSG_ENV}"
+                    echo "${g}"
+                    echo "env: ${g['CUSG_ENV']}"
                 }
             }
         }
@@ -27,11 +27,11 @@ pipeline {
             steps {
                 script {
                     withEnv([
-                        "CUSG_ENV=${g.CUSG_ENV}",
-                        "CUSG_VERSION=${g.CUSG_VERSION}",
-                        "CUSG_PORT=${g.CUSG_PORT}",
-                        "CUSG_SECRET=${g.CUSG_SECRET}",
-                        "CUSG_DEBUG=${g.CUSG_DEBUG}",
+                        "CUSG_ENV=${g['CUSG_ENV']}",
+                        "CUSG_VERSION=${g['CUSG_VERSION']}",
+                        "CUSG_PORT=${g['CUSG_PORT']}",
+                        "CUSG_SECRET=${g['CUSG_SECRET']}",
+                        "CUSG_DEBUG=${g['CUSG_DEBUG']}",
                         "CUSG_GUNICORN_WORKERS=2"
                     ]) {
                         sh 'docker-compose build cusg'
