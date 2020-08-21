@@ -26,19 +26,11 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    withEnv([
-                        "CUSG_ENV=${g['CUSG_ENV']}",
-                        "CUSG_VERSION=${g['CUSG_VERSION']}",
-                        "CUSG_PORT=${g['CUSG_PORT']}",
-                        "CUSG_SECRET=${g['CUSG_SECRET']}",
-                        "CUSG_DEBUG=${g['CUSG_DEBUG']}",
-                        "CUSG_GUNICORN_WORKERS=2"
-                    ]) {
+                    withEnv(["CUSG_VERSION=${g['CUSG_VERSION']}"]) {
                         sh 'docker-compose build cusg'
                     }
                 }
             }
-            
         }
 
         stage('Test') {
@@ -65,7 +57,18 @@ pipeline {
 
         stage('Run services') {
             steps {
-                sh 'docker-compose up -d'
+                script {
+                    withEnv([
+                        "CUSG_ENV=${g['CUSG_ENV']}",
+                        "CUSG_VERSION=${g['CUSG_VERSION']}",
+                        "CUSG_PORT=${g['CUSG_PORT']}",
+                        "CUSG_SECRET=${g['CUSG_SECRET']}",
+                        "CUSG_DEBUG=${g['CUSG_DEBUG']}",
+                        "CUSG_GUNICORN_WORKERS=2"
+                    ]) {
+                        sh 'docker-compose up -d'
+                    }
+                }
             }
         }
     }
