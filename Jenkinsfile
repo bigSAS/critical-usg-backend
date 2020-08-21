@@ -27,8 +27,8 @@ pipeline {
                     "CUSG_ENV=${g.CUSG_ENV}",
                     "CUSG_VERSION=${g.CUSG_VERSION}",
                     "CUSG_PORT=${g.CUSG_PORT}",
-                    "CUSG_SECRET=${g.CUSG_SECRET}"
-                    "CUSG_DEBUG=${g.CUSG_DEBUG}"
+                    "CUSG_SECRET=${g.CUSG_SECRET}",
+                    "CUSG_DEBUG=${g.CUSG_DEBUG}",
                     "CUSG_GUNICORN_WORKERS=2"
                 ]) {
                     steps {
