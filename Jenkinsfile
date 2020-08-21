@@ -1,4 +1,4 @@
-def g
+def buildEnv
 
 pipeline {
     agent {
@@ -16,9 +16,8 @@ pipeline {
         stage('Init') {
             steps {
                 script {
-                    g = load('jenkins.groovy')
-                    echo "${g}"
-                    echo "g:\n${g}"
+                    buildEnv = load('JenkinsBuildEnv.groovy')
+                    echo "${buildEnv}"
                 }
             }
         }
@@ -26,7 +25,7 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    withEnv(["CUSG_VERSION=${g['CUSG_VERSION']}"]) {
+                    withEnv(["CUSG_VERSION=${buildEnv['CUSG_VERSION']}"]) {
                         sh 'docker-compose build cusg'
                     }
                 }
@@ -59,11 +58,11 @@ pipeline {
             steps {
                 script {
                     withEnv([
-                        "CUSG_ENV=${g['CUSG_ENV']}",
-                        "CUSG_VERSION=${g['CUSG_VERSION']}",
-                        "CUSG_PORT=${g['CUSG_PORT']}",
-                        "CUSG_SECRET=${g['CUSG_SECRET']}",
-                        "CUSG_DEBUG=${g['CUSG_DEBUG']}",
+                        "CUSG_ENV=${buildEnv['CUSG_ENV']}",
+                        "CUSG_VERSION=${buildEnv['CUSG_VERSION']}",
+                        "CUSG_PORT=${buildEnv['CUSG_PORT']}",
+                        "CUSG_SECRET=${buildEnv['CUSG_SECRET']}",
+                        "CUSG_DEBUG=${buildEnv['CUSG_DEBUG']}",
                         "CUSG_GUNICORN_WORKERS=2"
                     ]) {
                         sh 'docker-compose up -d'

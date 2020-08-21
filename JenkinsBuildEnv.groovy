@@ -1,3 +1,6 @@
+/*
+Prepare building environment for Jenkinsfile pipeline
+*/
 def version = '1.0.0' // todo: read version from code
 def devPort = '8088'
 def prdPort = '9001'
