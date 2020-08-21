@@ -18,7 +18,7 @@ pipeline {
                 script {
                     g = load('jenkins.groovy')
                     echo "${g}"
-                    echo "env: ${g['CUSG_ENV']}"
+                    echo "g:\n${g}"
                 }
             }
         }
