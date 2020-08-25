@@ -7,7 +7,7 @@ from cusg.config import ENV, Config, TConfig
 
 
 app = Flask(__name__)
-dburi = TConfig.SQLALCHEMY_DATABASE_URI if ENV == 'test' else Config.SQLALCHEMY_DATABASE_URI
+dburi = TConfig.SQLALCHEMY_DATABASE_URI if ENV.lower() == 'test' else Config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_DATABASE_URI'] = dburi
 
 db.init_app(app)
