@@ -1,8 +1,11 @@
-:: run always before pytest tests
-docker exec postgre psql -U postgres -c "DROP DATABASE cusg_db_test"
-docker exec postgre psql -U postgres -c "CREATE DATABASE cusg_db_test"
+set CUSG_SECRET=secret
+set CUSG_ENV=test
+set CUSG_DEBUG=YES
 
-set PIPENV_DOTENV_LOCATION=.env.testing && ^
+:: run always before pytest tests
+docker exec postgres-local psql -U postgres -c "DROP DATABASE cusg_db_test"
+docker exec postgres-local psql -U postgres -c "CREATE DATABASE cusg_db_test"
+
 pipenv run python manage.py db upgrade && ^
 pipenv run python -m pytest ^
   -vrf --log-cli-level=ERROR ^
