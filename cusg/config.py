@@ -1,7 +1,6 @@
 import os
 from os import environ
 
-DEBUG = environ.get('CUSG_DEBUG', 'NO') == 'YES'
 ENV = environ.get('CUSG_ENV', 'prod')  # when testing set CUSG_ENV=test
 
 HOUR = (60 * 60)
@@ -12,6 +11,7 @@ SECRET = os.environ.get('CUSG_SECRET', None)
 
 if ENV == 'prod' and not SECRET: raise EnvironmentError('CUSG_SECRET not set!')
 else: SECRET = 'local'
+
 
 class Config:
     SECRET_KEY = SECRET
