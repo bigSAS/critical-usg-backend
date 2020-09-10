@@ -15,7 +15,6 @@ def FLASK_DEBUG = env.BRANCH_NAME == 'release/dev' ? '1' : '0'
 
 return [
     CUSG_ENV: CUSG_ENV,
-    CUSG_DEBUG: CUSG_DEBUG,
     CUSG_VERSION: CUSG_VERSION,
     CUSG_PORT: CUSG_PORT,
     CUSG_SECRET: CUSG_SECRET,
