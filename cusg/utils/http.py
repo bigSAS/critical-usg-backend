@@ -5,7 +5,7 @@ from typing import List, Union
 from pydantic import BaseModel
 from flask import Response, g, request
 
-from cusg.config import Config
+from cusg.config import ENV
 from cusg.db.models import ApiErrorModel, ResponseStatus, ResponseModel
 
 
@@ -84,7 +84,7 @@ def hide_passwords(data: dict):
 def error_response(error: Exception = None):
     http_status, response_status = ERROR_STATUS_MAP.get(type(error).__name__, (500, ResponseStatus.SERVER_ERROR))
     if not isinstance(error, ApiError):
-        if Config.FLASK_DEBUG: raise error
+        if ENV == 'dev': raise error
         api_error = ApiError(name='SERVER', data=repr(error))
     else:
         api_error = error
