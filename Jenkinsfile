@@ -63,6 +63,8 @@ pipeline {
                         "CUSG_PORT=${buildEnv['CUSG_PORT']}",
                         "CUSG_SECRET=${buildEnv['CUSG_SECRET']}",
                         "CUSG_DEBUG=${buildEnv['CUSG_DEBUG']}",
+                        "FLASK_ENV=${buildEnv['FLASK_ENV']}",
+                        "FLASK_DEBUG=${buildEnv['FLASK_DEBUG']}",
                         "CUSG_GUNICORN_WORKERS=2"
                     ]) {
                         sh 'docker-compose up -d'

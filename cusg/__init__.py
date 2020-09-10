@@ -44,6 +44,7 @@ def create_app(test_config=None):
     application.register_blueprint(files_blueprint, url_prefix='/api/files')
     application.before_request(check_json_content_type)
     application.errorhandler(handle_error)
+    
     create_default_groups(application)
 
     @application.route('/doc-admin', methods=('GET',))

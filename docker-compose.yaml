@@ -20,10 +20,12 @@ services:
       - "${CUSG_PORT-9001}:80"
     environment:
       CUSG_GUNICORN_WORKERS: ${CUSG_GUNICORN_WORKERS:-2}
-      CUSG_SECRET: "${CUSG_SECRET}"
-      CUSG_DEBUG: "${CUSG_DEBUG:-NO}"
-      FLASK_APP: "cusg"
-      CUSG_ENV: "${CUSG_ENV:-prod}"
+      CUSG_SECRET: ${CUSG_SECRET}
+      CUSG_DEBUG: ${CUSG_DEBUG:-NO}
+      CUSG_ENV: ${CUSG_ENV:-prod}
+      FLASK_APP: cusg
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
     volumes:
     - cusg-files:/opt/app/cusg/files/api/filez
     networks:
