@@ -14,6 +14,7 @@ from cusg.repository.repos import UserGroupRepository
 from cusg.utils.http import ValidationError, error_response
 
 
+log_level = logging.DEBUG if ENV == 'dev' else logging.WARNING
 def create_app(test_config=None):
     print('ENV:', ENV)
     application = Flask(__name__, instance_relative_config=False)
@@ -22,7 +23,6 @@ def create_app(test_config=None):
     CORS(application, resources={r"/api/*": {"origins": allowed_hosts.split(' ')}})
     conf = test_config if test_config else Config
     if ENV != 'test':
-        log_level = logging.DEBUG if Config.FLASK_DEBUG else logging.WARNING
         print('LOG LEVEL:', "DEBUG" if log_level == logging.DEBUG else "WARNING")
         print('CUSG ENV:', ENV)
         logging.basicConfig(
@@ -44,7 +44,7 @@ def create_app(test_config=None):
     application.register_blueprint(files_blueprint, url_prefix='/api/files')
     application.before_request(check_json_content_type)
     application.errorhandler(handle_error)
-    
+
     create_default_groups(application)
 
     @application.route('/doc-admin', methods=('GET',))
