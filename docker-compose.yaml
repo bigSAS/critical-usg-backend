@@ -41,7 +41,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - 9001:80
+      - ${CUSG_PORT-9001}:80
     networks:
       - cusg_network
 
