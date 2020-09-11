@@ -36,10 +36,13 @@ services:
   nginx:
     depends_on: 
       - cusg
-    image: nginx:latest
+    build:
+        context: ./nginx
+    image: nginx-cusg-server:latest
     container_name: cusg-nginx
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - cusg-files:/files
     ports:
       - ${CUSG_PORT-9001}:80
     networks:
