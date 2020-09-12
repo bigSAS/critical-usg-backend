@@ -27,9 +27,8 @@ logger = logging.getLogger(__name__)
 def create_app(test_config=None):
     logger.info(f'ENV: {ENV}')
     app = Flask(__name__, instance_relative_config=False)
-    allowed_hosts = os.environ.get('CUSG_ALLOWED_HOSTS', '*')
-    if allowed_hosts == '*': logger.warning('CUSG_ALLOWED_HOSTS not set')
-    CORS(app, resources={r"/api/*": {"origins": allowed_hosts.split(' ')}})
+    CORS(app, resources=r'/api/*')
+    logging.getLogger('flask_cors').level = logging.DEBUG
     
     conf = test_config if test_config else Config
     app.config.from_object(conf)
