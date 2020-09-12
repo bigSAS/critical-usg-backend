@@ -41,8 +41,8 @@ def create_app(test_config=None):
     app.register_blueprint(auth_blueprint, url_prefix='/api')
     app.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     app.register_blueprint(files_blueprint, url_prefix='/api/files')
+    app.errorhandler(error_response)
     app.before_request(check_json_content_type)
-    app.errorhandler(handle_error)
     
     with app.app_context():
         create_default_groups()
@@ -55,9 +55,6 @@ def check_json_content_type():
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
 
-
-def handle_error(error: Exception):
-    return error_response(error)
 
 
 DEFAULT_USER_GROUPS = ('USER', 'ADMIN')
