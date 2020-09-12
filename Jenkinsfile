@@ -46,6 +46,7 @@ pipeline {
         stage('Stop services') {
             steps {
                 sh 'docker-compose stop'
+                sh 'docker-compose rm db'
             }
         }
 
