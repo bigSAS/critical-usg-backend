@@ -6,11 +6,12 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
     volumes:
       - v-postgres:/var/lib/postgresql/data
     networks:
-      - cusg-network
-  
+      - cusg
   server:
     container_name: cusg-server
     depends_on:
@@ -30,8 +31,7 @@ services:
     - v-files:/opt/app/cusg/files
     - v-server-logs:/opt/app/logs
     networks:
-      - cusg-network
-
+      - cusg
   nginx:
     depends_on: 
       - server
@@ -43,12 +43,10 @@ services:
     ports:
       - ${CUSG_PORT-9001}:80
     networks:
-      - cusg-network
-
+      - cusg
 volumes:
   v-postgres:
   v-files:
   v-server-logs:
-
 networks:
-  cusg-network:
+  cusg:
