@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     withEnv(["CUSG_VERSION=${buildEnv['CUSG_VERSION']}"]) {
-                        sh 'docker-compose build cusg'
+                        sh 'docker-compose build'
                     }
                 }
             }
