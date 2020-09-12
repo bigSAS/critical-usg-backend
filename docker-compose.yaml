@@ -1,18 +1,18 @@
 version: "3"
 services:
   db:
-    container_name: cusg-postgres-${CUSG_ENV:-prod}
+    container_name: cusg-db
     image: postgres
     environment:
-      - POSTGRES_DB=cusg_db_${CUSG_ENV:-prod}
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - v-postgres:/var/lib/postgresql/data
     networks:
-      - cusg_network
-  cusg:
-    container_name: cusg-server-${CUSG_ENV:-prod}
+      - cusg-network
+  
+  server:
+    container_name: cusg-server
     depends_on:
       - db
     build:
@@ -22,35 +22,33 @@ services:
       CUSG_GUNICORN_WORKERS: ${CUSG_GUNICORN_WORKERS:-2}
       CUSG_ENV: ${CUSG_ENV:-prod}
       CUSG_SECRET: ${CUSG_SECRET}
-      FLASK_APP: cusg:app
       FLASK_ENV: ${FLASK_ENV:-production}
-      FLASK_DEBUG: ${FLASK_DEBUG:-1}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
     expose: 
       - 8000
     volumes:
-    - cusg-files:/opt/app/cusg/files/api/filez
-    - cusg-server-logs:/opt/app/logs
+    - v-files:/opt/app/cusg/files
+    - v-server-logs:/opt/app/logs
     networks:
-      - cusg_network
+      - cusg-network
 
   nginx:
     depends_on: 
-      - cusg
-    build:
-        context: ./nginx
-    image: nginx-cusg-server:latest
+      - server
+    image: nginx:latest
     container_name: cusg-nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - cusg-files:/files
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - v-files:/media:ro
     ports:
       - ${CUSG_PORT-9001}:80
     networks:
-      - cusg_network
+      - cusg-network
 
 volumes:
-  postgres-data:
-  cusg-files:
-  cusg-server-logs:
+  v-postgres:
+  v-files:
+  v-server-logs:
+
 networks:
-  cusg_network:
+  cusg-network:
