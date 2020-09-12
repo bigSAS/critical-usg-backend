@@ -2,16 +2,16 @@
 Prepare building environment for Jenkinsfile pipeline
 */
 def version = '1.0.0' // todo: read version from code
-def devPort = '8088'
-def prdPort = '9001'
+def port    = '9001'
 
+def isProdBranch() { return env.BRANCH_NAME == 'release/prod' }
 
-def CUSG_ENV = env.BRANCH_NAME == 'release/dev' ? 'dev' : 'prod'
-def CUSG_VERSION = env.BRANCH_NAME == 'release/dev' ? version + '-dev' : version
-def CUSG_PORT = env.BRANCH_NAME == 'release/dev' ? devPort : prdPort
-def CUSG_SECRET = env.BRANCH_NAME == 'release/dev' ? 'not-so-seret' : credentials('cusg-secret')
-def FLASK_ENV = env.BRANCH_NAME == 'release/dev' ? 'development' : 'production'
-def FLASK_DEBUG = env.BRANCH_NAME == 'release/dev' ? '1' : '0'
+def CUSG_VERSION = version
+def CUSG_PORT    = port
+def CUSG_ENV     = isProdBranch() ? 'prod' : 'dev'
+def CUSG_SECRET  = isProdBranch() ? credentials('cusg-secret') : 'notsosecret'
+def FLASK_ENV    = isProdBranch() ? 'production' : 'development'
+def FLASK_DEBUG  = isProdBranch() ? '0' : '1'
 
 return [
     CUSG_ENV: CUSG_ENV,

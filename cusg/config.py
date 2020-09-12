@@ -6,7 +6,7 @@ ENV = environ.get('CUSG_ENV', 'prod')  # when testing set CUSG_ENV=test
 HOUR = (60 * 60)
 DAY = (HOUR * 24)
 
-DB_URI = os.environ.get('CUSG_DB_CONNETION_STRING', f"postgresql://postgres:postgres@db:5432/cusg_db_{ENV}")
+DB_URI = os.environ.get('CUSG_DB_CONNETION_STRING', f"postgresql://postgres:postgres@db:5432/cusg_db")
 SECRET = os.environ.get('CUSG_SECRET', None)
 
 if ENV == 'prod' and not SECRET: raise EnvironmentError('CUSG_SECRET not set!')
