@@ -1,4 +1,4 @@
-import logging, os
+import logging
 
 from flask import Flask, request
 from flask_migrate import Migrate
@@ -13,7 +13,7 @@ from cusg.db.schema import db, bcrypt, UserGroup
 from cusg.repository.repos import UserGroupRepository
 from cusg.utils.http import ValidationError, error_response
 
-# log_level = logging.DEBUG if ENV == 'dev' else logging.WARNING
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="[%(asctime)s]\t[%(levelname)s]\t[%(name)s]\t%(message)s",
@@ -24,7 +24,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def create_app(test_config=None):
+    # todo: setup app.logger
     logger.info(f'ENV: {ENV}')
     app = Flask(__name__, instance_relative_config=False)
     CORS(app, resources=r'/api/*')
@@ -40,7 +42,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth_blueprint, url_prefix='/api')
     app.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     app.register_blueprint(files_blueprint, url_prefix='/api/files')
-    app.errorhandler(error_response)
+    app.register_error_handler(error_response)  # todo: err hanlding in error_response -> blueprint register default error_response
     app.before_request(check_json_content_type)
     
     with app.app_context():
@@ -53,7 +55,6 @@ def check_json_content_type():
     if request.path == '/api/files/add': return
     if request.method == "POST" and (request.content_type is None or 'application/json' not in request.content_type):
         raise ValidationError('Content-Type - application/json only')
-
 
 
 DEFAULT_USER_GROUPS = ('USER', 'ADMIN')
