@@ -42,7 +42,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth_blueprint, url_prefix='/api')
     app.register_blueprint(instruction_document_blueprint, url_prefix='/api/instruction-documents')
     app.register_blueprint(files_blueprint, url_prefix='/api/files')
-    app.register_error_handler(error_response)  # todo: err hanlding in error_response -> blueprint register default error_response
+    app.register_error_handler(Exception, error_response)  # todo: err hanlding in error_response -> blueprint register default error_response
     app.before_request(check_json_content_type)
     
     with app.app_context():
