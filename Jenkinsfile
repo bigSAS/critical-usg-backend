@@ -46,7 +46,6 @@ pipeline {
         stage('Stop services') {
             steps {
                 sh 'docker-compose stop'
-                sh 'docker-compose rm db'
             }
         }
 
@@ -62,7 +61,7 @@ pipeline {
                         "FLASK_DEBUG=${buildEnv['FLASK_DEBUG']}",
                         "CUSG_GUNICORN_WORKERS=2"
                     ]) {
-                        sh 'docker-compose up -d'
+                        sh 'docker-compose up -d  --force-recreate'
                     }
                 }
             }

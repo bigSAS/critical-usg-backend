@@ -1,7 +1,7 @@
 /*
 Prepare building environment for Jenkinsfile pipeline
 */
-def version = '1.0.0' // todo: read version from code
+def version = '1.0.0'
 def port    = '9001'
 
 def isProdBranch() { return env.BRANCH_NAME == 'release/prod' }
