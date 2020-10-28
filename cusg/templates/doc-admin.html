@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <title>Admin instrukcje</title>
+</head>
+
+  <body>
+    <div class="container" id="app">
+      <div class="row">
+        <div class="col">
+          <h2 class="text-center">Instrukcje - admin</h2>
+        </div>
+      </div>
+
+      <div class="row" v-if="!loggedIn">
+        <div class="col">
+          <form @submit.prevent="login">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input class="form-control" id="email" type="text" v-model="email" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input class="form-control" id="password" type="password" v-model="password" required>
+            </div>
+            <button class="btn btn-success" type="submit">log in</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row" v-if="loggedIn">
+
+        <div class="col">
+          <button class="btn btn-warning" @click="editMode = !editMode">Edycja istniejących</button>
+        </div>
+
+        <div class="col" v-if="editMode">
+          <div class="form-group">
+            <select v-model="chosenDocId" class="form-control">
+              <option value="null">Wybierz do edycji</option>
+              <option v-for="(doc, i) in docs" :key="i" :value="doc.id">[[ doc.name ]]</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col" v-if="editMode">
+          <button class="btn btn-primary" @click="edit()">Edytuj</button>
+        </div>
+      </div>
+
+      <div class="row" v-if="editedDoc">
+        <div class="col">
+          <form @submit.prevent="updateDoc()">
+            <div class="form-group">
+              <label for="doc-name">Title</label>
+              <input class="form-control" id="doc-name" type="text" v-model="editedDoc.name" required>
+            </div>
+            <div class="form-group">
+              <label for="doc-description">Description</label>
+              <textarea class="form-control" id="doc-description" type="text" v-model="editedDoc.description"></textarea>
+            </div>
+            <button class="btn btn-success" type="submit">Aktualizuj</button>
+          </form>
+          <h4>Strona:</h4>
+        </div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"
+            integrity="sha512-VZ6m0F78+yo3sbu48gElK4irv2dzPoep8oo9LEjxviigcnnnNvnTOJRSrIhuFk68FMLOpiNz+T77nNY89rnWDg=="
+            crossorigin="anonymous"></script>
+    <script>
+      const vm = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data() {
+            return {
+                email: '',
+                password: '',
+                loggedIn: false,
+                token: null,
+                docs: [],
+                editMode: false,
+                chosenDocId: null,
+                editedDoc: null
+            }
+        },
+        created() {
+            const getDocsData = {
+              "page": 1,
+              "limit": 999
+            }
+            axios.post(
+                '/api/instruction-documents/list-docs',
+                getDocsData
+            ).then(response => {
+                this.docs = response.data.data.results
+            })
+        },
+        methods: {
+            login () {
+                console.log('submit login')
+                const loginData = {
+                    'email': this.email,
+                    'password': this.password
+                }
+                axios.post(
+                    '/api/token-auth',
+                    loginData
+                ).then(response => {
+                    this.token = response.data.data.token
+                    axios.post(
+                        'api/get-user-data',
+                        {},
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${response.data.data.token}`
+                            }
+                        }
+                    ).then(resp => {
+                        this.loggedIn = resp.data.data.is_superuser
+                    })
+                })
+            },
+            edit () {
+                this.editedDoc = null
+                axios.post(
+                    '/api/instruction-documents/get-doc',
+                    {
+                        document_id: this.chosenDocId
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    }
+                ).then(resp => {
+                    this.editedDoc = resp.data.data
+                })
+            },
+            updateDoc () {
+
+            }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+Dockerfile
+logs/
+.idea/
+.vscode/

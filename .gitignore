@@ -102,7 +102,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env.development
 .venv
 env/
 venv/
@@ -131,3 +131,12 @@ dmypy.json
 app.db
 app_test.db
 config_local.py
+wip.py
+.env.*
+logs/*.log
+
+doc.example.md
+cusg/files/api/filez/*.jpg
+cusg/files/api/filez/*.jpeg
+cusg/files/api/filez/*.png
+.vscode/

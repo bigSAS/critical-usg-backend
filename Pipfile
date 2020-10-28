@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "5.4.3"
+WebTest = "2.0.35"
+
+[packages]
+Flask = "1.1.2"
+Flask-Bcrypt = "0.7.1"
+Flask-Cors = "3.0.8"
+Flask-JWT-Extended = "3.24.1"
+Flask-Migrate = "2.5.3"
+Flask-SQLAlchemy = "2.4.3"
+psycopg2-binary = "2.7.4"
+pydantic = {extras = ["dotenv", "email", "typing_extensions"], version = "*"}
+flask-script = "2.0.6"
+markdown = "3.2.2"
+
+[requires]
+python_version = "3.8"
